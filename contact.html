@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact — Start Your Project | Meraki Creative</title>
+  <meta name="description" content="Tell Meraki Creative about your project — actor website, reel, pitch deck, or creative materials — and get a clear plan and quote." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Inter:wght@400;500&family=Space+Mono:wght@400;700&family=Caveat:wght@500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap nav">
+      <a href="index.html" class="brand">MERAKI CREATIVE<span class="dot">.</span></a>
+      <button class="nav-toggle" aria-expanded="false" aria-controls="nav-links">Menu</button>
+      <nav class="nav-links" id="nav-links">
+        <a href="index.html">Home</a>
+        <a href="services.html">Services</a>
+        <a href="packages.html">Packages</a>
+        <a href="portfolio.html">Portfolio</a>
+        <a href="about.html">About</a>
+        <a href="contact.html" aria-current="page">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- ============ PAGE HERO ============ -->
+    <section class="hero" style="padding-bottom:clamp(24px,4vw,48px);">
+      <div class="wrap">
+        <span class="eyebrow"><span class="num">( Contact )</span> Start your project</span>
+        <h1 class="display display-xl">Let's get<br />you seen.</h1>
+        <p class="lede" style="margin-top:1.5rem;">Tell me a little about your work and where you're trying to get. I'll reply with a clear plan, a timeline, and a quote — usually within a couple of business days.</p>
+      </div>
+    </section>
+
+    <!-- ============ FORM ============ -->
+    <section class="section" style="padding-top:clamp(24px,4vw,48px);">
+      <div class="wrap contact-grid">
+        <!-- LEFT: details -->
+        <aside class="reveal">
+          <div class="contact-detail">
+            <span class="eyebrow">Email</span>
+            <a href="mailto:hello@merakicreative.com" class="display-sm" style="font-family:var(--font-display);">hello@merakicreative.com</a>
+          </div>
+          <div class="contact-detail">
+            <span class="eyebrow">Follow</span>
+            <a href="#">Instagram</a> &nbsp;·&nbsp;
+            <a href="#">IMDb</a> &nbsp;·&nbsp;
+            <a href="#">LinkedIn</a>
+          </div>
+          <div class="contact-detail">
+            <span class="eyebrow">Who I work with</span>
+            <p class="body-sm" style="max-width:34ch;">Actors at every stage, directors, and production companies — from a first professional website to a full launch.</p>
+          </div>
+          <div class="contact-detail">
+            <span class="eyebrow">Turnaround</span>
+            <p class="body-sm" style="max-width:34ch;">Most projects start within a week of booking. Reels and decks are often quicker — ask about rush options.</p>
+          </div>
+        </aside>
+
+        <!-- RIGHT: form -->
+        <div class="reveal">
+          <!--
+            SETUP FOR MERIVELLE — two easy options to make this form deliver:
+            1) FORMSPREE (recommended): create a free form at formspree.io, then replace
+               YOUR_FORM_ID below with your real ID. Nothing else to change.
+            2) MAILTO FALLBACK: delete the <form action=...> line and uncomment the mailto
+               version on the line beneath it to have submissions open the visitor's email app.
+          -->
+          <form action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+          <!-- <form action="mailto:hello@merakicreative.com" method="POST" enctype="text/plain"> -->
+
+            <div class="form-row">
+              <div class="form-field">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" required />
+              </div>
+              <div class="form-field">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-field">
+                <label for="role">I am a…</label>
+                <select id="role" name="role" required>
+                  <option value="" disabled selected>Select one</option>
+                  <option>Actor</option>
+                  <option>Filmmaker</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label for="interest">Service / package of interest</label>
+                <select id="interest" name="interest">
+                  <option value="" disabled selected>Select one</option>
+                  <option>Actor Website Starter</option>
+                  <option>Actor Launch Package</option>
+                  <option>Reel Refresh</option>
+                  <option>Filmmaker Package</option>
+                  <option>Pitch Deck Package</option>
+                  <option>A single service</option>
+                  <option>Not sure yet — help me decide</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-field">
+                <label for="timeline">Project timeline</label>
+                <select id="timeline" name="timeline">
+                  <option value="" disabled selected>Select one</option>
+                  <option>As soon as possible</option>
+                  <option>Within a month</option>
+                  <option>1–3 months</option>
+                  <option>Just exploring</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label for="budget">Budget range (optional)</label>
+                <input type="text" id="budget" name="budget" placeholder="e.g. $500–$1,000" />
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label for="message">Tell me about your project</label>
+              <textarea id="message" name="message" rows="5" placeholder="Where are you trying to get? Links to existing reels, sites, or footage are welcome." required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Start Your Project →</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-top">
+        <div>
+          <p class="footer-brand">MERAKI<br />CREATIVE<span class="dot">.</span></p>
+          <p class="muted" style="margin-top:1rem;max-width:32ch;font-size:0.9rem;">Creative services for actors and filmmakers. Websites, reels, and materials, made with soul.</p>
+        </div>
+        <div class="footer-cols">
+          <div class="footer-col">
+            <h4>Explore</h4>
+            <a href="services.html">Services</a>
+            <a href="packages.html">Packages</a>
+            <a href="portfolio.html">Portfolio</a>
+            <a href="about.html">About</a>
+          </div>
+          <div class="footer-col">
+            <h4>Connect</h4>
+            <a href="contact.html">Start a project</a>
+            <a href="mailto:hello@merakicreative.com">hello@merakicreative.com</a>
+            <a href="#">Instagram</a>
+            <a href="#">IMDb</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 Meraki Creative — by Merivelle</span>
+        <span>Websites · Reels · Decks · Materials</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>
