@@ -87,6 +87,8 @@
           -->
           <form name="contact" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" action="/thanks.html">
             <input type="hidden" name="form-name" value="contact" />
+            <!-- Email subject: main.js fills this with the submitter's name on submit; this value is the no-JS fallback. -->
+            <input type="hidden" name="subject" value="New inquiry — Meraki Creative" />
             <p class="hp-field" hidden><label>Leave this field empty if you're human: <input name="bot-field" /></label></p>
 
             <div class="form-row">

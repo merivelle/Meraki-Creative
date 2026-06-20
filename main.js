@@ -139,6 +139,17 @@
     reel.addEventListener("click", function () { if (v.paused) play(); else stop(); });
   });
 
+  /* ---- Contact form: put the submitter's name in the Netlify email subject ---- */
+  var contactForm = document.querySelector('form[name="contact"]');
+  if (contactForm) {
+    contactForm.addEventListener("submit", function () {
+      var subj = contactForm.querySelector('input[name="subject"]');
+      var nameEl = document.getElementById("name");
+      var who = nameEl && nameEl.value ? nameEl.value.trim() : "";
+      if (subj) subj.value = who ? ("New inquiry from " + who + " — Meraki Creative") : "New inquiry — Meraki Creative";
+    });
+  }
+
   /* ---- Pre-select package on contact form from ?package= or ?interest= ---- */
   var params = new URLSearchParams(window.location.search);
   var pkg = params.get("package") || params.get("interest");
