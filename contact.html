@@ -79,14 +79,15 @@
         <!-- RIGHT: form -->
         <div class="reveal">
           <!--
-            SETUP FOR MERIVELLE: two easy ways to make this form deliver.
-            1) FORMSPREE (recommended): create a free form at formspree.io, then replace
-               YOUR_FORM_ID below with your real ID. Nothing else to change.
-            2) MAILTO FALLBACK: delete the <form action=...> line and uncomment the mailto
-               version beneath it so submissions open the visitor's email app.
+            NETLIFY FORMS: this form is wired for Netlify's free built-in form handling.
+            When deployed on Netlify it just works (submissions appear under Site > Forms,
+            with email notifications you can turn on in the Netlify dashboard). No third
+            party or backend needed. The hidden "form-name" + honeypot fields below are
+            required by Netlify; the success page is thanks.html.
           -->
-          <form action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
-          <!-- <form action="mailto:hello@merakicreative.com" method="POST" enctype="text/plain"> -->
+          <form name="contact" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" action="/thanks.html">
+            <input type="hidden" name="form-name" value="contact" />
+            <p class="hp-field" hidden><label>Leave this field empty if you're human: <input name="bot-field" /></label></p>
 
             <div class="form-row">
               <div class="field">
