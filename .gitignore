@@ -1,0 +1,7 @@
+# OS / editor cruft
+.DS_Store
+**/.DS_Store
+Thumbs.db
+
+# Local impeccable skill cache
+.impeccable/

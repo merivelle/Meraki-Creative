@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Meraki Creative — From Cut to Launch</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face{font-family:'Archivo';font-style:normal;font-weight:700;font-display:block;src:url('assets/fonts/Archivo-700.woff2') format('woff2');}
+      @font-face{font-family:'Archivo';font-style:normal;font-weight:800;font-display:block;src:url('assets/fonts/Archivo-800.woff2') format('woff2');}
+      @font-face{font-family:'Archivo';font-style:normal;font-weight:900;font-display:block;src:url('assets/fonts/Archivo-900.woff2') format('woff2');}
+      @font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:500;font-display:block;src:url('assets/fonts/JetBrainsMono-500.woff2') format('woff2');}
+      @font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:600;font-display:block;src:url('assets/fonts/JetBrainsMono-600.woff2') format('woff2');}
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      :root {
+        --ink: #15130e;
+        --paper: #f3f2ee;
+        --paper-2: #e9e7e0;
+        --accent-soft: #c9897f;
+        --soft: #b6b0a6;
+        --mono: "JetBrains Mono", monospace;
+        --disp: "Archivo", sans-serif;
+      }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--ink); font-family: 'Archivo', sans-serif; }
+      #root { position: relative; width: 1920px; height: 1080px; background: var(--ink); }
+
+      .act { position: absolute; inset: 0; opacity: 0; }
+      .label {
+        position: absolute; top: 96px; left: 120px;
+        font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 600;
+        letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-soft);
+      }
+      .step {
+        position: absolute; top: 96px; right: 120px;
+        font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 500;
+        letter-spacing: 0.14em; text-transform: uppercase; color: var(--soft);
+      }
+      .step b { color: var(--paper); font-weight: 600; }
+
+      /* ---------- ACT 1: THE CUT ---------- */
+      .stage1 { position: absolute; left: 240px; right: 240px; top: 320px; }
+      .ruler { display: flex; justify-content: space-between; margin-bottom: 26px; }
+      .ruler i { width: 2px; height: 18px; background: rgba(243,242,238,0.25); }
+      .track { display: flex; gap: 16px; height: 96px; margin-bottom: 18px; }
+      .cbox { flex: 1; background: rgba(243,242,238,0.13); border: 1.5px solid rgba(243,242,238,0.2); border-radius: 4px; transform-origin: left center; }
+      .cbox.alt { background: rgba(201,137,127,0.32); border-color: rgba(201,137,127,0.55); }
+      .track.t2 .cbox:first-child { flex: 0.5; }
+      .waveform { display: flex; align-items: flex-end; gap: 5px; height: 120px; margin-top: 26px; }
+      .waveform i { flex: 1; background: var(--accent-soft); opacity: 0.55; transform-origin: bottom; height: 40%; }
+      .playhead { position: absolute; top: -30px; bottom: -30px; left: 0; width: 3px; background: var(--accent-soft); box-shadow: 0 0 22px rgba(201,137,127,0.7); }
+
+      /* ---------- ACT 2: THE SITE ---------- */
+      .browser { position: absolute; top: 210px; left: 50%; transform: translateX(-50%); width: 1040px; background: var(--paper); border-radius: 6px; box-shadow: 0 50px 120px rgba(0,0,0,0.55); overflow: hidden; }
+      .chrome { display: flex; align-items: center; gap: 12px; padding: 20px 26px; border-bottom: 1.5px solid rgba(23,21,15,0.1); }
+      .cdot { width: 16px; height: 16px; border-radius: 50%; background: rgba(23,21,15,0.14); }
+      .curl { margin-left: 18px; font-family: 'JetBrains Mono', monospace; font-size: 22px; color: #54504a; background: var(--paper-2); padding: 8px 28px; border-radius: 40px; min-width: 360px; }
+      .bbody { padding: 56px; display: flex; flex-direction: column; gap: 26px; }
+      .bnav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+      .bmark { width: 150px; height: 22px; background: var(--ink); }
+      .blinks { display: flex; gap: 18px; }
+      .blinks i { width: 56px; height: 12px; background: rgba(23,21,15,0.16); }
+      .bhead { width: 74%; height: 70px; background: var(--ink); }
+      .breel { position: relative; width: 100%; aspect-ratio: 16/6.5; background: var(--ink); display: flex; align-items: center; justify-content: center; }
+      .play { width: 0; height: 0; border-left: 46px solid var(--accent-soft); border-top: 28px solid transparent; border-bottom: 28px solid transparent; }
+      .brow { height: 16px; background: rgba(23,21,15,0.13); }
+      .brow.s { width: 52%; }
+
+      /* ---------- ACT 3: THE OUTCOME ---------- */
+      .outwrap { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 56px; }
+      .ogrid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; width: 1180px; }
+      .ocard { position: relative; aspect-ratio: 16/10; border: 1.5px solid rgba(243,242,238,0.16); overflow: hidden; display: flex; align-items: center; justify-content: center; }
+      .ocap { position: absolute; left: 22px; bottom: 18px; font-family: 'JetBrains Mono', monospace; font-size: 20px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--soft); }
+      .o-reel { background: #100f0a; }
+      .o-site { background: var(--paper); flex-direction: column; align-items: flex-start; justify-content: flex-start; padding: 34px; gap: 18px; }
+      .o-site .mininav { display: flex; gap: 14px; align-self: stretch; justify-content: flex-end; }
+      .o-site .mininav i { width: 44px; height: 11px; background: rgba(23,21,15,0.16); }
+      .o-site .minihead { width: 78%; height: 44px; background: var(--ink); margin-top: 6px; }
+      .o-site .minirow { width: 100%; height: 14px; background: rgba(23,21,15,0.13); }
+      .o-site .minirow.s { width: 48%; }
+      .o-site .ocap { color: #54504a; }
+      .ocaption { font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 60px; letter-spacing: -0.02em; color: var(--paper); text-align: center; }
+      .wordmark { position: absolute; bottom: 90px; left: 0; right: 0; text-align: center; }
+      .wordmark .wm { font-family: 'Archivo', sans-serif; font-weight: 900; font-size: 30px; letter-spacing: 0.02em; color: var(--paper); }
+      .wordmark .wm b { color: var(--accent-soft); }
+      .wordmark .sub { display: block; margin-top: 10px; font-family: 'JetBrains Mono', monospace; font-size: 19px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--soft); }
+
+      .grain { position: absolute; inset: 0; pointer-events: none; opacity: 0.05; mix-blend-mode: screen;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+      .vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgba(0,0,0,0.45) 100%); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="18" data-width="1920" data-height="1080">
+
+      <!-- ACT 1 — THE CUT -->
+      <div class="act act-cut">
+        <span class="label">Timeline / Cut</span>
+        <span class="step"><b id="s1a">Raw</b> &nbsp;&rarr;&nbsp; <span id="s1b">Selects</span> &nbsp;&rarr;&nbsp; <span id="s1c">Cut</span></span>
+        <div class="stage1">
+          <div class="ruler"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="track t1"><span class="cbox"></span><span class="cbox alt"></span><span class="cbox"></span><span class="cbox"></span></div>
+          <div class="track t2"><span class="cbox alt"></span><span class="cbox"></span><span class="cbox alt"></span></div>
+          <div class="waveform"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <span class="playhead"></span>
+        </div>
+      </div>
+
+      <!-- ACT 2 — THE SITE -->
+      <div class="act act-site">
+        <span class="label">Build / Site</span>
+        <span class="step"><span id="s2a">Reel</span> &nbsp;&rarr;&nbsp; <b id="s2b">Site</b></span>
+        <div class="browser">
+          <div class="chrome"><span class="cdot"></span><span class="cdot"></span><span class="cdot"></span><span class="curl" id="curl">|</span></div>
+          <div class="bbody">
+            <div class="bnav"><span class="bmark"></span><span class="blinks"><i></i><i></i><i></i></span></div>
+            <span class="bhead"></span>
+            <div class="breel"><span class="play"></span></div>
+            <span class="brow"></span><span class="brow s"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACT 3 — THE OUTCOME -->
+      <div class="act act-out">
+        <span class="label">Live</span>
+        <div class="outwrap">
+          <div class="ogrid">
+            <figure class="ocard o-reel"><span class="play"></span><figcaption class="ocap">Reel</figcaption></figure>
+            <figure class="ocard o-site">
+              <span class="mininav"><i></i><i></i><i></i></span>
+              <span class="minihead"></span>
+              <span class="minirow"></span><span class="minirow s"></span>
+              <figcaption class="ocap">Website</figcaption>
+            </figure>
+          </div>
+          <p class="ocaption">Real work. Ready for the room.</p>
+        </div>
+        <div class="wordmark">
+          <span class="wm">MERAKI CREATIVE<b>.</b></span>
+          <span class="sub">Start your project</span>
+        </div>
+      </div>
+
+      <div class="grain"></div>
+      <div class="vignette"></div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
+      const STAGE_W = 1440; // .stage1 width (1920 - 240*2)
+
+      /* ===== ACT 1 — THE CUT (0 -> 6.2s) ===== */
+      tl.set(".act-cut", { opacity: 1 }, 0)
+        .from(".act-cut .label", { opacity: 0, y: 14, duration: 0.5 }, 0.1)
+        .from(".act-cut .step", { opacity: 0, y: 14, duration: 0.5 }, 0.2)
+        .from(".act-cut .cbox", { scaleX: 0, opacity: 0, stagger: 0.09, duration: 0.5 }, 0.3)
+        .from(".act-cut .waveform i", { scaleY: 0.12, opacity: 0, stagger: 0.012, duration: 0.4 }, 0.7)
+        .fromTo(".act-cut .playhead", { x: 0 }, { x: STAGE_W, duration: 3.4, ease: "none" }, 0.7)
+        .to(".act-cut .waveform i", { scaleY: 1.5, duration: 0.16, overwrite: "auto", stagger: { each: 0.025, yoyo: true, repeat: 1 } }, 1.9)
+        .to("#s1b", { color: "#f3f2ee", duration: 0.3 }, 2.1)
+        .to("#s1a", { color: "#b6b0a6", duration: 0.3 }, 2.1)
+        .to("#s1c", { color: "#f3f2ee", duration: 0.3 }, 3.6)
+        .to("#s1b", { color: "#b6b0a6", duration: 0.3 }, 3.6)
+        .to(".act-cut .track .cbox", { opacity: 0.35, duration: 0.4 }, 4.4)
+        .to(".act-cut", { opacity: 0, duration: 0.6 }, 5.6);
+
+      /* ===== ACT 2 — THE SITE (5.9 -> 12.2s) ===== */
+      const url = "merakicreative.com";
+      tl.set(".act-site", { opacity: 1 }, 5.9)
+        .from(".browser", { yPercent: 6, opacity: 0, scale: 0.96, transformOrigin: "50% 50%", duration: 0.7 }, 5.9)
+        .from(".act-site .label, .act-site .step", { opacity: 0, y: 14, duration: 0.5 }, 6.1);
+      for (let i = 0; i <= url.length; i++) {
+        tl.set("#curl", { innerText: url.slice(0, i) + (i < url.length ? "|" : "") }, 6.5 + i * 0.04);
+      }
+      tl.from(".act-site .bnav, .act-site .bhead, .act-site .brow", { opacity: 0, y: 18, stagger: 0.14, duration: 0.45 }, 7.5)
+        .from(".breel", { opacity: 0, scale: 0.92, transformOrigin: "50% 50%", duration: 0.5 }, 7.8)
+        .from(".breel .play", { scale: 0, duration: 0.4, ease: "back.out(2)" }, 8.1)
+        .to("#s2b", { color: "#f3f2ee", duration: 0.3 }, 8.3)
+        .to("#s2a", { color: "#b6b0a6", duration: 0.3 }, 8.3)
+        .to(".act-site", { opacity: 0, duration: 0.6 }, 11.5);
+
+      /* ===== ACT 3 — THE OUTCOME (11.8 -> 18s) ===== */
+      tl.set(".act-out", { opacity: 1 }, 11.8)
+        .from(".act-out .label", { opacity: 0, y: 14, duration: 0.5 }, 12.0)
+        .from(".ocard", { opacity: 0, yPercent: 10, scale: 0.96, transformOrigin: "50% 50%", stagger: 0.2, duration: 0.7 }, 12.0)
+        .from(".o-reel .play", { scale: 0, duration: 0.5, ease: "back.out(2)" }, 12.5)
+        .from(".ocaption", { opacity: 0, y: 18, duration: 0.7 }, 12.9)
+        .from(".wordmark .wm", { opacity: 0, y: 16, duration: 0.6 }, 13.8)
+        .from(".wordmark .sub", { opacity: 0, y: 12, duration: 0.5 }, 14.1)
+        .to(".act-out", { opacity: 1, duration: 3.4 });
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
