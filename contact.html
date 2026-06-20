@@ -114,11 +114,24 @@
                 <label for="interest">Service / package of interest</label>
                 <select id="interest" name="interest">
                   <option value="" disabled selected>Select one</option>
-                  <option>Actor Website Starter</option>
-                  <option>Actor Launch Package</option>
-                  <option>Reel Refresh</option>
-                  <option>Filmmaker Package</option>
-                  <option>Pitch Deck Package</option>
+                  <optgroup label="Bundles">
+                    <option>Acting Package</option>
+                    <option>Filmmaker Package</option>
+                  </optgroup>
+                  <optgroup label="Post-Production">
+                    <option>Scene Edit</option>
+                    <option>Demo Reel Refresh</option>
+                    <option>Trailer Package</option>
+                  </optgroup>
+                  <optgroup label="Digital Presence">
+                    <option>Actor Website</option>
+                    <option>Director Website</option>
+                    <option>Production Company Website</option>
+                  </optgroup>
+                  <optgroup label="Creative Materials">
+                    <option>Pitch Deck Package</option>
+                    <option>Presentation Package</option>
+                  </optgroup>
                   <option>A single service</option>
                   <option>Not sure yet, help me decide</option>
                 </select>
