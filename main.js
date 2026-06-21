@@ -42,29 +42,28 @@
     var screenW = function () { var s = stage.querySelector(".stage-screen"); return s ? s.clientWidth : 600; };
     gsap.set(stage.querySelectorAll(".act"), { opacity: 0 });
 
-    var tl = gsap.timeline({ repeat: -1, repeatDelay: 0.5, defaults: { ease: "power3.out" } });
+    var tl = gsap.timeline({ repeat: -1, repeatDelay: 0.6, defaults: { ease: "power3.out" } });
 
-    // ACT 1 — THE CUT
+    // ACT 1 — THE CUT (real frame thumbnails snap onto the timeline)
     tl.set(".act-cut", { opacity: 1 })
-      .from(".act-cut .clip", { scaleX: 0, opacity: 0, stagger: 0.07, duration: 0.5 }, 0.1)
-      .from(".act-cut .waveform i", { scaleY: 0.15, opacity: 0, stagger: 0.015, duration: 0.4 }, 0.3)
-      .fromTo(".act-cut .playhead", { x: 0 }, { x: function () { return screenW() - 36; }, duration: 2.1, ease: "none" }, 0.3)
-      .to(".act-cut .waveform i", { scaleY: 1.25, duration: 0.18, stagger: { each: 0.04, yoyo: true, repeat: 1 } }, 0.6)
-      .to(".act-cut", { opacity: 0, duration: 0.5 }, "+=0.4")
+      .from(".act-cut .clip", { scaleX: 0, opacity: 0, stagger: 0.08, duration: 0.5 }, 0.1)
+      .from(".act-cut .waveform i", { scaleY: 0.15, opacity: 0, stagger: 0.015, duration: 0.4 }, 0.32)
+      .fromTo(".act-cut .playhead", { x: 0 }, { x: function () { return screenW() - 36; }, duration: 2.2, ease: "none" }, 0.32)
+      .to(".act-cut .waveform i", { scaleY: 1.25, duration: 0.18, stagger: { each: 0.04, yoyo: true, repeat: 1 } }, 0.65)
+      .to(".act-cut", { opacity: 0, duration: 0.55, ease: "power2.inOut" }, "+=0.5")
 
-      // ACT 2 — THE SITE
+      // ACT 2 — THE SITE (real screenshot wipes in as the page builds)
       .set(".act-site", { opacity: 1 }, "<")
-      .from(".browser", { yPercent: 8, opacity: 0, duration: 0.55 }, "<")
-      .from(".act-site .bnav, .act-site .bhead, .act-site .breel, .act-site .brow", { opacity: 0, y: 14, stagger: 0.12, duration: 0.4 }, "<0.2")
-      .from(".act-site .play", { scale: 0, duration: 0.4, ease: "back.out(2)" }, "-=0.2")
-      .to(".act-site", { opacity: 0, duration: 0.5 }, "+=0.7")
+      .from(".browser", { yPercent: 10, opacity: 0, duration: 0.6, ease: "expo.out" }, "<")
+      .fromTo(".act-site .bshot", { clipPath: "inset(0 0 100% 0)" }, { clipPath: "inset(0 0 0% 0)", duration: 0.85, ease: "power2.out" }, "<0.2")
+      .to(".act-site", { opacity: 0, duration: 0.55, ease: "power2.inOut" }, "+=0.9")
 
-      // ACT 3 — THE OUTCOME
+      // ACT 3 — THE OUTCOME (real reel + real website)
       .set(".act-out", { opacity: 1 }, "<")
-      .from(".out-card", { opacity: 0, yPercent: 12, stagger: 0.16, duration: 0.55 }, "<")
-      .from(".out-caption", { opacity: 0, y: 12, duration: 0.5 }, "-=0.15")
-      .to(".act-out", { opacity: 1, duration: 1.9 })           // hold on the outcome
-      .to(".act-out", { opacity: 0, duration: 0.55 });
+      .from(".out-card", { opacity: 0, yPercent: 14, scale: 0.96, stagger: 0.18, duration: 0.6, ease: "expo.out" }, "<")
+      .from(".out-caption", { opacity: 0, y: 12, duration: 0.55 }, "-=0.2")
+      .to(".act-out", { opacity: 1, duration: 2.1 })           // hold on the outcome
+      .to(".act-out", { opacity: 0, duration: 0.6, ease: "power2.inOut" });
 
     // Pause when the page is hidden (saves cycles; resumes on return)
     document.addEventListener("visibilitychange", function () {
@@ -108,13 +107,13 @@
   /* ---- Showreel: cutting-room frame (autoplay in view + synced playhead/timecode) ---- */
   document.querySelectorAll(".showreel[data-showreel]").forEach(function (sr) {
     var v = sr.querySelector("video");
-    var head = sr.querySelector(".sr-playhead");
+    var fill = sr.querySelector(".sr-progress-fill");
     var tc = sr.querySelector(".sr-tc");
     if (!v) return;
     function fmt(s) { s = Math.max(0, s || 0); var m = Math.floor(s / 60), ss = Math.floor(s % 60); return (m < 10 ? "0" : "") + m + ":" + (ss < 10 ? "0" : "") + ss; }
     v.addEventListener("timeupdate", function () {
       if (v.duration) {
-        if (head) head.style.transform = "translateX(" + (v.currentTime / v.duration) * sr.clientWidth + "px)";
+        if (fill) fill.style.transform = "scaleX(" + (v.currentTime / v.duration) + ")";
         if (tc) tc.textContent = fmt(v.currentTime);
       }
     });
