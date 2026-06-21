@@ -34,25 +34,59 @@
     document.addEventListener("visibilitychange", function () { if (document.hidden) revealAll(); });
   }
 
-  /* ---- Hero motion stage: cut -> site -> outcome (decorative, looped) ---- */
+  /* ---- Hero motion stage: editing timeline (real clips play under the playhead) ---- */
   var stage = document.querySelector(".stage[data-motion]");
   var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (stage && window.gsap && !reduceMotion) {
-    var gsap = window.gsap;
-    var screenW = function () { var s = stage.querySelector(".stage-screen"); return s ? s.clientWidth : 600; };
+  if (stage && !reduceMotion) {
+    var screenEl = stage.querySelector(".stage-screen");
+    var playhead = stage.querySelector(".act-cut .playhead");
+    var clipVideos = Array.prototype.slice.call(stage.querySelectorAll(".act-cut .clip video"));
 
-    // Editing timeline: clips snap onto the lanes, the audio waveform builds,
-    // then the playhead sweeps across on a loop. Decorative, transform/opacity only.
-    var tl = gsap.timeline({ repeat: -1, repeatDelay: 0.4, defaults: { ease: "power3.out" } });
-    tl.from(".act-cut .clip", { scaleX: 0, opacity: 0, transformOrigin: "left center", stagger: 0.09, duration: 0.5 }, 0)
-      .from(".act-cut .waveform i", { scaleY: 0.12, opacity: 0, stagger: 0.012, duration: 0.4 }, 0.3)
-      .to(".act-cut .waveform i", { scaleY: 1.3, duration: 0.16, stagger: { each: 0.03, yoyo: true, repeat: 1 } }, 0.6)
-      .fromTo(".act-cut .playhead", { x: 0, opacity: 1 }, { x: function () { return screenW() - 36; }, duration: 2.4, ease: "none" }, 0.85)
-      .to(".act-cut .playhead", { opacity: 0, duration: 0.3 }, ">-0.05");
+    // One-time intro reveal: clips snap onto the lanes, the audio waveform builds.
+    if (window.gsap) {
+      var gsap = window.gsap;
+      gsap.timeline({ defaults: { ease: "power3.out" } })
+        .from(".act-cut .clip", { scaleX: 0, opacity: 0, transformOrigin: "left center", stagger: 0.09, duration: 0.5 }, 0)
+        .from(".act-cut .waveform i", { scaleY: 0.12, opacity: 0, stagger: 0.012, duration: 0.4 }, 0.3)
+        .to(".act-cut .waveform i", { scaleY: 1.3, duration: 0.16, stagger: { each: 0.03, yoyo: true, repeat: 1 } }, 0.6);
+    }
 
-    // Pause when the page is hidden (saves cycles; resumes on return)
+    // Continuous, slow playhead sweep. Whichever clip the playhead sits over plays;
+    // the rest pause and freeze on frame (one rAF loop drives both, like an NLE).
+    var DURATION = 15000; // ms for one full left->right pass (slow + cinematic)
+    var rafId = 0, startT = 0;
+
+    function travel() { return (screenEl ? screenEl.clientWidth : 600) - 36; }
+
+    function syncPlayback() {
+      if (!playhead) return;
+      var pr = playhead.getBoundingClientRect();
+      var px = pr.left + pr.width / 2;
+      clipVideos.forEach(function (v) {
+        var r = v.getBoundingClientRect();
+        var over = px >= r.left && px <= r.right;
+        if (over && v.paused) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+        else if (!over && !v.paused) { v.pause(); }
+      });
+    }
+
+    function tick(now) {
+      if (!startT) startT = now;
+      var progress = ((now - startT) % DURATION) / DURATION;
+      if (playhead) playhead.style.transform = "translateX(" + (progress * travel()) + "px)";
+      syncPlayback();
+      rafId = requestAnimationFrame(tick);
+    }
+    rafId = requestAnimationFrame(tick);
+
+    // Pause the loop + all clips when the tab is hidden; resume on return.
     document.addEventListener("visibilitychange", function () {
-      if (document.hidden) tl.pause(); else tl.resume();
+      if (document.hidden) {
+        if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+        clipVideos.forEach(function (v) { v.pause(); });
+      } else if (!rafId) {
+        startT = 0; rafId = requestAnimationFrame(tick);
+      }
     });
   }
 
