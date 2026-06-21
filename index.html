@@ -60,41 +60,31 @@
           </div>
         </div>
 
-        <!-- Motion stage: cut -> site -> outcome. Decorative; static "outcome" fallback without JS/reduced-motion. -->
+        <!-- Editing-timeline motion graphic. Decorative; static assembled timeline without JS/reduced-motion. -->
         <div class="stage" data-motion aria-hidden="true">
           <div class="stage-screen">
-            <!-- ACT 1 — THE CUT -->
             <div class="act act-cut">
               <span class="act-tag">Timeline / Cut</span>
-              <div class="ruler"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-              <div class="tracks">
-                <div class="track"><span class="clip" style="background-image:url(assets/work/showreel-poster.jpg)"></span><span class="clip" style="background-image:url(assets/work/reel-sitdown-poster.jpg)"></span><span class="clip alt" style="background-image:url(assets/work/scene-sunflower-poster.jpg)"></span></div>
-                <div class="track"><span class="clip alt" style="background-image:url(assets/work/film-opa-poster.jpg)"></span><span class="clip" style="background-image:url(assets/work/scene-butterflies-poster.jpg)"></span></div>
+              <div class="ruler"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+              <div class="lanes">
+                <div class="lane"><span class="lane-label">V2</span><div class="track">
+                  <span class="clip" style="flex:1.4;background-image:url(assets/work/showreel-poster.jpg)"></span>
+                  <span class="clip" style="flex:1;background-image:url(assets/work/scene-sunflower-poster.jpg)"></span>
+                  <span class="clip" style="flex:1.7;background-image:url(assets/work/reel-sitdown-poster.jpg)"></span>
+                </div></div>
+                <div class="lane"><span class="lane-label">V1</span><div class="track">
+                  <span class="clip" style="flex:1;background-image:url(assets/work/film-opa-poster.jpg)"></span>
+                  <span class="clip" style="flex:1.5;background-image:url(assets/work/scene-butterflies-poster.jpg)"></span>
+                  <span class="clip" style="flex:1.1;background-image:url(assets/work/showreel-poster.jpg)"></span>
+                </div></div>
+                <div class="lane"><span class="lane-label">A1</span><div class="track audio">
+                  <div class="waveform"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                </div></div>
               </div>
-              <div class="waveform"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
               <span class="playhead"></span>
             </div>
-            <!-- ACT 2 — THE SITE -->
-            <div class="act act-site">
-              <span class="act-tag">Build / Site</span>
-              <div class="browser">
-                <div class="bchrome"><span class="bdot"></span><span class="bdot"></span><span class="bdot"></span><span class="burl">merivelle.net</span></div>
-                <div class="bbody">
-                  <img class="bshot" src="assets/work/site-merivelle.jpg" alt="" loading="eager" />
-                </div>
-              </div>
-            </div>
-            <!-- ACT 3 — THE OUTCOME (real product examples) -->
-            <div class="act act-out">
-              <span class="act-tag">Live</span>
-              <div class="out-grid">
-                <figure class="out-card out-reel" style="background-image:url(assets/work/showreel-poster.jpg)"><span class="play"></span><figcaption>Reel</figcaption></figure>
-                <figure class="out-card out-site"><img src="assets/work/site-merivelle.jpg" alt="" loading="eager" /><figcaption>Website</figcaption></figure>
-              </div>
-              <p class="out-caption">Real work. Ready for the room.</p>
-            </div>
           </div>
-          <p class="stage-cap"><span class="stage-cap-k">Process</span> Cut <span class="arr">&rarr;</span> Site <span class="arr">&rarr;</span> Live</p>
+          <p class="stage-cap"><span class="stage-cap-k">The cut</span> Where the story is found.</p>
         </div>
       </div>
     </section>

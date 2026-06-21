@@ -40,30 +40,15 @@
   if (stage && window.gsap && !reduceMotion) {
     var gsap = window.gsap;
     var screenW = function () { var s = stage.querySelector(".stage-screen"); return s ? s.clientWidth : 600; };
-    gsap.set(stage.querySelectorAll(".act"), { opacity: 0 });
 
-    var tl = gsap.timeline({ repeat: -1, repeatDelay: 0.6, defaults: { ease: "power3.out" } });
-
-    // ACT 1 — THE CUT (real frame thumbnails snap onto the timeline)
-    tl.set(".act-cut", { opacity: 1 })
-      .from(".act-cut .clip", { scaleX: 0, opacity: 0, stagger: 0.08, duration: 0.5 }, 0.1)
-      .from(".act-cut .waveform i", { scaleY: 0.15, opacity: 0, stagger: 0.015, duration: 0.4 }, 0.32)
-      .fromTo(".act-cut .playhead", { x: 0 }, { x: function () { return screenW() - 36; }, duration: 2.2, ease: "none" }, 0.32)
-      .to(".act-cut .waveform i", { scaleY: 1.25, duration: 0.18, stagger: { each: 0.04, yoyo: true, repeat: 1 } }, 0.65)
-      .to(".act-cut", { opacity: 0, duration: 0.55, ease: "power2.inOut" }, "+=0.5")
-
-      // ACT 2 — THE SITE (real screenshot wipes in as the page builds)
-      .set(".act-site", { opacity: 1 }, "<")
-      .from(".browser", { yPercent: 10, opacity: 0, duration: 0.6, ease: "expo.out" }, "<")
-      .fromTo(".act-site .bshot", { clipPath: "inset(0 0 100% 0)" }, { clipPath: "inset(0 0 0% 0)", duration: 0.85, ease: "power2.out" }, "<0.2")
-      .to(".act-site", { opacity: 0, duration: 0.55, ease: "power2.inOut" }, "+=0.9")
-
-      // ACT 3 — THE OUTCOME (real reel + real website)
-      .set(".act-out", { opacity: 1 }, "<")
-      .from(".out-card", { opacity: 0, yPercent: 14, scale: 0.96, stagger: 0.18, duration: 0.6, ease: "expo.out" }, "<")
-      .from(".out-caption", { opacity: 0, y: 12, duration: 0.55 }, "-=0.2")
-      .to(".act-out", { opacity: 1, duration: 2.1 })           // hold on the outcome
-      .to(".act-out", { opacity: 0, duration: 0.6, ease: "power2.inOut" });
+    // Editing timeline: clips snap onto the lanes, the audio waveform builds,
+    // then the playhead sweeps across on a loop. Decorative, transform/opacity only.
+    var tl = gsap.timeline({ repeat: -1, repeatDelay: 0.4, defaults: { ease: "power3.out" } });
+    tl.from(".act-cut .clip", { scaleX: 0, opacity: 0, transformOrigin: "left center", stagger: 0.09, duration: 0.5 }, 0)
+      .from(".act-cut .waveform i", { scaleY: 0.12, opacity: 0, stagger: 0.012, duration: 0.4 }, 0.3)
+      .to(".act-cut .waveform i", { scaleY: 1.3, duration: 0.16, stagger: { each: 0.03, yoyo: true, repeat: 1 } }, 0.6)
+      .fromTo(".act-cut .playhead", { x: 0, opacity: 1 }, { x: function () { return screenW() - 36; }, duration: 2.4, ease: "none" }, 0.85)
+      .to(".act-cut .playhead", { opacity: 0, duration: 0.3 }, ">-0.05");
 
     // Pause when the page is hidden (saves cycles; resumes on return)
     document.addEventListener("visibilitychange", function () {
