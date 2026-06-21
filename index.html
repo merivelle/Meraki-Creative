@@ -205,16 +205,22 @@
 
     <hr class="rule" />
 
-    <!-- ============ TESTIMONIAL ============ -->
-    <!-- One quote for now. More coming: wrap multiple <figure class="testimonial"> in a grid and
-         shrink .quote for the secondary ones (see .statement / packages grid patterns). -->
+    <!-- ============ TESTIMONIALS ============ -->
+    <!-- 2-up grid. Add more quotes by appending another <figure class="testimonial">; the grid
+         auto-extends (drop to 3 columns if it ever gets crowded). -->
     <section class="section">
       <div class="wrap">
-        <figure class="testimonial reveal">
-          <span class="slate-tag">In Their Words</span>
-          <blockquote class="quote">Merivelle is a true asset to any production. She is assertive, skilled, and highly intuitive in her execution. She delivered our edit on time and with excellence.</blockquote>
-          <figcaption class="quote-cite">Artistic Director <span>Liquid Theatre Collective</span></figcaption>
-        </figure>
+        <span class="slate-tag">In Their Words</span>
+        <div class="testimonials reveal-stagger">
+          <figure class="testimonial">
+            <blockquote class="quote">&ldquo;Merivelle is a true asset to any production. She is assertive, skilled, and highly intuitive in her execution. She delivered our edit on time and with excellence.&rdquo;</blockquote>
+            <figcaption class="quote-cite">Artistic Director <span>Liquid Theatre Collective</span></figcaption>
+          </figure>
+          <figure class="testimonial">
+            <blockquote class="quote">&ldquo;Working with Merivelle was nothing short of amazing; she has an incredible gift for storytelling through her editing. Her creativity, attention to detail, and instinct for storytelling turned my reel into something I was genuinely proud of. For the first time, I watched myself on screen and actually enjoyed what I saw. Not because of me, but because of her ability to bring out the story, emotion, and authenticity in every moment.&rdquo;</blockquote>
+            <figcaption class="quote-cite">Actor <span>Nicky Chartraw</span></figcaption>
+          </figure>
+        </div>
       </div>
     </section>
 

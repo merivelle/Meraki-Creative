@@ -305,13 +305,20 @@ p { text-wrap: pretty; max-width: 68ch; }
 .statement .lead-note { position: sticky; top: 120px; }
 @media (max-width: 820px) { .statement .lead-note { position: static; } }
 
-/* Testimonial — single editorial pull-quote (attributed client voice) */
-.testimonial { max-width: 60ch; margin: 0; }
-.testimonial .slate-tag { display: inline-block; margin-bottom: clamp(1.1rem, 3vw, 1.8rem); }
-.quote { margin: 0; font-family: var(--font-display); font-weight: 500; font-size: clamp(1.6rem, 3.4vw, 2.7rem); line-height: 1.18; letter-spacing: -0.02em; color: var(--ink); text-wrap: balance; }
-.quote-cite { margin-top: clamp(1.4rem, 3vw, 2rem); padding-top: clamp(1.1rem, 2.4vw, 1.5rem); border-top: 1px solid var(--line); font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); }
+/* Testimonials — attributed client voices, 2-up grid */
+.testimonials { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 4.5rem); align-items: stretch; margin-top: clamp(1.1rem, 3vw, 1.8rem); }
+@media (max-width: 820px) { .testimonials { grid-template-columns: 1fr; gap: 2.5rem; } }
+/* Phones: swipeable horizontal carousel (next card peeks as the swipe cue) */
+@media (max-width: 640px) {
+  .testimonials { display: flex; grid-template-columns: none; gap: 1rem; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .testimonials::-webkit-scrollbar { display: none; }
+  .testimonial { flex: 0 0 85%; scroll-snap-align: start; }
+}
+.testimonial { display: flex; flex-direction: column; height: 100%; margin: 0; }
+.quote { margin: 0; font-family: var(--font-display); font-weight: 500; font-size: clamp(1.15rem, 1.7vw, 1.55rem); line-height: 1.32; letter-spacing: -0.01em; color: var(--ink); text-wrap: pretty; }
+.quote-cite { margin-top: auto; padding-top: clamp(1.1rem, 2.4vw, 1.5rem); border-top: 1px solid var(--line); font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); }
 .quote-cite span { color: var(--accent); }
-.quote-cite span::before { content: " · "; color: var(--ink-soft); }
+.quote-cite span::before { content: "\0000B7"; margin-inline: 0.5ch; color: var(--ink-soft); }
 
 /* =================================================================
    SPLIT — asymmetric index + side column (frame or whitespace)
