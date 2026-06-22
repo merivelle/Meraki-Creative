@@ -205,25 +205,28 @@
 
     <hr class="rule" />
 
-    <!-- ============ TESTIMONIALS ============ -->
-    <!-- 2-up grid. Add more quotes by appending another <figure class="testimonial">; the grid
-         auto-extends (drop to 3 columns if it ever gets crowded). -->
+    <!-- ============ TESTIMONIALS (auto-advancing slideshow) ============ -->
+    <!-- Add more quotes by appending another <figure class="testimonial"> to .tsl-track; main.js
+         rebuilds the dots automatically. Without JS the track stays swipeable. -->
     <section class="section">
       <div class="wrap">
         <span class="slate-tag reveal">In Their Words</span>
-        <div class="testimonials reveal-stagger">
-          <figure class="testimonial">
-            <blockquote class="quote">&ldquo;Merivelle is a true asset to any production. She is assertive, skilled, and highly intuitive in her execution. She delivered our edit on time and with excellence.&rdquo;</blockquote>
-            <figcaption class="quote-cite">Artistic Director <span>Liquid Theatre Collective</span></figcaption>
-          </figure>
-          <figure class="testimonial">
-            <blockquote class="quote">&ldquo;Working with Merivelle was nothing short of amazing; she has an incredible gift for storytelling through her editing. Her creativity, attention to detail, and instinct for storytelling turned my reel into something I was genuinely proud of. For the first time, I watched myself on screen and actually enjoyed what I saw. Not because of me, but because of her ability to bring out the story, emotion, and authenticity in every moment.&rdquo;</blockquote>
-            <figcaption class="quote-cite">Actor <span>Nicky Chartraw</span></figcaption>
-          </figure>
-          <figure class="testimonial">
-            <blockquote class="quote">&ldquo;Merivelle helped me put together my acting reel, and honestly it came out better than I expected. She was really thoughtful about which moments to use and how to tell a story through the footage. The final reel felt much more professional and much more like me. Since updating it, I&rsquo;ve been getting more auditions, and it definitely gave me more confidence when submitting myself for projects. The reel also helped me land my first feature film, which was a huge milestone for me as an actor. I&rsquo;m really happy with the result and grateful for all the work she put into it.&rdquo;</blockquote>
-            <figcaption class="quote-cite">Actor <span>Yonatan Shaham Vitos</span></figcaption>
-          </figure>
+        <div class="tsl reveal" data-testimonials role="group" aria-roledescription="carousel" aria-label="Client testimonials">
+          <div class="tsl-track">
+            <figure class="testimonial" role="group" aria-roledescription="slide" aria-label="1 of 3">
+              <blockquote class="quote">&ldquo;Merivelle is a true asset to any production. She is assertive, skilled, and highly intuitive in her execution. She delivered our edit on time and with excellence.&rdquo;</blockquote>
+              <figcaption class="quote-cite">Artistic Director <span>Liquid Theatre Collective</span></figcaption>
+            </figure>
+            <figure class="testimonial" role="group" aria-roledescription="slide" aria-label="2 of 3">
+              <blockquote class="quote">&ldquo;Working with Merivelle was nothing short of amazing; she has an incredible gift for storytelling through her editing. Her creativity, attention to detail, and instinct for storytelling turned my reel into something I was genuinely proud of. For the first time, I watched myself on screen and actually enjoyed what I saw. Not because of me, but because of her ability to bring out the story, emotion, and authenticity in every moment.&rdquo;</blockquote>
+              <figcaption class="quote-cite">Actor <span>Nicky Chartraw</span></figcaption>
+            </figure>
+            <figure class="testimonial" role="group" aria-roledescription="slide" aria-label="3 of 3">
+              <blockquote class="quote">&ldquo;Merivelle helped me put together my acting reel, and honestly it came out better than I expected. She was really thoughtful about which moments to use and how to tell a story through the footage. The final reel felt much more professional and much more like me. Since updating it, I&rsquo;ve been getting more auditions, and it definitely gave me more confidence when submitting myself for projects. The reel also helped me land my first feature film, which was a huge milestone for me as an actor. I&rsquo;m really happy with the result and grateful for all the work she put into it.&rdquo;</blockquote>
+              <figcaption class="quote-cite">Actor <span>Yonatan Shaham Vitos</span></figcaption>
+            </figure>
+          </div>
+          <!-- .tsl-controls (prev · dots · next) injected by main.js -->
         </div>
       </div>
     </section>

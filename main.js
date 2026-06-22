@@ -34,6 +34,114 @@
     document.addEventListener("visibilitychange", function () { if (document.hidden) revealAll(); });
   }
 
+  /* ---- Testimonials slideshow (auto-advance + swipe + dots/arrows) ---- */
+  var tsl = document.querySelector("[data-testimonials]");
+  if (tsl) {
+    var tslTrack = tsl.querySelector(".tsl-track");
+    var tslSlides = Array.prototype.slice.call(tslTrack.querySelectorAll(".testimonial"));
+    if (tslSlides.length > 1) {
+      var tslReduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var tslIndex = 0, tslTimer = 0, tslRaf = 0;
+      var SVG = "http://www.w3.org/2000/svg";
+
+      function tslArrow(dir) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "tsl-arrow tsl-" + (dir < 0 ? "prev" : "next");
+        b.setAttribute("aria-label", dir < 0 ? "Previous testimonial" : "Next testimonial");
+        var svg = document.createElementNS(SVG, "svg");
+        svg.setAttribute("viewBox", "0 0 24 24");
+        svg.setAttribute("fill", "none");
+        svg.setAttribute("aria-hidden", "true");
+        var p = document.createElementNS(SVG, "path");
+        p.setAttribute("d", dir < 0 ? "M15 5l-7 7 7 7" : "M9 5l7 7-7 7");
+        p.setAttribute("stroke", "currentColor");
+        p.setAttribute("stroke-width", "2");
+        p.setAttribute("stroke-linecap", "round");
+        p.setAttribute("stroke-linejoin", "round");
+        svg.appendChild(p);
+        b.appendChild(svg);
+        b.addEventListener("click", function () { go(tslIndex + dir, true); });
+        return b;
+      }
+
+      var controls = document.createElement("div");
+      controls.className = "tsl-controls";
+      var prev = tslArrow(-1);
+      var dotsWrap = document.createElement("div");
+      dotsWrap.className = "tsl-dots";
+      var dots = tslSlides.map(function (_, i) {
+        var d = document.createElement("button");
+        d.type = "button";
+        d.className = "tsl-dot";
+        d.setAttribute("aria-label", "Go to testimonial " + (i + 1));
+        d.addEventListener("click", function () { go(i, true); });
+        dotsWrap.appendChild(d);
+        return d;
+      });
+      controls.appendChild(prev);
+      controls.appendChild(dotsWrap);
+      controls.appendChild(tslArrow(1));
+      tsl.appendChild(controls);
+      tsl.setAttribute("data-ready", "");
+
+      function setActive(i) {
+        tslIndex = i;
+        tslSlides.forEach(function (s, n) { s.classList.toggle("is-active", n === i); });
+        dots.forEach(function (d, n) {
+          if (n === i) { d.setAttribute("aria-current", "true"); }
+          else { d.removeAttribute("aria-current"); }
+        });
+      }
+
+      function go(i, user) {
+        i = (i + tslSlides.length) % tslSlides.length;
+        tslTrack.scrollTo({ left: tslSlides[i].offsetLeft - tslSlides[0].offsetLeft, behavior: tslReduce ? "auto" : "smooth" });
+        setActive(i);
+        if (user) restart();
+      }
+
+      function start() {
+        if (tslReduce || tslTimer) return;
+        tslTimer = window.setInterval(function () { go(tslIndex + 1, false); }, 7000);
+      }
+      function stop() { if (tslTimer) { clearInterval(tslTimer); tslTimer = 0; } }
+      function restart() { stop(); start(); }
+
+      // Keep dots in sync with manual swipe / native scroll.
+      tslTrack.addEventListener("scroll", function () {
+        if (tslRaf) return;
+        tslRaf = requestAnimationFrame(function () {
+          tslRaf = 0;
+          var best = 0, min = Infinity, base = tslSlides[0].offsetLeft;
+          tslSlides.forEach(function (s, n) {
+            var d = Math.abs(s.offsetLeft - base - tslTrack.scrollLeft);
+            if (d < min) { min = d; best = n; }
+          });
+          if (best !== tslIndex) setActive(best);
+        });
+      }, { passive: true });
+
+      // Pause while the visitor is reading or interacting; resume after.
+      ["pointerenter", "focusin", "pointerdown", "touchstart"].forEach(function (ev) {
+        tsl.addEventListener(ev, stop, { passive: true });
+      });
+      ["pointerleave", "focusout"].forEach(function (ev) {
+        tsl.addEventListener(ev, function () { restart(); });
+      });
+      document.addEventListener("visibilitychange", function () { document.hidden ? stop() : start(); });
+
+      // Keyboard: arrows move between testimonials when a control is focused.
+      controls.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowLeft") { e.preventDefault(); go(tslIndex - 1, true); }
+        else if (e.key === "ArrowRight") { e.preventDefault(); go(tslIndex + 1, true); }
+      });
+
+      setActive(0);
+      start();
+    }
+  }
+
   /* ---- Hero motion stage: editing timeline (real clips play under the playhead) ---- */
   var stage = document.querySelector(".stage[data-motion]");
   var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
