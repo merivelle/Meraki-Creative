@@ -4,19 +4,28 @@
 THREE co-equal pillars: **Post-Production** (film/trailer/teaser/reel/scene/social editing),
 **Digital Presence** (actor/director/production-company/portfolio/film websites), and
 **Creative Materials** (pitch decks, lookbooks). Actors + filmmakers are audiences, not the whole
-identity. Core message: **"The work is already there. We help present it."**
+identity. Core message: **"The story is already there. We're here to help it be seen."**
 
 ## Brand positioning (read this before touching copy or design)
 
-- Must feel **elevated, cinematic, personal, and practical** — like an **A24 creative studio /
-  editorial design studio / boutique post-production house**.
+- Must feel **cinematic, thoughtful, warm, artistic, understated, and human** — like an **A24
+  creative studio / editorial design studio / boutique post-production house**. Write
+  filmmaker-to-filmmaker, not agency-to-client.
 - Tone: **professional, warm, clear, industry-aware**.
 - Position as a **boutique creative studio for storytellers**. Do NOT position as: an actor-only
   business, a reel-editing service, a marketing agency, a social agency, or a website-design company.
 - Three pillars are **co-equal** (editing, websites, materials all primary).
 - Avoid: corporate, techy, neon, overly feminine, template/stock-photo energy.
-- Keep verbatim: **"Your work is ready for the room."** and **"The talent is rarely the problem.
-  The packaging is."** Main CTA: **"Start Your Project"** · Secondary CTA: **"View Services"**.
+- **Signature lines (canon — echo these across the site):** "The story is already there. We're here
+  to help it be seen." · "The work matters. So does how it's experienced." · "Start with the story."
+  · "Stories we've helped shape." · "We design what speaks for it." Main CTA button stays
+  **"Start Your Project"** · Secondary **"View Services"**.
+- **Story-first voice (2026 pivot).** The brand reveals what's already there; it does not manufacture
+  attention or sell. Write filmmaker-to-filmmaker. BANNED words/phrases: "the room," "the right
+  people," "opens doors," "sell / sells it," "packaging," "elevate/elevated," "launch," "scale,"
+  "funnels," "conversion," "personal brand," "pick a lane," "impossible to ignore," "get you seen."
+  Lead with story, craft, and soul (*meraki*: doing something with soul, creativity, and love). The
+  question behind every service: "What is this story trying to say?"
 - **DO NOT redesign** — the visual system is locked; repositioning is copy/framing only.
 
 ## ⭐ Two folders that define how to work here
