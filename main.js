@@ -265,7 +265,7 @@
     reel.addEventListener("click", function () { if (v.paused) play(); else stop(); });
   });
 
-  /* ---- Contact form: put the submitter's name in the Netlify email subject ---- */
+  /* ---- Contact form: put the submitter's name in the Web3Forms email subject ---- */
   var contactForm = document.querySelector('form[name="contact"]');
   if (contactForm) {
     contactForm.addEventListener("submit", function () {

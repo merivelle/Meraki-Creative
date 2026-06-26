@@ -79,17 +79,20 @@
         <!-- RIGHT: form -->
         <div class="reveal">
           <!--
-            NETLIFY FORMS: this form is wired for Netlify's free built-in form handling.
-            When deployed on Netlify it just works (submissions appear under Site > Forms,
-            with email notifications you can turn on in the Netlify dashboard). No third
-            party or backend needed. The hidden "form-name" + honeypot fields below are
-            required by Netlify; the success page is thanks.html.
+            WEB3FORMS: this form posts to Web3Forms' free static-site handler (works on any host,
+            including Vercel — unlike Netlify Forms, which only works on Netlify). Generous free tier,
+            no per-submission paywall. SETUP: go to web3forms.com, enter merivellee@gmail.com, and it
+            emails you an access key (a UUID) — paste it into the access_key value below. No account
+            password and no dashboard required. Special fields: subject sets the email subject (main.js
+            fills it with the submitter's name), redirect sends the visitor to thanks.html after
+            submit, botcheck is the spam honeypot; the email field is used as reply-to automatically.
           -->
-          <form name="contact" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" action="/thanks.html">
-            <input type="hidden" name="form-name" value="contact" />
+          <form name="contact" method="POST" action="https://api.web3forms.com/submit">
+            <input type="hidden" name="access_key" value="a8482f1e-c1a7-4979-a63d-237c67634ac0" />
             <!-- Email subject: main.js fills this with the submitter's name on submit; this value is the no-JS fallback. -->
             <input type="hidden" name="subject" value="New inquiry — Meraki Creative" />
-            <p class="hp-field" hidden><label>Leave this field empty if you're human: <input name="bot-field" /></label></p>
+            <input type="hidden" name="redirect" value="https://www.merakicreative.co/thanks.html" />
+            <input type="checkbox" name="botcheck" style="display:none" tabindex="-1" aria-hidden="true" />
 
             <div class="form-row">
               <div class="field">
