@@ -494,7 +494,7 @@ p { text-wrap: pretty; max-width: 68ch; }
 .work-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.2rem, 3vw, 2.4rem); }
 @media (max-width: 860px) { .work-grid-3 { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 560px) { .work-grid-3 { grid-template-columns: 1fr; } }
-.work-cap2 { display: flex; justify-content: space-between; gap: 1rem; margin-top: 0.8rem;
+.work-cap2 { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.35rem 1rem; margin-top: 0.8rem;
   font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.05em; text-transform: uppercase; }
 .work-cap2 .t { color: var(--ink); } .work-cap2 .tag { color: var(--accent); }
 .work-cap2 a:hover { color: var(--accent); }
