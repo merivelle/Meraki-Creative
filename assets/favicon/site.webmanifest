@@ -2,10 +2,20 @@
   "name": "Meraki Creative",
   "short_name": "Meraki",
   "icons": [
-    { "src": "/assets/favicon/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/assets/favicon/icon-512.png", "sizes": "512x512", "type": "image/png" }
+    {
+      "src": "/assets/favicon/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/favicon/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
   ],
   "theme_color": "#15130E",
   "background_color": "#15130E",
-  "display": "standalone"
+  "display": "standalone",
+  "start_url": "/",
+  "description": "A Los Angeles creative studio for storytellers: film editing, website design, and creative materials."
 }

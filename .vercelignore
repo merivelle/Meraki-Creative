@@ -1,0 +1,9 @@
+# Render sources and working files — not part of the public site.
+# social/ also contains a committed Chrome profile that must never be served.
+/social/
+/motion/renders/
+/assets/favicon copy/
+assets/work/tl-sunflower-cu copy.jpg
+DESIGN.md
+PRODUCT.md
+CLAUDE.md

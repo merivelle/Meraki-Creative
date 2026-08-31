@@ -93,15 +93,30 @@ Fonts (Google): **Archivo** (display + body, weight contrast) + **JetBrains Mono
 > (oxblood → forest/slate) via `--accent*`. Detector residuals across pages are the intentional
 > `single-font` (one grotesk by choice) and, on the homepage, the justified `Call 01–04` schedule.
 
-## Before launch — Merivelle's to-do
-1. **Pricing:** replace every `from $—` in `packages.html` with real starting prices.
-2. **Contact form:** in `contact.html`, swap `YOUR_FORM_ID` for a real
-   [Formspree](https://formspree.io) ID (or switch to the mailto fallback — instructions in
-   the form's HTML comment).
-3. **Email + socials:** replace `hello@merakicreative.com` and the `#` Instagram/IMDb/LinkedIn
-   links across all pages and the footer.
-4. **Images:** replace placeholder `.ph` blocks with real media (see `assets/README.txt`).
-5. Optional: add a favicon; run the `impeccable` skill for a final polish pass.
+## Before launch — status
+1. ~~**Pricing**~~ — done; `packages.html` carries real "From $" prices.
+2. ~~**Contact form**~~ — done; live on **Web3Forms** (not Formspree), routing to
+   `merivellee@gmail.com`, redirecting to `thanks.html`.
+3. ~~**Socials**~~ — done; real Instagram / IMDb / Vimeo links are in every footer.
+   ⚠️ There is **no `hello@merakicreative.com`** — `merakicreative.com` belongs to someone
+   else. The site is `merakicreative.co`, and the canonical host is
+   **`https://www.merakicreative.co`** (the apex 308-redirects to `www`). Never write the
+   `.com` form anywhere.
+4. ~~**Favicon**~~ — done; full icon set in `assets/favicon/` plus a web manifest.
+5. **Images:** a few `.ph` placeholder blocks remain (see `assets/README.txt`).
+
+## SEO — what is wired up
+- `robots.txt`, `sitemap.xml` (8 URLs), custom `404.html`, `.vercelignore`.
+- Every public page: canonical, Open Graph, Twitter card, `theme-color`, and JSON-LD
+  (`ProfessionalService` + `Person` + per-page type + breadcrumbs). OG image lives at
+  `assets/social/og-default.jpg` (1200×630).
+- Two SEO landing pages: `post-production.html` and `website-design.html`. They are linked
+  from the footer, the homepage pillars, and `services.html` — **not** from the top nav,
+  which stays at six items by design.
+- Positioning for search is **Los Angeles / local**. Keep the city in titles, descriptions,
+  and schema. The plain-language service words ("film editing", "post-production",
+  "website design") must stay in the copy — they are what people actually search for, and
+  the site had none of them before.
 
 ## Working conventions
 - Keep all styling in `styles.css`; reuse existing component classes (`.card`, `.pkg`,

@@ -1,0 +1,10 @@
+# Meraki Creative — www.merakicreative.co
+User-agent: *
+Allow: /
+
+# Internal tools and render sources, not site pages
+Disallow: /email-kit/
+Disallow: /motion/
+Disallow: /social/
+
+Sitemap: https://www.merakicreative.co/sitemap.xml

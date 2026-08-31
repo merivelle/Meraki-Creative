@@ -5,3 +5,6 @@ Thumbs.db
 
 # Local impeccable skill cache
 .impeccable/
+
+# Social capture output (large binaries, never deploy)
+/social/
