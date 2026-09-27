@@ -8,3 +8,23 @@ Thumbs.db
 
 # Social capture output (large binaries, never deploy)
 /social/
+
+# Next.js / Node
+/node_modules/
+/.next/
+/out/
+next-env.d.ts
+*.tsbuildinfo
+
+# Env — only .env.example is committed
+.env
+.env*.local
+
+# Supabase local state
+/supabase/.branches/
+/supabase/.temp/
+
+# Test output
+/test-results/
+/playwright-report/
+/playwright/.cache/

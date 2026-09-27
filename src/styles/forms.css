@@ -1,0 +1,16 @@
+/*
+ * Functional helpers for dynamic forms (inquiry + questionnaires). Structural only:
+ * spacing and layout built on the existing tokens. Visual design is deferred.
+ */
+.choice-list { display: grid; gap: 0.45rem; }
+.field label.choice, .choice { display: flex; align-items: flex-start; gap: 0.55rem; cursor: pointer; margin: 0;
+  font-family: var(--font-body); font-size: 0.95rem; font-weight: 400; letter-spacing: normal; text-transform: none; color: var(--ink); }
+.field .choice input { width: auto; border: 0; padding: 0; margin-top: 0.3rem; flex: none; }
+/* Matches `.field label` so grouped questions (radios, checkboxes) read the same. */
+.field .field-label { display: block; font-family: var(--font-mono); font-size: 0.7rem; font-weight: 600;
+  letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 0.55rem; }
+.field-error { color: var(--accent); font-size: 0.85rem; margin-top: 0.4rem; }
+.form-error { border: 1px solid var(--accent); padding: 0.9rem 1rem; margin-bottom: 1.6rem; color: var(--accent); }
+.form-section > legend { padding: 0; }
+.visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+[hidden] { display: none !important; }
