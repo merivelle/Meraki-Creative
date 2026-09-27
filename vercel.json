@@ -1,4 +1,7 @@
 {
-  "cleanUrls": false,
-  "trailingSlash": false
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "crons": [
+    { "path": "/api/cron/email-retry", "schedule": "0 15 * * *" }
+  ]
 }

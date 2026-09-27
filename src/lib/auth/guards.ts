@@ -2,6 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { supabaseConfigured } from "@/lib/env";
 
 export class AuthorizationError extends Error {
   constructor(message = "Not authorized") {
@@ -22,6 +23,7 @@ export type Session = {
  * through the is_staff() database function — never from user-editable metadata.
  */
 export const getSession = cache(async (): Promise<Session | null> => {
+  if (!supabaseConfigured()) return null;
   const supabase = await createClient();
   const {
     data: { user },

@@ -57,21 +57,33 @@ Consult these (especially `impeccable` + `humanize-writing`) when iterating.
 
 ## The site
 
-Static, no build step. Lives in `meraki-creative/`. Host anywhere (Netlify, Vercel,
-GitHub Pages) — just upload the folder. Open `index.html` to preview locally.
+**Next.js (App Router, TypeScript) + Supabase + Resend** at the repo root (migrated Sep 2026
+from the static HTML site, which is kept for reference in `legacy/`). Three areas: public site,
+client portal (`/portal`), studio admin (`/admin`). Read `docs/ARCHITECTURE.md` first.
 
 ```
-meraki-creative/
-  index.html      Home
-  services.html   Services (For Actors / For Filmmakers)
-  packages.html   5 packages
-  portfolio.html  Editorial work grid (placeholders)
-  about.html      Merivelle's story
-  contact.html    Inquiry form
-  styles.css      Single shared stylesheet + design tokens (:root)
-  main.js         Mobile nav + scroll reveal (progressive; site works without JS)
-  assets/         README.txt with image/video specs; drop real media here
+src/app/(site)/     Public pages: /, /web-design, /post-production, /creative-materials,
+                    /services, /packages, /work(/[slug]), /about, /start(/thanks)
+src/app/portal/     Client portal (invited clients, per-project access)
+src/app/admin/      Studio admin (staff only); server actions in admin/_actions/
+src/app/(auth)/     /login, /forgot-password, /account/set-password, /invite/[token]
+src/components/site Public markup, 1:1 with the old HTML (same class names)
+src/components/app  Plain functional portal/admin components (design deferred)
+src/lib/            forms engine, auth guards, email outbox, payments, content, files
+src/content/        seed.ts (site content transcribed from legacy/), forms/ (questionnaires)
+src/styles/         site.css = the original styles.css (verbatim); app.css + forms.css = functional only
+supabase/           migrations (schema + RLS), local config, auth email templates
+scripts/            seed-content, seed-dev, grant-admin, import-inquiries
+public/assets/      images/video/favicons (URLs unchanged: /assets/...)
 ```
+
+- Old `.html` URLs 308-redirect to the new routes (`src/lib/redirects.ts`). Keep that list.
+- Public content (packages, portfolio, services, testimonials, FAQs, page copy) is edited in
+  Admin → Website content and must be **published** to appear. Prices are verbatim strings.
+- Dev: `npm run dev`; tests: `npm test` (unit), `npm run test:integration` (needs the dev
+  Supabase in `.env.local`), `npm run test:e2e`. Never point `.env.local` at production.
+- Setup still needing accounts/keys: `docs/SETUP_EXTERNAL.md`. First admin: `docs/ADMIN_SETUP.md`.
+- New/changed copy awaiting sign-off: `docs/COPY_FOR_REVIEW.md`.
 
 ### Design direction — "Marquee Minimal" (current)
 History: original cream/editorial → audited with `impeccable` (flagged as the saturated
@@ -95,8 +107,8 @@ Fonts (Google): **Archivo** (display + body, weight contrast) + **JetBrains Mono
 
 ## Before launch — status
 1. ~~**Pricing**~~ — done; `packages.html` carries real "From $" prices.
-2. ~~**Contact form**~~ — done; live on **Web3Forms** (not Formspree), routing to
-   `merivellee@gmail.com`, redirecting to `thanks.html`.
+2. ~~**Contact form**~~ — replaced by the branching inquiry at `/start` (saved to Supabase,
+   emailed via Resend). Web3Forms is no longer called by the new site.
 3. ~~**Socials**~~ — done; real Instagram / IMDb / Vimeo links are in every footer.
    ⚠️ There is **no `hello@merakicreative.com`** — `merakicreative.com` belongs to someone
    else. The site is `merakicreative.co`, and the canonical host is
@@ -106,20 +118,23 @@ Fonts (Google): **Archivo** (display + body, weight contrast) + **JetBrains Mono
 5. **Images:** a few `.ph` placeholder blocks remain (see `assets/README.txt`).
 
 ## SEO — what is wired up
-- `robots.txt`, `sitemap.xml` (8 URLs), custom `404.html`, `.vercelignore`.
+- `robots.ts`, `sitemap.ts` (static routes + published `/work/[slug]`), `not-found.tsx`, `.vercelignore`.
 - Every public page: canonical, Open Graph, Twitter card, `theme-color`, and JSON-LD
   (`ProfessionalService` + `Person` + per-page type + breadcrumbs). OG image lives at
   `assets/social/og-default.jpg` (1200×630).
-- Two SEO landing pages: `post-production.html` and `website-design.html`. They are linked
-  from the footer, the homepage pillars, and `services.html` — **not** from the top nav,
-  which stays at six items by design.
+- Service pages `/post-production` and `/web-design` are now in the primary nav (seven items:
+  Home, Web Design, Post-Production, Work, About, Start a Project, Client Login — changed at
+  Merivelle's request, Sep 2026). `/creative-materials` and `/services` are footer-linked.
 - Positioning for search is **Los Angeles / local**. Keep the city in titles, descriptions,
   and schema. The plain-language service words ("film editing", "post-production",
   "website design") must stay in the copy — they are what people actually search for, and
   the site had none of them before.
 
 ## Working conventions
-- Keep all styling in `styles.css`; reuse existing component classes (`.card`, `.pkg`,
-  `.service-row`, `.ph`, `.band-dark`, `.btn`, etc.) rather than adding new patterns.
+- Public styling stays in `src/styles/site.css` (the original stylesheet); reuse its classes
+  (`.pkg-item`, `.index-row`, `.btn`, `.field`, etc.). Portal/admin styling is intentionally
+  minimal and functional until visual references are chosen.
+- Authorization: every page/action/route calls a guard from `src/lib/auth/guards.ts`; RLS is
+  the backstop. Never export an unguarded function from a `"use server"` file.
 - Every page needs a unique `<title>` and `<meta name="description">`.
 - Run new/edited copy through the `humanize-writing` skill; match the existing voice.

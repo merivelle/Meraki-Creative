@@ -18,6 +18,8 @@ $$;
 
 -- ---------------------------------------------------------------------------
 -- Identity
+-- User columns everywhere reference public.profiles (1:1 with auth.users), which lets
+-- the API embed names (e.g. who submitted feedback) without extra queries.
 -- ---------------------------------------------------------------------------
 create table public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
@@ -58,9 +60,9 @@ create trigger on_auth_user_email_changed after update of email on auth.users
 
 -- Staff (studio) roles. Server-managed only: no client-facing write policy exists.
 create table public.staff_roles (
-  user_id uuid primary key references auth.users (id) on delete cascade,
+  user_id uuid primary key references public.profiles (id) on delete cascade,
   role text not null check (role in ('owner', 'admin')),
-  granted_by uuid references auth.users (id),
+  granted_by uuid references public.profiles (id),
   granted_at timestamptz not null default now()
 );
 
@@ -86,7 +88,7 @@ create trigger clients_updated_at before update on public.clients
 
 create table public.client_members (
   client_id uuid not null references public.clients (id) on delete cascade,
-  user_id uuid not null references auth.users (id) on delete cascade,
+  user_id uuid not null references public.profiles (id) on delete cascade,
   role text not null default 'primary' check (role in ('primary', 'collaborator')),
   created_at timestamptz not null default now(),
   primary key (client_id, user_id)
@@ -146,7 +148,7 @@ create table public.services (
   sort int not null default 0,
   status text not null default 'draft' check (status in ('draft', 'published', 'archived')),
   published_at timestamptz,
-  updated_by uuid references auth.users (id),
+  updated_by uuid references public.profiles (id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -165,7 +167,7 @@ create table public.packages (
   sort int not null default 0,
   status text not null default 'draft' check (status in ('draft', 'published', 'archived')),
   published_at timestamptz,
-  updated_by uuid references auth.users (id),
+  updated_by uuid references public.profiles (id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -189,7 +191,7 @@ create table public.portfolio_items (
   sort int not null default 0,
   status text not null default 'draft' check (status in ('draft', 'published', 'archived')),
   published_at timestamptz,
-  updated_by uuid references auth.users (id),
+  updated_by uuid references public.profiles (id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -202,7 +204,7 @@ create table public.testimonials (
   sort int not null default 0,
   status text not null default 'draft' check (status in ('draft', 'published', 'archived')),
   published_at timestamptz,
-  updated_by uuid references auth.users (id),
+  updated_by uuid references public.profiles (id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -215,7 +217,7 @@ create table public.faqs (
   sort int not null default 0,
   status text not null default 'draft' check (status in ('draft', 'published', 'archived')),
   published_at timestamptz,
-  updated_by uuid references auth.users (id),
+  updated_by uuid references public.profiles (id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -229,7 +231,7 @@ create table public.content_blocks (
   data jsonb not null default '{}'::jsonb,
   status text not null default 'draft' check (status in ('draft', 'published', 'archived')),
   published_at timestamptz,
-  updated_by uuid references auth.users (id),
+  updated_by uuid references public.profiles (id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique (page, key)
@@ -286,7 +288,7 @@ create table public.projects (
   start_date date,
   due_date date,
   is_dev_fixture boolean not null default false,
-  created_by uuid references auth.users (id),
+  created_by uuid references public.profiles (id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -297,9 +299,9 @@ create trigger projects_updated_at before update on public.projects
 -- Explicit per-project access. Client membership alone grants nothing.
 create table public.project_members (
   project_id uuid not null references public.projects (id) on delete cascade,
-  user_id uuid not null references auth.users (id) on delete cascade,
+  user_id uuid not null references public.profiles (id) on delete cascade,
   role text not null default 'client' check (role in ('client', 'collaborator')),
-  added_by uuid references auth.users (id),
+  added_by uuid references public.profiles (id),
   created_at timestamptz not null default now(),
   primary key (project_id, user_id)
 );
@@ -310,12 +312,12 @@ create table public.invitations (
   email text not null,
   client_id uuid not null references public.clients (id) on delete cascade,
   project_id uuid references public.projects (id) on delete cascade,
-  user_id uuid not null references auth.users (id) on delete cascade,
+  user_id uuid not null references public.profiles (id) on delete cascade,
   token_hash text not null unique,           -- sha256 hex of the emailed token; raw token never stored
   expires_at timestamptz not null,
   accepted_at timestamptz,
   revoked_at timestamptz,
-  created_by uuid references auth.users (id),
+  created_by uuid references public.profiles (id),
   created_at timestamptz not null default now()
 );
 create index invitations_client_idx on public.invitations (client_id);
@@ -355,7 +357,7 @@ create table public.internal_notes (
   entity_id uuid not null,
   project_id uuid references public.projects (id) on delete cascade,
   body text not null,
-  author_id uuid references auth.users (id),
+  author_id uuid references public.profiles (id),
   created_at timestamptz not null default now()
 );
 create index internal_notes_entity_idx on public.internal_notes (entity_type, entity_id, created_at desc);
@@ -375,7 +377,7 @@ create table public.files (
   -- 'staff' = uploaded by the studio and not yet released to the client.
   visibility text not null default 'project' check (visibility in ('project', 'staff')),
   upload_status text not null default 'pending' check (upload_status in ('pending', 'complete')),
-  uploaded_by uuid references auth.users (id),
+  uploaded_by uuid references public.profiles (id),
   created_at timestamptz not null default now(),
   deleted_at timestamptz
 );
@@ -400,7 +402,7 @@ create table public.form_template_versions (
   schema jsonb not null,
   notes text,
   published_at timestamptz,
-  created_by uuid references auth.users (id),
+  created_by uuid references public.profiles (id),
   created_at timestamptz not null default now(),
   unique (template_id, version)
 );
@@ -413,7 +415,7 @@ create table public.form_assignments (
   context jsonb not null default '{}'::jsonb,   -- branching context, e.g. {clientType, scope}
   due_date date,
   status text not null default 'assigned' check (status in ('assigned', 'in_progress', 'submitted', 'reopened')),
-  assigned_by uuid references auth.users (id),
+  assigned_by uuid references public.profiles (id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -425,7 +427,7 @@ create trigger form_assignments_updated_at before update on public.form_assignme
 create table public.form_drafts (
   assignment_id uuid primary key references public.form_assignments (id) on delete cascade,
   answers jsonb not null default '{}'::jsonb,
-  updated_by uuid references auth.users (id),
+  updated_by uuid references public.profiles (id),
   updated_at timestamptz not null default now()
 );
 
@@ -438,7 +440,7 @@ create table public.form_submissions (
   answers jsonb not null,
   amends_submission_id uuid references public.form_submissions (id),
   change_summary text,
-  submitted_by uuid not null references auth.users (id),
+  submitted_by uuid not null references public.profiles (id),
   submitted_at timestamptz not null default now(),
   unique (assignment_id, revision_no)
 );
@@ -482,7 +484,7 @@ create table public.asset_items (
   file_id uuid references public.files (id) on delete cascade,
   url text,
   label text,
-  added_by uuid references auth.users (id),
+  added_by uuid references public.profiles (id),
   created_at timestamptz not null default now(),
   check ((file_id is not null) <> (url is not null))
 );
@@ -496,7 +498,7 @@ create table public.reviews (
   milestone_id uuid references public.milestones (id) on delete set null,
   title text not null,
   review_kind text not null default 'website' check (review_kind in ('website', 'edit', 'document')),
-  created_by uuid references auth.users (id),
+  created_by uuid references public.profiles (id),
   created_at timestamptz not null default now()
 );
 create index reviews_project_idx on public.reviews (project_id);
@@ -511,7 +513,7 @@ create table public.review_versions (
   instructions text,
   due_date date,
   published_at timestamptz,                    -- null = draft, invisible to the client
-  created_by uuid references auth.users (id),
+  created_by uuid references public.profiles (id),
   created_at timestamptz not null default now(),
   unique (review_id, version_no)
 );
@@ -524,8 +526,8 @@ create table public.feedback_sets (
   status text not null default 'draft' check (status in ('draft', 'submitted')),
   decision text check (decision in ('approve', 'request_changes')),
   general_notes text,
-  last_edited_by uuid references auth.users (id),
-  submitted_by uuid references auth.users (id),
+  last_edited_by uuid references public.profiles (id),
+  submitted_by uuid references public.profiles (id),
   submitted_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -544,7 +546,7 @@ create table public.feedback_items (
   resolution_status text not null default 'open' check (resolution_status in ('open', 'in_progress', 'resolved', 'wont_change')),
   resolution_note text,                         -- client-visible
   resolved_at timestamptz,
-  created_by uuid references auth.users (id),
+  created_by uuid references public.profiles (id),
   created_at timestamptz not null default now()
 );
 create index feedback_items_set_idx on public.feedback_items (feedback_set_id);
@@ -556,7 +558,7 @@ create table public.approvals (
   review_version_id uuid not null unique references public.review_versions (id) on delete restrict,
   feedback_set_id uuid references public.feedback_sets (id),
   statement text not null,                       -- snapshot of what the client agreed to
-  approved_by uuid not null references auth.users (id),
+  approved_by uuid not null references public.profiles (id),
   approved_at timestamptz not null default now()
 );
 
@@ -566,7 +568,7 @@ create table public.approvals (
 create table public.project_messages (
   id uuid primary key default gen_random_uuid(),
   project_id uuid not null references public.projects (id) on delete cascade,
-  author_id uuid not null references auth.users (id),
+  author_id uuid not null references public.profiles (id),
   kind text not null default 'message' check (kind in ('message', 'update')),
   parent_id uuid references public.project_messages (id) on delete set null,
   body text not null check (length(body) between 1 and 10000),
@@ -583,7 +585,7 @@ create table public.deliverables (
   url text,
   status text not null default 'draft' check (status in ('draft', 'published')),
   published_at timestamptz,
-  created_by uuid references auth.users (id),
+  created_by uuid references public.profiles (id),
   created_at timestamptz not null default now()
 );
 
@@ -595,7 +597,7 @@ create table public.work_requests (
   description text not null check (length(description) between 1 and 5000),
   desired_date date,
   status text not null default 'new' check (status in ('new', 'reviewing', 'quoted', 'converted', 'closed')),
-  requested_by uuid not null references auth.users (id),
+  requested_by uuid not null references public.profiles (id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -632,8 +634,8 @@ create table public.proposals (
   status text not null default 'draft' check (status in ('draft', 'sent', 'accepted', 'declined', 'expired', 'superseded')),
   sent_at timestamptz,
   responded_at timestamptz,
-  responded_by uuid references auth.users (id),
-  created_by uuid references auth.users (id),
+  responded_by uuid references public.profiles (id),
+  created_by uuid references public.profiles (id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -653,7 +655,7 @@ create table public.agreements (
   status_source text not null default 'manual' check (status_source in ('manual', 'provider')),
   signed_file_id uuid references public.files (id),
   signed_at timestamptz,
-  created_by uuid references auth.users (id),
+  created_by uuid references public.profiles (id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -675,7 +677,7 @@ create table public.invoices (
   provider_invoice_id text unique,
   payment_url text,
   paid_at timestamptz,
-  created_by uuid references auth.users (id),
+  created_by uuid references public.profiles (id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -697,7 +699,7 @@ create table public.payment_events (
 
 create table public.audit_log (
   id bigint generated always as identity primary key,
-  actor_id uuid references auth.users (id),
+  actor_id uuid references public.profiles (id),
   action text not null,
   entity_type text not null,
   entity_id uuid,
@@ -718,7 +720,7 @@ create table public.notifications (
   dedupe_key text not null unique,
   type text not null,
   project_id uuid references public.projects (id) on delete cascade,
-  recipient_user_id uuid references auth.users (id) on delete cascade,
+  recipient_user_id uuid references public.profiles (id) on delete cascade,
   recipient_email text,
   audience text not null check (audience in ('client', 'studio', 'visitor')),
   title text not null,

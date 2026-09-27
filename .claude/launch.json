@@ -1,0 +1,18 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "meraki-next",
+      "runtimeExecutable": "/Users/merivelle/.local/node/bin/npm",
+      "runtimeArgs": [
+        "run",
+        "start"
+      ],
+      "env": {
+        "PATH": "/Users/merivelle/.local/node/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+      },
+      "port": 3100,
+      "autoPort": true
+    }
+  ]
+}

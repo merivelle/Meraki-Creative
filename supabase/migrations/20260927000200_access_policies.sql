@@ -283,8 +283,25 @@ create trigger form_submissions_immutable before update or delete on public.form
   for each row execute function public.forbid_change();
 create trigger approvals_immutable before update or delete on public.approvals
   for each row execute function public.forbid_change();
+-- The audit log is append-only. The one permitted update is a foreign key being cleared
+-- by a cascade (e.g. a deleted dev fixture), which keeps the entry itself intact.
+create or replace function public.guard_audit_log() returns trigger
+language plpgsql set search_path = '' as $$
+begin
+  if tg_op = 'UPDATE'
+     and new.id = old.id and new.action = old.action and new.entity_type = old.entity_type
+     and new.entity_id is not distinct from old.entity_id and new.before is not distinct from old.before
+     and new.after is not distinct from old.after and new.reason is not distinct from old.reason
+     and new.source = old.source and new.created_at = old.created_at
+     and (new.project_id is null or new.project_id = old.project_id)
+     and (new.actor_id is null or new.actor_id = old.actor_id) then
+    return new;
+  end if;
+  raise exception 'audit_log rows are immutable (%)', tg_op using errcode = 'P0001';
+end;
+$$;
 create trigger audit_log_immutable before update or delete on public.audit_log
-  for each row execute function public.forbid_change();
+  for each row execute function public.guard_audit_log();
 
 create or replace function public.guard_form_version() returns trigger
 language plpgsql set search_path = '' as $$
