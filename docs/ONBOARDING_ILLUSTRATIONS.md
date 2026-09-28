@@ -28,10 +28,21 @@ exists, a card shows as text only, so you can add them one at a time.
 
 | File | Subject line to add after the style block |
 |---|---|
-| `service-web.png` | Subject: a small Victorian theatre proscenium, heavy velvet curtains drawn open on an empty stage, seen straight on. |
+| `service-web.png` | Pick one of the Web design options below. |
 | `service-post.png` | Subject: a vintage upright Moviola film-editing machine with two film reels on top, three-quarter view. |
-| `service-materials.png` | Subject: an open, bound portfolio book with photographs tipped onto its pages and a fountain pen lying across it. |
 | `service-unsure.png` | Subject: an antique open pocket compass with a hinged lid, three-quarter view. |
+
+**Web design options** (try a few, keep the one you like, save it as `service-web.png`):
+
+- **A. The frame.** Subject: an ornate, empty gilt picture frame, slightly angled, with nothing inside it. *The site frames the work.*
+- **B. The window.** Subject: an antique arched window with its wooden shutters open and fine engraved rays of light falling through it. *A way in to the work.*
+- **C. The cinema.** Subject: the façade of a small 1920s cinema with a marquee of bulb lights and a blank sign with no letters on it. *The place the work is shown.*
+- **D. The townhouse.** Subject: a cutaway of a narrow Victorian townhouse with the front wall removed, showing furnished rooms on each of its four floors. *One home, many rooms (pages).*
+- **E. The door.** Subject: an old wooden door standing slightly ajar, an ornate iron key in the lock. *An invitation in.*
+- **F. The stereoscope.** Subject: a Victorian stereoscope viewer with a photograph card slotted into it. *Seeing the work in depth.*
+- **G. The stage.** Subject: a small Victorian theatre proscenium, heavy velvet curtains drawn open on an empty stage, seen straight on.
+
+My suggestion: **A** reads most clearly at card size; **D** is the most distinctive.
 
 **And you are…**
 
@@ -40,7 +51,6 @@ exists, a card shows as text only, so you can add them one at a time.
 | `who-actor.png` | Subject: an antique theatre limelight spotlight on a tall iron stand. |
 | `who-director.png` | Subject: a director's viewfinder lens hanging from a leather neck cord. |
 | `who-filmmaker.png` | Subject: a hand-cranked 1920s film camera on a wooden tripod. |
-| `who-photographer.png` | Subject: an antique large-format bellows camera, the bellows extended. |
 | `who-company.png` | Subject: a neat stack of round metal film canisters, the top one slightly open. |
 | `who-business.png` | Subject: a wooden letterpress type drawer filled with metal type. |
 | `who-other.png` | Subject: a feather quill resting in a glass inkwell. |

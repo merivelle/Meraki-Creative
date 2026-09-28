@@ -55,6 +55,10 @@ describe("inquiry preselection", () => {
   it("ignores unknown values", () => {
     expect(preselect(seedPackages, { service: "<script>", package: "nope" })).toEqual({});
   });
+  it("deck and lookbook links keep the package but add no service (not offered in the form)", () => {
+    expect(preselect(seedPackages, { service: "creative-materials" })).toEqual({});
+    expect(preselect(seedPackages, { package: "Pitch Deck Package" })).toEqual({ package: "pitch-deck" });
+  });
   it("bundles preselect the package but no single service", () => {
     expect(preselect(seedPackages, { package: "acting-package" })).toEqual({ package: "acting-package" });
   });

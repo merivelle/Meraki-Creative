@@ -57,9 +57,6 @@ export const STEPS: Step[] = [
   { id: "post_type", kind: "question", label: "The edit", title: "What kind of edit?", lead: "Choose as many as fit.", questions: [{ id: "post_type", display: "chips" }] },
   { id: "post_runtime", kind: "question", label: "The edit", title: "About how long should it run?", questions: [{ id: "post_runtime", display: "chips" }], autoAdvance: true },
   { id: "post_footage_ready", kind: "question", label: "The edit", title: "Is the footage already shot?", questions: [{ id: "post_footage_ready", display: "chips" }], autoAdvance: true },
-  // --- Creative materials scope ---
-  { id: "materials_type", kind: "question", label: "The materials", title: "A deck, a lookbook, or both?", questions: [{ id: "materials_type", display: "chips" }] },
-  { id: "materials_stage", kind: "question", label: "The materials", title: "Where is the project right now?", questions: [{ id: "materials_stage", display: "text" }], skippable: true },
   // --- The story ---
   { id: "goal", kind: "question", label: "The story", title: "What's the goal?", lead: "In a line. Where should this work take you?", questions: [{ id: "goal", display: "text" }] },
   { id: "description", kind: "question", label: "The story", title: "Tell me about the project.", lead: "What it is, who it's for, and anything you already know you want.", questions: [{ id: "description", display: "textarea" }] },
@@ -97,12 +94,10 @@ export const STEPS: Step[] = [
 export const ILLUSTRATIONS: Record<string, string> = {
   // "services:web-design": "/assets/onboarding/service-web.png",
   // "services:post-production": "/assets/onboarding/service-post.png",
-  // "services:creative-materials": "/assets/onboarding/service-materials.png",
   // "services:not-sure": "/assets/onboarding/service-unsure.png",
   // "client_type:actor": "/assets/onboarding/who-actor.png",
   // "client_type:director": "/assets/onboarding/who-director.png",
   // "client_type:filmmaker": "/assets/onboarding/who-filmmaker.png",
-  // "client_type:photographer": "/assets/onboarding/who-photographer.png",
   // "client_type:production_company": "/assets/onboarding/who-company.png",
   // "client_type:creative_business": "/assets/onboarding/who-business.png",
   // "client_type:other": "/assets/onboarding/who-other.png",

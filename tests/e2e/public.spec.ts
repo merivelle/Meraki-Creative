@@ -105,9 +105,9 @@ test("the onboarding branches, keeps answers on Back and Edit, and survives a re
 
   // Edit from the review returns to the review with the change.
   await page.getByRole("button", { name: "Edit: And you are…" }).click();
-  await page.keyboard.press("d"); // Photographer
+  await page.keyboard.press("d"); // Production company
   await expect(current()).toHaveAttribute("data-step", "review");
-  await expect(page.locator(".ob-review")).toContainText("Photographer");
+  await expect(page.locator(".ob-review")).toContainText("Production company");
 });
 
 test("work can be filtered by service and has detail pages", async ({ page }) => {

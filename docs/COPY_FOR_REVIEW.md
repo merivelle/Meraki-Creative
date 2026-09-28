@@ -100,3 +100,9 @@ The `/start` page is now a full-screen, one-question-at-a-time flow. New lines:
   signed "— Merivelle".
 All of it lives in `src/lib/inquiry/steps.ts` (screens) and `src/lib/inquiry/definition.ts`
 (answer options).
+
+### Update (Sep 28)
+"Pitch deck or lookbook" and "Photographer" were removed from the Start a Project choices.
+Photographers pick "Other creative business"; deck and lookbook inquiries use "Not sure yet".
+Links from the Creative Materials page or a Pitch Deck / Presentation package still open the
+flow and show "You came in through [package]", and that package is saved with the inquiry.

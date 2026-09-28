@@ -8,7 +8,6 @@ import type { PackageItem } from "@/lib/content/types";
 export const SERVICE_OPTIONS: Option[] = [
   { value: "web-design", label: "Web design" },
   { value: "post-production", label: "Post-production and editing" },
-  { value: "creative-materials", label: "Pitch deck or lookbook" },
   { value: "not-sure", label: "Not sure yet, help me decide" },
 ];
 
@@ -16,7 +15,6 @@ export const CLIENT_TYPE_OPTIONS: Option[] = [
   { value: "actor", label: "Actor" },
   { value: "director", label: "Director" },
   { value: "filmmaker", label: "Filmmaker / producer" },
-  { value: "photographer", label: "Photographer" },
   { value: "production_company", label: "Production company" },
   { value: "creative_business", label: "Other creative business" },
   { value: "other", label: "Something else" },
@@ -44,7 +42,8 @@ export function preselect(packages: Pkg[], params: { service?: string; package?:
   const services = new Set<string>();
   if (pkg) {
     answers.package = pkg.slug;
-    if (pkg.categoryId !== "bundles") services.add(pkg.categoryId);
+    // Only services the form offers (deck/lookbook packages keep the package, no service).
+    if (SERVICE_OPTIONS.some((o) => o.value === pkg.categoryId)) services.add(pkg.categoryId);
   }
   if (params.service && SERVICE_OPTIONS.some((o) => o.value === params.service)) services.add(params.service);
   if (services.size) answers.services = [...services];
@@ -137,22 +136,6 @@ export function inquiryDefinition(packages: Pkg[]): FormDefinition {
             ],
           },
           { id: "post_footage_ready", type: "yes_no_unsure", label: "Is the footage already shot?" },
-        ],
-      },
-      {
-        id: "scope_materials",
-        title: "Deck or lookbook scope",
-        showIf: { key: "services", op: "includes", value: "creative-materials" },
-        questions: [
-          {
-            id: "materials_type", type: "multiselect", label: "Which one?", required: true,
-            options: [
-              { value: "pitch-deck", label: "Pitch deck" },
-              { value: "lookbook", label: "Lookbook or visual treatment" },
-              { value: "other", label: "Something else" },
-            ],
-          },
-          { id: "materials_stage", type: "text", label: "Where is the project right now?", placeholder: "e.g. script done, raising financing", maxLength: 300 },
         ],
       },
       {
