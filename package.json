@@ -24,7 +24,8 @@
     "grant-admin": "node --env-file-if-exists=.env.local --import tsx scripts/grant-admin.ts",
     "import-inquiries": "node --env-file-if-exists=.env.local --import tsx scripts/import-inquiries.ts",
     "seed:dev": "node --env-file-if-exists=.env.local --import tsx scripts/seed-dev.ts",
-    "db:push": "node --env-file-if-exists=.env.local -e \"const u=process.env.SUPABASE_DB_URL;if(!u){console.error('Set SUPABASE_DB_URL in .env.local');process.exit(1)}require('child_process').execFileSync('npx',['supabase','db','push','--db-url',u,'--include-all'],{stdio:'inherit'})\""
+    "db:push": "node --env-file-if-exists=.env.local -e \"const u=process.env.SUPABASE_DB_URL;if(!u){console.error('Set SUPABASE_DB_URL in .env.local');process.exit(1)}require('child_process').execFileSync('npx',['supabase','db','push','--db-url',u,'--include-all'],{stdio:'inherit'})\"",
+    "optimize:art": "node scripts/optimize-illustrations.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.6.1",

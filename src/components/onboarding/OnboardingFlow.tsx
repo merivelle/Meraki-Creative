@@ -175,7 +175,7 @@ export function OnboardingFlow({ def, initial, packageNames, token, preselected,
     if (e.key === "Enter") {
       if (t.tagName === "TEXTAREA" && !(e.metaKey || e.ctrlKey)) return;
       if (t.tagName === "BUTTON" || t.tagName === "A") return;
-      if (step.kind === "review" || step.kind === "welcome" && t.tagName !== "BODY") return;
+      if (step.kind === "review") return;
       e.preventDefault();
       next();
       return;

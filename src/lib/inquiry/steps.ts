@@ -87,23 +87,24 @@ export const STEPS: Step[] = [
 ];
 
 /**
- * Illustrations that exist in /public/assets/onboarding. Options without an entry show
+ * Illustrations in /public/assets/onboarding (web versions made by `npm run optimize:art`
+ * from the originals in design/onboarding). Options without an entry show
  * as text-only cards, so the flow works before any artwork arrives.
  * Keys are `${questionId}:${optionValue}`. See docs/ONBOARDING_ILLUSTRATIONS.md.
  */
 export const ILLUSTRATIONS: Record<string, string> = {
-  // "services:web-design": "/assets/onboarding/service-web.png",
-  // "services:post-production": "/assets/onboarding/service-post.png",
-  // "services:not-sure": "/assets/onboarding/service-unsure.png",
-  // "client_type:actor": "/assets/onboarding/who-actor.png",
-  // "client_type:director": "/assets/onboarding/who-director.png",
-  // "client_type:filmmaker": "/assets/onboarding/who-filmmaker.png",
-  // "client_type:production_company": "/assets/onboarding/who-company.png",
-  // "client_type:creative_business": "/assets/onboarding/who-business.png",
-  // "client_type:other": "/assets/onboarding/who-other.png",
+  "services:web-design": "/assets/onboarding/service-web.webp",
+  "services:post-production": "/assets/onboarding/service-post.webp",
+  "services:not-sure": "/assets/onboarding/service-unsure.webp",
+  "client_type:actor": "/assets/onboarding/who-actor.webp",
+  "client_type:director": "/assets/onboarding/who-director.webp",
+  "client_type:filmmaker": "/assets/onboarding/who-filmmaker.webp",
+  "client_type:production_company": "/assets/onboarding/who-company.webp",
+  "client_type:creative_business": "/assets/onboarding/who-business.webp",
+  "client_type:other": "/assets/onboarding/who-other.webp",
 };
 
-/** Optional artwork for the dark welcome screen (shown inverted as cream line art). */
-export const WELCOME_ILLUSTRATION: string | null = null; // "/assets/onboarding/welcome-projector.png"
+/** Artwork for the dark welcome screen. */
+export const WELCOME_ILLUSTRATION: string | null = "/assets/onboarding/welcome-projector.webp";
 
 export const STORAGE_KEY = "meraki:start:v1";

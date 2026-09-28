@@ -1,5 +1,7 @@
 # Start a Project: engraving illustrations
 
+**Status (Sep 28):** all ten are in and live on the cards and the welcome screen.
+
 The onboarding cards ("What are we making together?" and "And you are…") can each carry a
 small antique-engraving illustration, in the spirit of Victor Work's cards. Until an image
 exists, a card shows as text only, so you can add them one at a time.
@@ -11,8 +13,11 @@ exists, a card shows as text only, so you can add them one at a time.
    ask ChatGPT to redo it "in exactly the same engraving style as before".
 2. Download as **PNG**. Transparent background is best; a pure white background also works,
    because the site blends white away.
-3. Save it with the file name shown, and send it to me (or drop it in
-   `public/assets/onboarding/`). I'll switch it on in `src/lib/inquiry/steps.ts`.
+3. Save it with the file name shown in **`design/onboarding/`** (the full-size originals live
+   there and are never served), then run `npm run optimize:art`. That trims each image, fits it
+   into the same square, and writes a light `.webp` (about 30 to 90 KB) to
+   `public/assets/onboarding/`, which is what the site loads.
+4. New file names also need a line in `ILLUSTRATIONS` in `src/lib/inquiry/steps.ts`.
 
 ### Style block (use for every image)
 

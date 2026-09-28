@@ -76,7 +76,18 @@ html.ob-js .ob:not(.is-live) .ob-begin { display: inline-flex; }
 }
 .ob-welcome .ob-lead { color: var(--on-night-soft); margin: 1.8rem 0 2.4rem; animation: ob-in .8s var(--ob-ease) 1.1s both; }
 .ob-welcome .ob-begin { animation: ob-in .8s var(--ob-ease) 1.25s both; }
-.ob-welcome-art { width: clamp(150px, 18vw, 240px); height: auto; filter: invert(1); opacity: .9; margin-bottom: 2rem; }
+/* The projector sits to the right of the greeting, its beam running off the edge. */
+.ob-welcome { position: relative; }
+.ob-welcome-art {
+  position: absolute; right: calc(var(--ob-pad) * -1); top: 50%;
+  width: clamp(260px, 36vw, 540px); height: auto; transform: translateY(-50%);
+  pointer-events: none; animation: ob-art-in 1.4s var(--ob-ease) .2s both;
+}
+@keyframes ob-art-in { from { opacity: 0; transform: translate(24px, -50%); } to { opacity: 1; transform: translateY(-50%); } }
+.ob-welcome > :not(.ob-welcome-art) { position: relative; z-index: 1; }
+@media (max-width: 760px) {
+  .ob-welcome-art { position: static; transform: none; width: 170px; margin: 0 0 1.4rem -10px; animation-name: ob-in; }
+}
 .ob[data-phase="welcome"] .btn-primary { background: var(--paper); color: var(--ink); border-color: var(--paper); }
 .ob[data-phase="welcome"] .btn-primary:hover { background: var(--accent); border-color: var(--accent); color: var(--accent-on); }
 
@@ -100,7 +111,7 @@ html.ob-js .ob:not(.is-live) .ob-begin { display: inline-flex; }
 .ob-option.is-selected .ob-key { opacity: 1; background: var(--accent); border-color: var(--accent); color: var(--accent-on); }
 
 /* ---- Cards (services, who you are) ---- */
-.ob-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); gap: 0.9rem; }
+.ob-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 0.9rem; max-width: 1040px; }
 .ob-cards .ob-option {
   flex-direction: column; justify-content: space-between; gap: 1rem;
   min-height: 132px; padding: 1rem 1rem 1.1rem;
@@ -115,7 +126,8 @@ html.ob-js .ob:not(.is-live) .ob-begin { display: inline-flex; }
 .ob-cards .ob-option:hover .ob-art { transform: scale(1.04); }
 .ob-option-label { font-family: var(--font-display); font-weight: 600; font-size: clamp(1.05rem, 1.4vw, 1.25rem); letter-spacing: -0.01em; line-height: 1.15; }
 .ob-cards .ob-option.is-selected { border-color: var(--ink); background: var(--ink); color: var(--paper); }
-.ob-cards .ob-option.is-selected .ob-art { filter: invert(1); mix-blend-mode: screen; }
+/* The engravings have white highlights, so on ink they read best as they are. */
+.ob-cards .ob-option.is-selected .ob-art { mix-blend-mode: normal; }
 .ob-tick {
   position: absolute; top: 1rem; right: 1rem; width: 0.7rem; height: 0.7rem; border-radius: 50%;
   border: 1px solid currentColor; opacity: .5; transition: background .25s, opacity .25s;
@@ -194,6 +206,7 @@ html.ob-js .ob:not(.is-live) .ob-begin { display: inline-flex; }
   .ob.is-live .ob-step.is-current { animation: ob-fade .25s linear both; }
   .ob-word { animation: none; }
   .ob-option, .ob-art { transition: none; }
+  .ob-welcome-art { animation: none; }
   .ob-cards .ob-option:hover, .ob-cards .ob-option:hover .ob-art { transform: none; }
 }
 @keyframes ob-fade { from { opacity: 0; } to { opacity: 1; } }
@@ -202,4 +215,16 @@ html.ob-js .ob:not(.is-live) .ob-begin { display: inline-flex; }
   .ob-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; }
   .ob-cards .ob-option { min-height: 108px; padding: 0.8rem; }
   .ob-cards .ob-option.has-art { min-height: 220px; }
+}
+
+/* Longer lists (e.g. "And you are…", six options): one row of narrower cards on desktop. */
+.ob-cards:has(> .ob-option:nth-child(5)) { grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); max-width: none; }
+.ob-cards:has(> .ob-option:nth-child(5)) .ob-option.has-art { min-height: 250px; }
+.ob-cards:has(> .ob-option:nth-child(5)) .ob-art { width: 82%; }
+@media (max-width: 900px) {
+  .ob-cards:has(> .ob-option:nth-child(5)) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  .ob-cards:has(> .ob-option:nth-child(5)) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ob-cards .ob-option.has-art, .ob-cards:has(> .ob-option:nth-child(5)) .ob-option.has-art { min-height: 200px; }
 }
