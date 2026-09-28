@@ -18,7 +18,7 @@ export const viewport: Viewport = { themeColor: "#F3F2EE" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         {/* Same Google Fonts request as the original static site. */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />

@@ -61,7 +61,13 @@ export async function processInquiry(fd: FormData, packages: Pkg[]): Promise<Inq
     if (a[k] !== undefined) scope[k] = a[k];
   }
 
-  const admin = createAdminClient();
+  let admin: ReturnType<typeof createAdminClient>;
+  try {
+    admin = createAdminClient();
+  } catch (e) {
+    console.error("[inquiry] database not configured:", e);
+    return { status: "error", values, formError: "Something went wrong saving your inquiry. Please try again in a moment." };
+  }
   const { data: row, error } = await admin
     .from("inquiries")
     .insert({

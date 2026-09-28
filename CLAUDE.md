@@ -27,6 +27,9 @@ identity. Core message: **"The story is already there. We're here to help it be 
   Lead with story, craft, and soul (*meraki*: doing something with soul, creativity, and love). The
   question behind every service: "What is this story trying to say?"
 - **DO NOT redesign** — the visual system is locked; repositioning is copy/framing only.
+  Exception (Sep 2026): Merivelle is now redesigning gradually, page by page, from references
+  she provides. Done so far: `/start` (dark welcome → cream, one question per screen, engraved
+  card art from docs/ONBOARDING_ILLUSTRATIONS.md). Redesign only what she asks for.
 
 ## ⭐ Two folders that define how to work here
 
@@ -63,7 +66,9 @@ client portal (`/portal`), studio admin (`/admin`). Read `docs/ARCHITECTURE.md` 
 
 ```
 src/app/(site)/     Public pages: /, /web-design, /post-production, /creative-materials,
-                    /services, /packages, /work(/[slug]), /about, /start(/thanks)
+                    /services, /packages, /work(/[slug]), /about
+src/app/(onboarding) /start(/thanks): full-screen guided inquiry (no site header/footer);
+                    screens in src/lib/inquiry/steps.ts, UI in src/components/onboarding/
 src/app/portal/     Client portal (invited clients, per-project access)
 src/app/admin/      Studio admin (staff only); server actions in admin/_actions/
 src/app/(auth)/     /login, /forgot-password, /account/set-password, /invite/[token]

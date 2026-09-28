@@ -80,3 +80,23 @@ Edit any of these in Admin → Website content → Packages.
 ## Portal, admin, questionnaires, and emails
 All new. Questionnaire wording lives in `src/content/forms/*.ts` (published as v1; edits create
 v2 in Admin → Questionnaires). Email wording lives in `src/lib/email/templates.ts`.
+
+## Start a Project: guided onboarding (Sep 2026)
+The `/start` page is now a full-screen, one-question-at-a-time flow. New lines:
+- Welcome: **"Hi there."** / "The story is already there. Let's start with yours." /
+  "A few short questions · about three minutes · no account needed" / **Begin**
+- Questions: "What are we making together?" · "And you are…" · "Roughly how big is the site?" ·
+  "Do you have a website now?" · "Anything beyond pages?" · "What kind of edit?" ·
+  "About how long should it run?" · "Is the footage already shot?" · "A deck, a lookbook, or
+  both?" · "Where is the project right now?" · "What's the goal?" ("In a line. Where should
+  this work take you?") · "Tell me about the project." · "Anything I should look at?" · "Is there
+  a date you're working toward?" · "Roughly what budget do you have in mind?" ("A range is
+  plenty. Unsure is a fine answer.") · "How do I reach you?"
+- Review: "Here's what you told me." / "Check it over, then send."
+- Chip for links from a package: "You came in through [package]".
+- The old sidebar (Follow / Who I work with / Where / Turnaround) is no longer on this page.
+  Its "Turnaround" promise is gone from here; bring any of it back if you want.
+- Thank-you screen: "Thank you. It's on its way." with the same reply-time line as before,
+  signed "— Merivelle".
+All of it lives in `src/lib/inquiry/steps.ts` (screens) and `src/lib/inquiry/definition.ts`
+(answer options).

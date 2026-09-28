@@ -6,7 +6,7 @@
       "runtimeExecutable": "/Users/merivelle/.local/node/bin/npm",
       "runtimeArgs": [
         "run",
-        "start"
+        "dev"
       ],
       "env": {
         "PATH": "/Users/merivelle/.local/node/bin:/usr/bin:/bin:/usr/sbin:/sbin"
