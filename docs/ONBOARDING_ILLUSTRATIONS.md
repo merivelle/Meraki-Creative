@@ -16,7 +16,7 @@ exists, a card shows as text only, so you can add them one at a time.
 
 ### Style block (use for every image)
 
-> Antique 19th-century steel-engraving illustration, fine cross-hatching and stipple shading,
+> Illustration in the style of an antique 19th-century steel engraving, fine cross-hatching and stipple shading,
 > black ink only, no colour and no grey fills. A single object, centred, isolated on a fully
 > transparent background, with generous empty space around it. No text, no lettering, no frame,
 > no border, no ground shadow. Crisp, high-contrast linework like a plate from an old
@@ -32,17 +32,15 @@ exists, a card shows as text only, so you can add them one at a time.
 | `service-post.png` | Subject: a vintage upright Moviola film-editing machine with two film reels on top, three-quarter view. |
 | `service-unsure.png` | Subject: an antique open pocket compass with a hinged lid, three-quarter view. |
 
-**Web design options** (try a few, keep the one you like, save it as `service-web.png`):
+**Web design options** (clear and recognisable; keep the one you like, save it as `service-web.png`):
 
-- **A. The frame.** Subject: an ornate, empty gilt picture frame, slightly angled, with nothing inside it. *The site frames the work.*
-- **B. The window.** Subject: an antique arched window with its wooden shutters open and fine engraved rays of light falling through it. *A way in to the work.*
-- **C. The cinema.** Subject: the façade of a small 1920s cinema with a marquee of bulb lights and a blank sign with no letters on it. *The place the work is shown.*
-- **D. The townhouse.** Subject: a cutaway of a narrow Victorian townhouse with the front wall removed, showing furnished rooms on each of its four floors. *One home, many rooms (pages).*
-- **E. The door.** Subject: an old wooden door standing slightly ajar, an ornate iron key in the lock. *An invitation in.*
-- **F. The stereoscope.** Subject: a Victorian stereoscope viewer with a photograph card slotted into it. *Seeing the work in depth.*
-- **G. The stage.** Subject: a small Victorian theatre proscenium, heavy velvet curtains drawn open on an empty stage, seen straight on.
+- **A. The laptop.** Subject: an open laptop seen at a three-quarter angle, its screen showing a simple website layout: a large photo block at the top, a headline bar, and three smaller image tiles below. Drawn as a modern object but in the same antique engraving linework.
+- **B. The browser window.** Subject: a single web browser window floating flat, with three small round buttons in its top bar, an address bar, and a page inside showing a big photo block and a few lines of text drawn as simple bars. No real letters.
+- **C. The monitor.** Subject: a desktop computer monitor on a stand, its screen showing a website with a photo gallery grid.
+- **D. The phone and laptop.** Subject: a laptop with a smartphone leaning against it, both screens showing the same simple website layout, so the site clearly works on both.
 
-My suggestion: **A** reads most clearly at card size; **D** is the most distinctive.
+For all of these, add this line at the end: "Draw the screen content as simple shapes only, with no readable text, logos, or letters."
+My suggestion: **A**. It says "website" at a glance and still sits with the other engravings.
 
 **And you are…**
 
