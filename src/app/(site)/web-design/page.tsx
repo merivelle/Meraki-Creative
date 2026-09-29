@@ -11,9 +11,9 @@ const cfg: ServicePageConfig = {
   crumb: "Web Design",
   schema: { name: "Website Design for Actors and Filmmakers", serviceType: "Website design" },
   hero: {
-    meta: ["Web Design", "Los Angeles · Actors · Directors · Photographers · Companies"],
+    meta: ["Web Design", "Los Angeles · Actors · Directors · Companies"],
     title: <>Website design<br />for storytellers.</>,
-    lede: "Websites for actors, directors, filmmakers, photographers, production companies, and other creative businesses, designed and built out of Los Angeles. Fast, mobile-ready, and shaped around the work rather than around a template.",
+    lede: "Websites for actors, directors, filmmakers, production companies, and other creative businesses, designed and built out of Los Angeles. Fast, mobile-ready, and shaped around the work rather than around a template.",
   },
   services: {
     slate: "Digital Presence",

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 const LINKS = [
   { role: "Post", href: "/post-production", title: "Post-Production", desc: "Film, trailer, scene, and demo reel editing in Los Angeles." },
-  { role: "Web", href: "/web-design", title: "Web Design", desc: "Sites for actors, directors, photographers, and production companies." },
+  { role: "Web", href: "/web-design", title: "Web Design", desc: "Sites for actors, directors, and production companies." },
   { role: "Work", href: "/work", title: "Work", desc: "Reels, short films, trailers, color grades, and client sites." },
   { role: "Price", href: "/packages", title: "Packages", desc: "Starting points by craft, with real prices." },
   { role: "Talk", href: "/start", title: "Start a Project", desc: "Tell us about the work and get a plan, a timeline, and a quote." },

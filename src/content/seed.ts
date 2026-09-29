@@ -26,7 +26,6 @@ export const seedServices: ServiceItem[] = [
   { id: id(114), categoryId: "web-design", roleLabel: "Folio", title: "Portfolio Websites", description: "For any storyteller, a writer, DP, designer, who needs their body of work in one place, presented with intent.", summary: "For any storyteller who needs their body of work in one place.", sort: 40 },
   { id: id(115), categoryId: "web-design", roleLabel: "Film", title: "Film Websites", description: "A dedicated, cinematic page for a single film or series: trailer, stills, synopsis, credits, and press. Built for festival runs and distribution conversations.", summary: "Trailer, stills, credits, and press in one cinematic place.", sort: 50 },
   // NEW copy (see docs/COPY_FOR_REVIEW.md)
-  { id: id(116), categoryId: "web-design", roleLabel: "Photo", title: "Photographer Websites", description: "Galleries arranged the way you think about your work, with the image details that matter to you. Print sales or a shop can be added as separate scope.", summary: null, sort: 60 },
   { id: id(117), categoryId: "web-design", roleLabel: "Studio", title: "Creative Business Websites", description: "For studios, composers, and other creative businesses whose work deserves the same care they put into it.", summary: null, sort: 70 },
 ];
 
