@@ -56,7 +56,8 @@ export type PortfolioItem = {
   sort: number;
 };
 
-export type Testimonial = { id: string; quote: string; roleLabel: string; name: string; sort: number };
+/** `pullQuote` is the short line shown large; the full `quote` sits small beneath it. */
+export type Testimonial = { id: string; quote: string; pullQuote?: string; roleLabel: string; name: string; sort: number };
 
 export type FaqScope = "web-design" | "post-production" | "creative-materials" | "general" | "process";
 export type Faq = { id: string; scope: FaqScope; question: string; answer: string; sort: number };

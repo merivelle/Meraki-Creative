@@ -12,7 +12,7 @@ const DESCRIPTION =
 
 export const metadata = pageMetadata({ path: "/work", title: TITLE, description: DESCRIPTION });
 
-const FILTERS: CategoryId[] = ["web-design", "post-production", "creative-materials"];
+const FILTERS: CategoryId[] = ["web-design", "post-production"];
 
 export default async function WorkPage({ searchParams }: { searchParams: Promise<{ service?: string }> }) {
   const { service } = await searchParams;
@@ -30,7 +30,7 @@ export default async function WorkPage({ searchParams }: { searchParams: Promise
       <PageHero
         meta={["Work", "Selected work"]}
         title={<>Stories we&apos;ve<br />helped shape.</>}
-        lede="A look at the editing, the websites, and the materials. The footage and projects are real; the cut, the build, and the design are the craft. Every piece is made to let the work speak for itself."
+        lede="A look at the editing and the websites. The footage and projects are real; the cut and the build are the craft. Every piece is made to let the work speak for itself."
       >
         <div className="btn-group">
           <Link href={active ? `/start?service=${active}` : "/start"} className="btn btn-primary">Start Your Project</Link>

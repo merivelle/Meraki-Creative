@@ -79,6 +79,7 @@ function Fields({ type, r }: { type: string; r: R | null }) {
     }
     case "testimonial":
       return (<>
+        <F k="pull_quote" label="Pull-quote (shown large)" r={r} help="A short line from the quote, in their words. Leave empty to use the first sentence." />
         <F k="quote" label="Quote" r={r} rows={5} />
         <div className="form-row"><F k="name" label="Name" r={r} /><F k="role_label" label="Role" r={r} /></div>
         <F k="sort" label="Order" r={r} type="number" />

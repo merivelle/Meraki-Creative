@@ -27,7 +27,6 @@ test("public pages render their key content", async ({ page }) => {
     ["/", "The story is"],
     ["/web-design", "Website design"],
     ["/post-production", "Post-production,"],
-    ["/creative-materials", "We design what"],
     ["/packages", "Where"],
     ["/work", "Stories we"],
     ["/about", "Made with meraki."],

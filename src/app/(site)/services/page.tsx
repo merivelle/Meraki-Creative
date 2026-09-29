@@ -4,9 +4,9 @@ import { breadcrumbs, graph, pageMetadata, pageNode, personNode, studioNode } fr
 import { JsonLd } from "@/components/site/JsonLd";
 import { CtaBand, IndexList, PageHero, Rule, Schedule, serviceRows } from "@/components/site/blocks";
 
-const TITLE = "Video Editing, Website Design & Pitch Decks in LA | Meraki Creative";
+const TITLE = "Film Editing & Website Design Services in LA | Meraki Creative";
 const DESCRIPTION =
-  "Film and demo reel editing, website design for actors and filmmakers, and pitch deck design. Three crafts, one studio, based in Los Angeles.";
+  "Film, trailer, and demo reel editing, and website design for actors and filmmakers. Two crafts, one studio, based in Los Angeles.";
 
 export const metadata = pageMetadata({ path: "/services", title: TITLE, description: DESCRIPTION });
 
@@ -21,9 +21,9 @@ export default async function ServicesPage() {
         breadcrumbs([{ name: "Home", path: "/" }, { name: "Services", path: "/services" }]))} />
 
       <PageHero
-        meta={["Services", "Post-Production · Digital Presence · Creative Materials"]}
+        meta={["Services", "Post-Production · Digital Presence"]}
         title={<>The story, and<br />everything that carries it.</>}
-        lede="Three crafts, one studio standard. We edit the work, build the home for it, and shape the materials that carry it. The story is already there. We help it come across."
+        lede="Two crafts, one studio standard. We edit the work and build the home for it. The story is already there. We help it come across."
       >
         <div className="btn-group">
           <Link href="/start" className="btn btn-primary">Start Your Project</Link>
@@ -56,20 +56,6 @@ export default async function ServicesPage() {
           <p className="lede reveal" style={{ marginBottom: "2rem" }}>Website design for actors, directors, and production companies in Los Angeles. Clean, cinematic websites that read as seriously as the work you put into them. Built to send to reps, casting, financiers, and festivals.</p>
           <IndexList rows={rows("web-design")} />
           <p className="lede reveal" style={{ marginTop: "2rem" }}>More on how the sites get built, and the ones that are live right now: <Link href="/web-design" className="txt-link">website design for actors and filmmakers</Link>.</p>
-        </div>
-      </section>
-
-      <Rule />
-
-      <section className="section" id="materials">
-        <div className="wrap">
-          <div className="index-head reveal">
-            <span className="slate-tag">Creative Materials</span>
-            <h2 className="display display-lg">We design what speaks for it.</h2>
-          </div>
-          <p className="lede reveal" style={{ marginBottom: "2rem" }}>Pitch deck and lookbook design for films in development. The documents that carry your project, designed with the same eye as the film so the vision reads on the page the way it does on screen.</p>
-          <IndexList rows={rows("creative-materials")} />
-          <p className="lede reveal" style={{ marginTop: "2rem" }}>More on decks and lookbooks: <Link href="/creative-materials" className="txt-link">creative materials</Link>.</p>
         </div>
       </section>
 

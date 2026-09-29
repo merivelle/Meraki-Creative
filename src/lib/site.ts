@@ -12,7 +12,6 @@ export const PRIMARY_NAV = [
 export const FOOTER_EXPLORE = [
   { href: "/web-design", label: "Web Design" },
   { href: "/post-production", label: "Post-Production" },
-  { href: "/creative-materials", label: "Creative Materials" },
   { href: "/services", label: "All Services" },
   { href: "/packages", label: "Packages" },
   { href: "/work", label: "Work" },

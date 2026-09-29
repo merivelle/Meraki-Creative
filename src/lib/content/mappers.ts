@@ -27,7 +27,7 @@ export const toPortfolio = (r: Row): PortfolioItem => ({
 });
 
 export const toTestimonial = (r: Row): Testimonial => ({
-  id: s(r.id), quote: s(r.quote), roleLabel: s(r.role_label), name: s(r.name), sort: n(r.sort),
+  id: s(r.id), quote: s(r.quote), pullQuote: s(r.pull_quote) || undefined, roleLabel: s(r.role_label), name: s(r.name), sort: n(r.sort),
 });
 
 export const toFaq = (r: Row): Faq => ({

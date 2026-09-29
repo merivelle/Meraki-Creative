@@ -50,7 +50,7 @@ export const studioNode = {
   logo: abs("/assets/favicon/icon-512.png"),
   image: abs("/assets/og-default.jpg"),
   description:
-    "A Los Angeles creative studio for storytellers: film and demo reel editing, website design for actors and filmmakers, and pitch deck design.",
+    "A Los Angeles creative studio for storytellers: film, trailer, and demo reel editing, and website design for actors and filmmakers.",
   priceRange: "$$",
   address: { "@type": "PostalAddress", addressLocality: "Los Angeles", addressRegion: "CA", addressCountry: "US" },
   areaServed: [...AREA_SERVED, { "@type": "Country", name: "United States" }],
@@ -63,7 +63,7 @@ export const studioNode = {
   founder: { "@id": abs("/#merivelle") },
   knowsAbout: [
     "Film editing", "Post-production", "Demo reel editing", "Trailer editing", "Color grading",
-    "Website design for actors", "Pitch deck design",
+    "Website design for actors", "Website design for filmmakers",
   ],
 };
 

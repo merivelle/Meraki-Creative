@@ -8,6 +8,11 @@ import type { CategoryId, ContentBlocks, PortfolioItem, PublicContent } from "./
 
 export const CONTENT_TAG = "public-content";
 
+// Creative Materials was retired from the public site (Sep 2026). Rows may still be
+// published in Supabase (and past projects reference the category), so hide them here.
+const RETIRED: CategoryId[] = ["creative-materials"];
+const offered = (x: { categoryId: CategoryId }) => !RETIRED.includes(x.categoryId);
+
 const bySort = <T extends { sort: number }>(a: T, b: T) => a.sort - b.sort;
 
 /** Published snapshot, cached until an admin publishes (revalidateTag(CONTENT_TAG)). */
@@ -80,11 +85,14 @@ export async function getContent(): Promise<PublicContent> {
   const c = isDraft ? await loadDrafts() : await loadPublished();
   return {
     ...c,
-    services: [...c.services].sort(bySort),
-    packages: [...c.packages].sort(bySort),
-    portfolio: [...c.portfolio].sort(bySort),
+    services: c.services.filter(offered).sort(bySort),
+    packages: c.packages.filter(offered).sort(bySort),
+    portfolio: c.portfolio
+      .map((p) => ({ ...p, categories: p.categories.filter((cat) => !RETIRED.includes(cat)) }))
+      .filter((p) => p.categories.length > 0)
+      .sort(bySort),
     testimonials: [...c.testimonials].sort(bySort),
-    faqs: [...c.faqs].sort(bySort),
+    faqs: c.faqs.filter((f) => !RETIRED.includes(f.scope as CategoryId)).sort(bySort),
   };
 }
 

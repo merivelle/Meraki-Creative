@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getBlock, getContent } from "@/lib/content/queries";
 import { graph, pageMetadata, pageNode, personNode, studioNode } from "@/lib/seo";
 import { JsonLd } from "@/components/site/JsonLd";
-import { CtaBand, IndexList, PackageCard, Rule, Schedule, Testimonials, serviceRows } from "@/components/site/blocks";
+import { CtaBand, IndexList, PackageCard, Rule, Schedule, ServiceCards, Testimonials, serviceRows } from "@/components/site/blocks";
 
 const TITLE = "Meraki Creative — Film Editing & Website Design in Los Angeles";
 const DESCRIPTION =
@@ -13,29 +13,16 @@ export const metadata = pageMetadata({ path: "/", title: TITLE, description: DES
 // Homepage "Pick a starting point" — same four packages as the original page.
 const FEATURED_SLUGS = ["acting-package", "reel-refresh", "scene-edit", "trailer"];
 
-const CLIPS_V2 = [
-  { flex: 1.4, name: "tl-demoreel-table" },
-  { flex: 1, name: "tl-sunflower-cu" },
-  { flex: 1.7, name: "tl-demoreel-bar" },
-];
-const CLIPS_V1 = [
-  { flex: 1, name: "tl-demoreel-end" },
-  { flex: 1.5, name: "tl-butterflies" },
-  { flex: 1.1, name: "tl-car" },
-];
-
-function Clip({ flex, name }: { flex: number; name: string }) {
-  return (
-    <span className="clip" style={{ flex }}>
-      <video src={`/assets/work/${name}.mp4`} poster={`/assets/work/${name}.jpg`} muted loop playsInline preload="none" />
-    </span>
-  );
-}
-
 export default async function HomePage() {
   const content = await getContent();
   const process = await getBlock("home.process");
   const services = (cat: string) => content.services.filter((s) => s.categoryId === cat && s.summary);
+  const web = services("web-design");
+  const post = services("post-production");
+  // Intro plates alternate crafts so the stack reads as one studio, not two lists.
+  const plates = Array.from({ length: Math.max(web.length, post.length) }, (_, i) => [web[i], post[i]])
+    .flat()
+    .filter((s) => !!s);
   const featured = FEATURED_SLUGS.map((slug) => content.packages.find((p) => p.slug === slug)).filter((p) => !!p);
 
   return (
@@ -45,39 +32,52 @@ export default async function HomePage() {
       {/* ============ HERO (type-led) ============ */}
       <section className="hero">
         <div className="wrap">
-          <div className="hero-meta">
-            <span className="slate">Meraki Creative · Est. 2026</span>
-            <span className="slate hide-sm">A creative studio for storytellers · Now Booking</span>
-          </div>
-          <h1 className="display display-xl">The story is<br />already there.</h1>
-          <div className="hero-foot">
-            <p className="lede">We&apos;re here to help it be seen. Meraki Creative is a Los Angeles creative studio for storytellers. We edit the films, build the sites, and shape the materials that carry your work.</p>
-            <div className="btn-group">
-              <Link href="/start" className="btn btn-primary">Start Your Project</Link>
-              <Link href="/services" className="btn btn-secondary">View Services</Link>
-            </div>
-          </div>
-
-          {/* Editing-timeline motion graphic. Decorative; static assembled timeline without JS/reduced-motion. */}
-          <div className="stage" data-motion aria-hidden="true">
-            <div className="stage-screen">
-              <div className="act act-cut">
-                <span className="act-tag">Timeline / Cut</span>
-                <div className="tl-block">
-                  <div className="ruler">{Array.from({ length: 16 }, (_, i) => <i key={i} />)}</div>
-                  <div className="lanes">
-                    <div className="lane"><span className="lane-label">V2</span><div className="track">{CLIPS_V2.map((c) => <Clip key={c.name} {...c} />)}</div></div>
-                    <div className="lane"><span className="lane-label">V1</span><div className="track">{CLIPS_V1.map((c) => <Clip key={c.name} {...c} />)}</div></div>
-                    <div className="lane"><span className="lane-label">A1</span><div className="track audio">
-                      <div className="waveform">{Array.from({ length: 36 }, (_, i) => <i key={i} />)}</div>
-                    </div></div>
-                  </div>
-                  <span className="playhead" />
+          <div className="hero-title-row">
+            <h1 className="hero-title display display-xl" aria-label="Meraki Creative">
+              {["Meraki", "Creative"].map((word) => (
+                <span className="mk-word" key={word} aria-hidden="true">
+                  {word.split("").map((ch, i) => <span className="mk-ch" key={i}>{ch}</span>)}
+                </span>
+              ))}
+            </h1>
+            {/* Intro (first visit per session, see enhancements.ts): the words part, the services roll
+                through the gap once, then the two craft plates drop into the service cards below. */}
+            <div className="hero-roll" aria-hidden="true">
+              {plates.map((s, i) => (
+                <div className={`plate plate-${i % 3}`} key={s.id}>
+                  <span className="plate-meta">
+                    <span>( {String(i + 1).padStart(2, "0")} )</span>
+                    <span>{s.categoryId === "web-design" ? "Web" : "Post"}</span>
+                  </span>
+                  <span className="plate-name">{s.title}</span>
                 </div>
+              ))}
+              <div className="plate plate-1 plate-craft" data-craft="/web-design">
+                <span className="plate-meta"><span>( 01 )</span><span>Craft</span></span>
+                <span className="plate-name">Web Design</span>
+              </div>
+              <div className="plate plate-2 plate-craft" data-craft="/post-production">
+                <span className="plate-meta"><span>( 02 )</span><span>Craft</span></span>
+                <span className="plate-name">Post-Production</span>
               </div>
             </div>
-            <p className="stage-cap"><span className="stage-cap-k">The cut</span> Where the story is found.</p>
           </div>
+          <p className="hero-tag display">The story is already there.</p>
+          <div className="btn-group hero-cta">
+            <Link href="/start" className="btn btn-primary">Start Your Project</Link>
+            <Link href="/services" className="btn btn-secondary">View Services</Link>
+          </div>
+
+          <div className="svc-rule">
+            <span className="slate-tag">( Services )</span>
+            <span className="slate hide-sm">Two crafts, one studio</span>
+          </div>
+          <ServiceCards
+            cards={[
+              { href: "/web-design", title: "Web Design", line: "We build the home for it.", media: { img: "/assets/work/site-angelique.jpg" }, services: web },
+              { href: "/post-production", title: "Post-Production", line: "We cut the story.", media: { video: "/assets/work/scene-sunflower.mp4", poster: "/assets/work/scene-sunflower-poster.jpg" }, services: post },
+            ]}
+          />
         </div>
       </section>
 
@@ -91,7 +91,7 @@ export default async function HomePage() {
             <p className="display display-sm" style={{ marginTop: "1.2rem" }}>The work matters. So does how it&apos;s experienced.</p>
           </div>
           <div className="reveal">
-            <p className="lede" style={{ marginBottom: "1.4rem" }}>We start with the story you&apos;re trying to tell, then build everything around it. The edit, the site, the materials. Every project gets treated like its own film: one set of hands, real care, nothing left generic.</p>
+            <p className="lede" style={{ marginBottom: "1.4rem" }}>We start with the story you&apos;re trying to tell, then build everything around it, from the edit to the site. Every project gets treated like its own film: one set of hands, real care, nothing left generic.</p>
             <p className="body-2">That care is the whole point. <i>Meraki</i> means doing something with soul, creativity, and love, and leaving a piece of yourself in it. We bring that same care to your work, so your story lands the way you felt it.</p>
           </div>
         </div>
@@ -131,25 +131,6 @@ export default async function HomePage() {
               <Link href="/web-design" className="txt-link" style={{ display: "inline-block", marginTop: "1.5rem" }}>All digital presence</Link>
             </div>
             <IndexList rows={serviceRows(services("web-design"), true)} />
-          </div>
-        </div>
-      </section>
-
-      <Rule />
-
-      {/* ============ PILLAR 3 — CREATIVE MATERIALS ============ */}
-      <section className="section" id="materials">
-        <div className="wrap">
-          <div className="split">
-            <div className="reveal">
-              <div className="index-head">
-                <span className="slate-tag">Creative Materials</span>
-                <h2 className="display display-lg">We design what speaks for it.</h2>
-              </div>
-              <p className="body-2" style={{ marginTop: "1.2rem", maxWidth: "42ch" }}>Pitch deck and lookbook design for films in development. The documents that carry your project: designed with the same eye as the film, so the vision reads on the page the way it does on screen.</p>
-              <Link href="/creative-materials" className="txt-link" style={{ display: "inline-block", marginTop: "1.5rem" }}>All creative materials</Link>
-            </div>
-            <IndexList rows={serviceRows(services("creative-materials"), true)} />
           </div>
         </div>
       </section>

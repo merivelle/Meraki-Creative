@@ -1,9 +1,10 @@
 # Meraki Creative — Project Guide
 
 **"A creative studio for storytellers"** — a boutique creative studio by **Merivelle** across
-THREE co-equal pillars: **Post-Production** (film/trailer/teaser/reel/scene/social editing),
-**Digital Presence** (actor/director/production-company/portfolio/film websites), and
-**Creative Materials** (pitch decks, lookbooks). Actors + filmmakers are audiences, not the whole
+TWO co-equal pillars: **Post-Production** (film/trailer/teaser/reel/scene/social editing) and
+**Digital Presence** (actor/director/production-company/portfolio/film websites). Creative
+Materials (pitch decks, lookbooks) was retired from the public site in Sep 2026: `/creative-materials`
+308s to `/services`, and `getContent()` hides that category (admin + DB still keep it for history). Actors + filmmakers are audiences, not the whole
 identity. Core message: **"The story is already there. We're here to help it be seen."**
 
 ## Brand positioning (read this before touching copy or design)
@@ -14,7 +15,7 @@ identity. Core message: **"The story is already there. We're here to help it be 
 - Tone: **professional, warm, clear, industry-aware**.
 - Position as a **boutique creative studio for storytellers**. Do NOT position as: an actor-only
   business, a reel-editing service, a marketing agency, a social agency, or a website-design company.
-- Three pillars are **co-equal** (editing, websites, materials all primary).
+- The two pillars are **co-equal** (editing and websites both primary).
 - Avoid: corporate, techy, neon, overly feminine, template/stock-photo energy.
 - **Signature lines (canon — echo these across the site):** "The story is already there. We're here
   to help it be seen." · "The work matters. So does how it's experienced." · "Start with the story."
@@ -29,7 +30,11 @@ identity. Core message: **"The story is already there. We're here to help it be 
 - **DO NOT redesign** — the visual system is locked; repositioning is copy/framing only.
   Exception (Sep 2026): Merivelle is now redesigning gradually, page by page, from references
   she provides. Done so far: `/start` (dark welcome → cream, one question per screen, engraved
-  card art from docs/ONBOARDING_ILLUSTRATIONS.md). Redesign only what she asks for.
+  card art from docs/ONBOARDING_ILLUSTRATIONS.md); homepage hero (YUNGBLD-style: "Meraki Creative" types
+  in, the words part, services roll once through the gap, the Web/Post plates drop into the
+  two craft cards — once per session; markup in
+  `(site)/page.tsx`, timeline in `enhancements.ts`, gate script in `(site)/layout.tsx`).
+  Redesign only what she asks for.
 
 ## ⭐ Two folders that define how to work here
 
@@ -65,7 +70,7 @@ from the static HTML site, which is kept for reference in `legacy/`). Three area
 client portal (`/portal`), studio admin (`/admin`). Read `docs/ARCHITECTURE.md` first.
 
 ```
-src/app/(site)/     Public pages: /, /web-design, /post-production, /creative-materials,
+src/app/(site)/     Public pages: /, /web-design, /post-production,
                     /services, /packages, /work(/[slug]), /about
 src/app/(onboarding) /start(/thanks): full-screen guided inquiry (no site header/footer);
                     screens in src/lib/inquiry/steps.ts, UI in src/components/onboarding/
@@ -129,7 +134,7 @@ Fonts (Google): **Archivo** (display + body, weight contrast) + **JetBrains Mono
   `assets/social/og-default.jpg` (1200×630).
 - Service pages `/post-production` and `/web-design` are now in the primary nav (seven items:
   Home, Web Design, Post-Production, Work, About, Start a Project, Client Login — changed at
-  Merivelle's request, Sep 2026). `/creative-materials` and `/services` are footer-linked.
+  Merivelle's request, Sep 2026). `/services` is footer-linked.
 - Positioning for search is **Los Angeles / local**. Keep the city in titles, descriptions,
   and schema. The plain-language service words ("film editing", "post-production",
   "website design") must stay in the copy — they are what people actually search for, and

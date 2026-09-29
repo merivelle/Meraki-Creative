@@ -65,7 +65,7 @@ function rowFor(type: string, fd: FormData): Record<string, unknown> | string {
       };
     }
     case "testimonial":
-      return { quote: str(fd, "quote", 3000), role_label: optStr(fd, "role_label", 100), name: str(fd, "name", 200), sort };
+      return { quote: str(fd, "quote", 3000), pull_quote: optStr(fd, "pull_quote", 200), role_label: optStr(fd, "role_label", 100), name: str(fd, "name", 200), sort };
     case "faq": {
       const scope = str(fd, "scope", 40);
       if (!SCOPES.includes(scope)) return "Choose where it appears.";

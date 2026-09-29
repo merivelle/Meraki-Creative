@@ -14,4 +14,6 @@ export const legacyRedirects: { source: string; destination: string }[] = [
   { source: "/thanks.html", destination: "/start/thanks" },
   { source: "/website-design.html", destination: "/web-design" },
   { source: "/post-production.html", destination: "/post-production" },
+  // Creative Materials was retired (Sep 2026); its page folds into the services overview.
+  { source: "/creative-materials", destination: "/services" },
 ];

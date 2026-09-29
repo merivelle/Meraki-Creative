@@ -9,7 +9,7 @@ export function SiteFooter() {
           <div>
             <p className="footer-brand">Meraki<br />Creative<span className="dot">.</span></p>
             <p className="muted" style={{ marginTop: "1rem", maxWidth: "34ch", fontSize: "0.9rem", color: "var(--on-night-soft)" }}>
-              A creative studio for storytellers. Post-production, websites, and creative materials, made with soul.
+              A creative studio for storytellers. Post-production and websites, made with soul.
             </p>
           </div>
           <div className="footer-cols">
@@ -27,7 +27,7 @@ export function SiteFooter() {
         </div>
         <div className="footer-bottom">
           <span>© 2026 Meraki Creative, by Merivelle · Los Angeles, CA</span>
-          <span>Post-Production · Digital Presence · Creative Materials</span>
+          <span>Post-Production · Digital Presence</span>
         </div>
       </div>
     </footer>

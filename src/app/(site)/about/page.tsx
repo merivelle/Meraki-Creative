@@ -37,8 +37,8 @@ export default function AboutPage() {
                 <p>I work out of Los Angeles, where I grew up around filmmaking. My grandparents, Lou Antonio and Lane Bradbury, dedicated their lives to storytelling, and from an early age I saw how much work, care, and collaboration goes into bringing a story to life.</p>
                 <p>Over time, I realized something frustrating. A lot of talented people create incredible work that never gets the attention it deserves. Not because the work isn&apos;t good, but because it isn&apos;t being presented in a way that allows people to truly see it.</p>
                 <p>That&apos;s why I created Meraki Creative.</p>
-                <p>I wanted a studio that approaches websites, edits, trailers, reels, and creative materials with the same mindset I bring to directing. Find the heart of the work, understand what makes it unique, and build something that communicates it clearly.</p>
-                <p>Whether I&apos;m cutting a scene, editing a trailer, building a website, designing a pitch deck, or shaping a reel, I&apos;m asking the same question:</p>
+                <p>I wanted a studio that approaches websites, edits, trailers, and reels with the same mindset I bring to directing. Find the heart of the work, understand what makes it unique, and build something that communicates it clearly.</p>
+                <p>Whether I&apos;m cutting a scene, editing a trailer, building a website, or shaping a reel, I&apos;m asking the same question:</p>
                 <p style={{ fontStyle: "italic", color: "var(--accent)" }}>What is this story really trying to say?</p>
                 <p>You work directly with me. Every project is personal. Every decision is intentional. And every creative choice starts with the story.</p>
               </div>

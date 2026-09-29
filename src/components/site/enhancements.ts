@@ -5,15 +5,42 @@
  */
 type Cleanup = () => void;
 
+type GsapTimeline = {
+  to: (targets: unknown, vars: object, position?: number | string) => GsapTimeline;
+  fromTo: (targets: unknown, from: object, to: object, position?: number | string) => GsapTimeline;
+  set: (targets: unknown, vars: object, position?: number | string) => GsapTimeline;
+  call: (fn: () => void, params?: unknown[], position?: number | string) => GsapTimeline;
+  progress: (value: number) => GsapTimeline;
+  kill: () => void;
+};
+
 declare global {
   interface Window {
     gsap?: {
-      timeline: (opts: unknown) => { from: (...a: unknown[]) => unknown; to: (...a: unknown[]) => unknown } & Record<string, unknown>;
+      timeline: (opts?: object) => GsapTimeline;
+      set: (targets: unknown, vars: object) => void;
+      to: (targets: unknown, vars: object) => unknown;
+      getProperty: (target: Element, prop: string) => number;
     };
   }
 }
 
 const GSAP_SRC = "https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js";
+
+/** GSAP comes from the CDN on demand; resolves once window.gsap exists. */
+function loadGsap(signal: AbortSignal): Promise<void> {
+  if (window.gsap) return Promise.resolve();
+  return new Promise((resolve) => {
+    let s = document.querySelector<HTMLScriptElement>(`script[src="${GSAP_SRC}"]`);
+    if (!s) {
+      s = document.createElement("script");
+      s.src = GSAP_SRC;
+      s.async = true;
+      document.head.appendChild(s);
+    }
+    s.addEventListener("load", () => resolve(), { once: true, signal });
+  });
+}
 
 export function initEnhancements(root: Document = document): Cleanup {
   const ac = new AbortController();
@@ -47,182 +74,327 @@ export function initEnhancements(root: Document = document): Cleanup {
     document.addEventListener("visibilitychange", () => { if (document.hidden) revealAll(); }, { signal });
   }
 
-  /* ---- Testimonials slideshow (auto-advance + swipe + dots/arrows) ---- */
-  const tsl = root.querySelector<HTMLElement>("[data-testimonials]");
-  if (tsl && !tsl.hasAttribute("data-ready")) {
-    const tslTrack = tsl.querySelector<HTMLElement>(".tsl-track")!;
-    const tslSlides = Array.from(tslTrack.querySelectorAll<HTMLElement>(".testimonial"));
-    if (tslSlides.length > 1) {
-      const tslReduce = reduceMotion;
-      let tslIndex = 0;
-      let tslTimer = 0;
-      let tslRaf = 0;
-      const SVG = "http://www.w3.org/2000/svg";
+  /* ---- Testimonials (Shed-style): the quote's lines leave, the track glides, and the next
+     quote fills in line by line. Pills + blob, drag/swipe, keys, auto-advance. ---- */
+  const tq = root.querySelector<HTMLElement>("[data-testimonials]");
+  const tqTrack = tq?.querySelector<HTMLElement>(".tq-track");
+  const tqSlides = tqTrack ? Array.from(tqTrack.querySelectorAll<HTMLElement>(".tq-slide")) : [];
+  if (tq && tqTrack && tqSlides.length > 1 && !tq.hasAttribute("data-ready")) {
+    const track = tqTrack;
+    const slides = tqSlides;
+    const inks = slides.map((sl) => sl.querySelector<HTMLElement>(".tq-ink")!);
+    const source = inks.map((el) => el.textContent ?? "");
+    let index = 0;
+    let timer = 0;
+    let tl: GsapTimeline | null = null;
 
-      const tslArrow = (dir: number) => {
-        const b = document.createElement("button");
-        b.type = "button";
-        b.className = "tsl-arrow tsl-" + (dir < 0 ? "prev" : "next");
-        b.setAttribute("aria-label", dir < 0 ? "Previous testimonial" : "Next testimonial");
-        const svg = document.createElementNS(SVG, "svg");
-        svg.setAttribute("viewBox", "0 0 24 24");
-        svg.setAttribute("fill", "none");
-        svg.setAttribute("aria-hidden", "true");
-        const p = document.createElementNS(SVG, "path");
-        p.setAttribute("d", dir < 0 ? "M15 5l-7 7 7 7" : "M9 5l7 7-7 7");
-        p.setAttribute("stroke", "currentColor");
-        p.setAttribute("stroke-width", "2");
-        p.setAttribute("stroke-linecap", "round");
-        p.setAttribute("stroke-linejoin", "round");
-        svg.appendChild(p);
-        b.appendChild(svg);
-        b.addEventListener("click", () => go(tslIndex + dir, true), { signal });
-        return b;
-      };
-
-      const controls = document.createElement("div");
-      controls.className = "tsl-controls";
-      const prev = tslArrow(-1);
-      const dotsWrap = document.createElement("div");
-      dotsWrap.className = "tsl-dots";
-      const dots = tslSlides.map((_, i) => {
-        const d = document.createElement("button");
-        d.type = "button";
-        d.className = "tsl-dot";
-        d.setAttribute("aria-label", "Go to testimonial " + (i + 1));
-        d.addEventListener("click", () => go(i, true), { signal });
-        dotsWrap.appendChild(d);
-        return d;
-      });
-      controls.appendChild(prev);
-      controls.appendChild(dotsWrap);
-      controls.appendChild(tslArrow(1));
-      tsl.appendChild(controls);
-      tsl.setAttribute("data-ready", "");
-
-      const setActive = (i: number) => {
-        tslIndex = i;
-        tslSlides.forEach((s, n) => s.classList.toggle("is-active", n === i));
-        dots.forEach((d, n) => (n === i ? d.setAttribute("aria-current", "true") : d.removeAttribute("aria-current")));
-      };
-      const stop = () => { if (tslTimer) { clearInterval(tslTimer); tslTimer = 0; } };
-      const start = () => {
-        if (tslReduce || tslTimer) return;
-        tslTimer = window.setInterval(() => go(tslIndex + 1, false), 7000);
-      };
-      const restart = () => { stop(); start(); };
-      function go(i: number, user: boolean) {
-        i = (i + tslSlides.length) % tslSlides.length;
-        tslTrack.scrollTo({ left: tslSlides[i].offsetLeft - tslSlides[0].offsetLeft, behavior: tslReduce ? "auto" : "smooth" });
-        setActive(i);
-        if (user) restart();
-      }
-
-      // Keep dots in sync with manual swipe / native scroll.
-      tslTrack.addEventListener("scroll", () => {
-        if (tslRaf) return;
-        tslRaf = requestAnimationFrame(() => {
-          tslRaf = 0;
-          let best = 0;
-          let min = Infinity;
-          const base = tslSlides[0].offsetLeft;
-          tslSlides.forEach((s, n) => {
-            const d = Math.abs(s.offsetLeft - base - tslTrack.scrollLeft);
-            if (d < min) { min = d; best = n; }
-          });
-          if (best !== tslIndex) setActive(best);
+    // Split each solid quote into its rendered lines, each inside its own mask.
+    const split = () => {
+      inks.forEach((el, k) => {
+        el.textContent = "";
+        const words = source[k].split(" ").map((w) => {
+          const span = document.createElement("span");
+          span.textContent = w;
+          el.append(span, " ");
+          return span;
         });
-      }, { passive: true, signal });
+        const groups: string[][] = [];
+        let top = -Infinity;
+        words.forEach((w) => {
+          if (w.offsetTop > top + 2) { groups.push([]); top = w.offsetTop; }
+          groups[groups.length - 1].push(w.textContent ?? "");
+        });
+        el.textContent = "";
+        groups.forEach((g) => {
+          const line = document.createElement("span");
+          line.className = "tq-line";
+          const inner = document.createElement("span");
+          inner.className = "tq-line-in";
+          inner.textContent = g.join(" ");
+          line.append(inner);
+          el.append(line);
+        });
+      });
+    };
+    const lines = (k: number) => Array.from(inks[k].querySelectorAll<HTMLElement>(".tq-line-in"));
+    const offsetFor = (k: number) => tq.clientWidth / 2 - (slides[k].offsetLeft + slides[k].offsetWidth / 2);
 
-      // Pause while the visitor is reading or interacting; resume after.
-      (["pointerenter", "focusin", "pointerdown", "touchstart"] as const).forEach((ev) =>
-        tsl.addEventListener(ev, stop, { passive: true, signal }));
-      (["pointerleave", "focusout"] as const).forEach((ev) => tsl.addEventListener(ev, () => restart(), { signal }));
+    const pills = document.createElement("div");
+    pills.className = "tq-pills";
+    const blob = document.createElement("span");
+    blob.className = "tq-blob";
+    blob.setAttribute("aria-hidden", "true");
+    pills.append(blob);
+    const pillBtns = slides.map((_, i) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "tq-pill";
+      b.textContent = String(i + 1).padStart(2, "0");
+      b.setAttribute("aria-label", `Testimonial ${i + 1} of ${slides.length}`);
+      b.addEventListener("click", () => go(i, true), { signal });
+      pills.append(b);
+      return b;
+    });
+    const live = document.createElement("p");
+    live.className = "tq-live";
+    live.setAttribute("aria-live", "polite");
+
+    const setActive = (k: number) => {
+      slides.forEach((sl, i) => {
+        sl.classList.toggle("is-active", i === k);
+        sl.setAttribute("aria-hidden", String(i !== k));
+      });
+      pillBtns.forEach((b, i) => b.setAttribute("aria-current", String(i === k)));
+      const cite = slides[k].querySelector(".tq-cite")?.textContent ?? "";
+      live.textContent = `${source[k]} ${cite}`;
+    };
+    // Snap everything to the current index with no motion (first paint, resize, reduced motion).
+    const place = () => {
+      const g = window.gsap!;
+      g.set(track, { x: offsetFor(index) });
+      slides.forEach((_, k) => g.set(lines(k), { yPercent: k === index ? 0 : 105 }));
+      g.set(blob, { x: pillBtns[index].offsetLeft, scaleX: 1 });
+    };
+
+    const go = (to: number, user = false) => {
+      const g = window.gsap;
+      const next = (to + slides.length) % slides.length;
+      if (!g || next === index) return;
+      const prev = index;
+      index = next;
+      setActive(next);
+      tl?.progress(1);
+      tl?.kill();
+      if (reduceMotion) place();
+      else {
+        tl = g.timeline({ defaults: { ease: "power3.out" } });
+        tl.to(lines(prev), { yPercent: -105, duration: 0.45, stagger: 0.05, ease: "power3.in" }, 0)
+          .to(track, { x: offsetFor(next), duration: 0.9, ease: "power3.inOut" }, 0.1)
+          .fromTo(lines(next), { yPercent: 105 }, { yPercent: 0, duration: 0.7, stagger: 0.08 }, 0.55)
+          .set(lines(prev), { yPercent: 105 }, 1.3) // back below its mask, ready to fill in again
+          .to(blob, { x: pillBtns[next].offsetLeft, duration: 0.6, ease: "power3.inOut" }, 0.1)
+          .to(blob, { scaleX: 1.8, duration: 0.3, ease: "power2.out" }, 0.1)
+          .to(blob, { scaleX: 1, duration: 0.3, ease: "power2.in" }, 0.4);
+      }
+      if (user) start();
+    };
+
+    const stop = () => { window.clearInterval(timer); timer = 0; };
+    const start = () => {
+      stop();
+      if (!reduceMotion && !document.hidden) timer = window.setInterval(() => go(index + 1), 7000);
+    };
+
+    loadGsap(signal).then(() => (document.fonts ? document.fonts.ready : null)).then(() => {
+      const g = window.gsap;
+      if (signal.aborted || !g) return;
+      tq.append(pills, live);
+      tq.setAttribute("data-ready", "");
+      split();
+      setActive(index);
+      place();
+      start();
+
+      // Drag / swipe: follow the pointer a little, then change on a 50px pull.
+      // A tap on a peeking neighbour brings it forward.
+      let dragging = false;
+      let startX = 0;
+      let baseX = 0;
+      let moved = 0;
+      track.addEventListener("pointerdown", (e) => {
+        dragging = true;
+        moved = 0;
+        startX = e.clientX;
+        tl?.progress(1);
+        baseX = g.getProperty(track, "x");
+        track.classList.add("is-dragging");
+        stop();
+      }, { signal });
+      window.addEventListener("pointermove", (e) => {
+        if (!dragging) return;
+        moved = e.clientX - startX;
+        g.set(track, { x: baseX + moved * 0.6 });
+      }, { signal });
+      const end = (e: PointerEvent) => {
+        if (!dragging) return;
+        dragging = false;
+        track.classList.remove("is-dragging");
+        if (Math.abs(moved) > 50) return go(index + (moved < 0 ? 1 : -1), true);
+        const hit = (document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null)?.closest(".tq-slide");
+        const k = hit ? slides.indexOf(hit as HTMLElement) : -1;
+        if (Math.abs(moved) < 6 && k >= 0 && k !== index) return go(k, true);
+        g.to(track, { x: offsetFor(index), duration: 0.5, ease: "power3.out" });
+        start();
+      };
+      window.addEventListener("pointerup", end, { signal });
+      window.addEventListener("pointercancel", end, { signal });
+
+      tq.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight") { e.preventDefault(); go(index + 1, true); }
+        else if (e.key === "ArrowLeft") { e.preventDefault(); go(index - 1, true); }
+      }, { signal });
+      tq.addEventListener("pointerenter", stop, { signal });
+      tq.addEventListener("pointerleave", () => { if (!dragging) start(); }, { signal });
+      tq.addEventListener("focusin", stop, { signal });
+      tq.addEventListener("focusout", start, { signal });
       document.addEventListener("visibilitychange", () => (document.hidden ? stop() : start()), { signal });
 
-      // Keyboard: arrows move between testimonials when a control is focused.
-      controls.addEventListener("keydown", (e) => {
-        if (e.key === "ArrowLeft") { e.preventDefault(); go(tslIndex - 1, true); }
-        else if (e.key === "ArrowRight") { e.preventDefault(); go(tslIndex + 1, true); }
+      let resizeT = 0;
+      window.addEventListener("resize", () => {
+        window.clearTimeout(resizeT);
+        resizeT = window.setTimeout(() => { tl?.progress(1); split(); place(); }, 150);
       }, { signal });
+      cleanups.push(() => window.clearTimeout(resizeT));
+    });
 
-      setActive(0);
-      start();
-      cleanups.push(() => {
-        stop();
-        if (tslRaf) cancelAnimationFrame(tslRaf);
-        controls.remove();
-        tsl.removeAttribute("data-ready");
-      });
-    }
+    cleanups.push(() => {
+      stop();
+      tl?.kill();
+      pills.remove();
+      live.remove();
+      tq.removeAttribute("data-ready");
+      inks.forEach((el, k) => (el.textContent = source[k]));
+      slides.forEach((sl) => { sl.classList.remove("is-active"); sl.removeAttribute("aria-hidden"); });
+      window.gsap?.set(track, { clearProps: "transform" });
+    });
   }
 
-  /* ---- Hero motion stage: editing timeline (real clips play under the playhead) ---- */
-  const stage = root.querySelector<HTMLElement>(".stage[data-motion]");
-  if (stage && !reduceMotion) {
-    const screenEl = stage.querySelector<HTMLElement>(".stage-screen");
-    const playhead = stage.querySelector<HTMLElement>(".act-cut .playhead");
-    const clipVideos = Array.from(stage.querySelectorAll<HTMLVideoElement>(".act-cut .clip video"));
+  /* ---- Hero intro (YUNGBLD-style): "Meraki Creative" types in, the words part, the services
+     roll once through the gap, then the two craft plates drop into the service cards ---- */
+  const html = document.documentElement;
+  const roll = root.querySelector<HTMLElement>(".hero-roll");
+  const endIntro = () => {
+    html.classList.remove("intro");
+    html.classList.add("intro-done"); // the intro already brought the hero in; skip the CSS rise
+    try { sessionStorage.setItem("mk-intro", "1"); } catch {}
+  };
+  if (roll && html.classList.contains("intro")) {
+    if (reduceMotion) endIntro();
+    // Measure only once the webfont is in: the fallback font has different word widths,
+    // which would put the gap (and the cards spilling out of it) off-centre.
+    else Promise.all([loadGsap(signal), document.fonts ? document.fonts.ready : null]).then(() => {
+      const gsap = window.gsap;
+      if (signal.aborted || !gsap || !html.classList.contains("intro")) return;
+      const hero = roll.closest<HTMLElement>(".hero")!;
+      const row = hero.querySelector<HTMLElement>(".hero-title-row")!;
+      const words = Array.from(hero.querySelectorAll<HTMLElement>(".mk-word"));
+      const chars = hero.querySelectorAll(".mk-ch");
+      const plates = Array.from(roll.querySelectorAll<HTMLElement>(".plate:not(.plate-craft)"));
+      const crafts = Array.from(roll.querySelectorAll<HTMLElement>(".plate-craft"));
+      const deck = [...plates, ...crafts];
+      const tag = hero.querySelector(".hero-tag");
+      const cta = hero.querySelector(".hero-cta");
+      const rule = hero.querySelector(".svc-rule");
+      const cards = Array.from(hero.querySelectorAll<HTMLElement>(".svc-card"));
+      const reveal = [...chars, tag, cta, rule, ...cards, ...words, hero.querySelector(".hero-title")];
 
-    // One-time intro reveal: clips snap onto the lanes, the audio waveform builds.
-    const intro = () => {
-      if (signal.aborted || !window.gsap) return;
-      const tl = window.gsap.timeline({ defaults: { ease: "power3.out" } }) as unknown as {
-        from: (...a: unknown[]) => typeof tl; to: (...a: unknown[]) => typeof tl;
+      // The words part sideways on one line (as in the reference). The gap is sized to the
+      // plates; if the parted title won't fit the screen, the title shrinks while it's open.
+      const title = hero.querySelector<HTMLElement>(".hero-title")!;
+      const rowR = row.getBoundingClientRect();
+      const [w0, w1] = words.map((w) => w.getBoundingClientRect());
+      const plateW = roll.offsetWidth;
+      const plateH = (plateW * 2) / 3;
+      const gap = Math.min(plateW + 32, rowR.width * 0.42);
+      const fit = Math.min(1, (gap - 16) / plateW);
+      const shrink = Math.min(1, (window.innerWidth - 32) / (w0.width + w1.width + gap));
+      const cx = rowR.left + rowR.width / 2;
+      const cy = rowR.top + rowR.height / 2;
+      const gapX = (w0.right + w1.left) / 2;
+      const gapY = w0.top + w0.height / 2; // the letters' middle, not the h1 line box's
+      const move0 = { x: gapX - gap / 2 - w0.right }; // in the title's own (unscaled) units
+      const move1 = { x: gapX + gap / 2 - w1.left };
+
+      // Deck depth d: 0 = the front card. Each card keeps one side (above or below, by its
+      // index) and drifts further out as it sinks, so the deck reads as a tunnel with edges
+      // on both sides, and nothing jumps between steps.
+      const depth = (j: number, d: number) => ({
+        scale: 1 - 0.05 * d,
+        y: (j % 2 ? -1 : 1) * plateH * 0.075 * d,
+        opacity: d > 6 ? 0 : 1,
+      });
+
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+      tl.set(roll, { x: (gapX - cx) * shrink, y: (gapY - cy) * shrink, scale: fit * shrink }, 0);
+      deck.forEach((pl, k) => tl.set(pl, { yPercent: -50, y: 0, scale: 0.6, opacity: 0, zIndex: 100 + k }, 0));
+
+      // 1. Type in: each letter arrives grey, then settles to ink.
+      tl.fromTo(chars, { opacity: 0, color: "#54504A" }, { opacity: 1, duration: 0.3, stagger: 0.06 }, 0.2);
+      tl.to(chars, { color: "#17150F", duration: 0.4, stagger: 0.06 }, 0.5);
+
+      // 2. The words part left and right.
+      const SPLIT = 0.25 + chars.length * 0.06 + 0.3;
+      if (shrink < 1) tl.to(title, { scale: shrink, duration: 0.6, ease: "power3.inOut" }, SPLIT);
+      tl.to(words[0], { ...move0, duration: 0.6, ease: "power3.inOut" }, SPLIT);
+      tl.to(words[1], { ...move1, duration: 0.6, ease: "power3.inOut" }, SPLIT);
+
+      // 3. Each service comes out of the centre toward you; the one before sinks into the deck.
+      const ROLL = SPLIT + 0.4;
+      const STEP = 0.16;
+      deck.forEach((pl, k) => {
+        const at = ROLL + k * STEP;
+        tl.to(pl, { scale: 1, y: 0, duration: 0.45 }, at);
+        tl.set(pl, { opacity: 1 }, at); // appears solid and small, then grows (nothing shows through)
+        deck.slice(0, k).forEach((prev, j) => tl.to(prev, { ...depth(j, k - j), duration: 0.45 }, at));
+      });
+
+      // 4. Drop: the service plates fall away; the craft plates fly down and become the cards.
+      const DROP = ROLL + deck.length * STEP + 0.4;
+      plates.forEach((pl, k) => {
+        tl.to(pl, { y: "+=" + window.innerHeight, rotation: (k % 2 ? 1 : -1) * (3 + (k % 3) * 2), opacity: 0, duration: 0.6, ease: "power3.in" }, DROP);
+      });
+      tl.call(() => {
+        crafts.forEach((pl, k) => {
+          const card = cards.find((c) => c.getAttribute("href") === pl.dataset.craft);
+          if (!card) return;
+          const r = pl.getBoundingClientRect();
+          const c = card.getBoundingClientRect();
+          const rs = fit || 1;
+          gsap.to(pl.children, { opacity: 0, duration: 0.2 });
+          gsap.to(pl, {
+            x: "+=" + (c.left + c.width / 2 - (r.left + r.width / 2)) / rs,
+            y: "+=" + (c.top + c.height / 2 - (r.top + r.height / 2)) / rs,
+            scaleX: (gsap.getProperty(pl, "scaleX") * c.width) / r.width,
+            scaleY: (gsap.getProperty(pl, "scaleY") * c.height) / r.height,
+            opacity: 1, duration: 0.75, delay: k * 0.08, ease: "power3.inOut",
+          });
+        });
+      }, undefined, DROP);
+      const LAND = DROP + 0.8;
+      tl.fromTo(cards, { opacity: 0 }, { opacity: 1, duration: 0.35, stagger: 0.08 }, LAND);
+      tl.to(crafts, { opacity: 0, duration: 0.3, stagger: 0.08 }, LAND + 0.1);
+
+      // The name closes back up and the rest of the hero arrives.
+      tl.to(words, { x: 0, duration: 0.7, ease: "power3.inOut" }, DROP + 0.15);
+      tl.to(title, { scale: 1, duration: 0.7, ease: "power3.inOut" }, DROP + 0.15);
+      tl.fromTo(tag, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.7 }, DROP + 0.45);
+      tl.fromTo(cta, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.7 }, DROP + 0.55);
+      tl.fromTo(rule, { opacity: 0, clipPath: "inset(0 100% 0 0)" }, { opacity: 1, clipPath: "inset(0 0% 0 0)", duration: 0.8, ease: "power2.inOut" }, DROP + 0.3);
+
+      // Any click, key, wheel or touch skips straight to the settled hero.
+      const off = new AbortController();
+      const finish = () => {
+        off.abort();
+        endIntro();
+        gsap.set(reveal, { clearProps: "all" });
       };
-      tl.from(".act-cut .clip", { scaleX: 0, opacity: 0, transformOrigin: "left center", stagger: 0.09, duration: 0.5 }, 0)
-        .from(".act-cut .waveform i", { scaleY: 0.12, opacity: 0, stagger: 0.012, duration: 0.4 }, 0.3)
-        .to(".act-cut .waveform i", { scaleY: 1.3, duration: 0.16, stagger: { each: 0.03, yoyo: true, repeat: 1 } }, 0.6);
-    };
-    if (window.gsap) intro();
-    else {
-      let s = document.querySelector<HTMLScriptElement>(`script[src="${GSAP_SRC}"]`);
-      if (!s) {
-        s = document.createElement("script");
-        s.src = GSAP_SRC;
-        s.async = true;
-        document.head.appendChild(s);
-      }
-      s.addEventListener("load", intro, { once: true, signal });
-    }
-
-    // Continuous, slow playhead sweep. Whichever clip the playhead sits over plays;
-    // the rest pause and freeze on frame (one rAF loop drives both, like an NLE).
-    const DURATION = 15000;
-    let rafId = 0;
-    let startT = 0;
-    const travel = () => (screenEl ? screenEl.clientWidth : 600) - 36;
-    const syncPlayback = () => {
-      if (!playhead) return;
-      const pr = playhead.getBoundingClientRect();
-      const px = pr.left + pr.width / 2;
-      clipVideos.forEach((v) => {
-        const r = v.getBoundingClientRect();
-        const over = px >= r.left && px <= r.right;
-        if (over && v.paused) v.play()?.catch(() => {});
-        else if (!over && !v.paused) v.pause();
-      });
-    };
-    const tick = (now: number) => {
-      if (!startT) startT = now;
-      const progress = ((now - startT) % DURATION) / DURATION;
-      if (playhead) playhead.style.transform = "translateX(" + progress * travel() + "px)";
-      syncPlayback();
-      rafId = requestAnimationFrame(tick);
-    };
-    rafId = requestAnimationFrame(tick);
-
-    document.addEventListener("visibilitychange", () => {
-      if (document.hidden) {
-        if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
-        clipVideos.forEach((v) => v.pause());
-      } else if (!rafId) {
-        startT = 0;
-        rafId = requestAnimationFrame(tick);
-      }
-    }, { signal });
-    cleanups.push(() => { if (rafId) cancelAnimationFrame(rafId); clipVideos.forEach((v) => v.pause()); });
+      tl.call(finish, undefined, LAND + 0.5);
+      const skip = () => { off.abort(); tl.progress(1); finish(); };
+      ["pointerdown", "keydown", "wheel", "touchstart"].forEach((ev) =>
+        window.addEventListener(ev, skip, { once: true, passive: true, signal: off.signal }));
+      signal.addEventListener("abort", () => { tl.kill(); finish(); });
+    });
   }
+
+  /* ---- Hero service card: the Post clip plays while it's on screen ---- */
+  root.querySelectorAll<HTMLVideoElement>("video[data-svc-video]").forEach((v) => {
+    if (reduceMotion || !("IntersectionObserver" in window)) return; // poster only
+    const iosv = new IntersectionObserver((entries) => {
+      entries.forEach((en) => { if (en.isIntersecting) v.play().catch(() => {}); else v.pause(); });
+    }, { threshold: 0.25 });
+    iosv.observe(v);
+    cleanups.push(() => { iosv.disconnect(); v.pause(); });
+  });
 
   /* ---- Before/after sliders ---- */
   root.querySelectorAll<HTMLElement>(".ba[data-ba]").forEach((ba) => {

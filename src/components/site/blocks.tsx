@@ -23,7 +23,44 @@ export function IndexList({ rows }: { rows: { role: string; title: string; desc:
   );
 }
 
-export const serviceRows = (services: ServiceItem[], short = false) =>
+/** Homepage hero: one tall card per craft, media from real work. */
+export type ServiceCard = {
+  href: string;
+  title: string;
+  line: string;
+  media: { img: string } | { video: string; poster: string };
+  services: ServiceItem[];
+};
+
+export function ServiceCards({ cards }: { cards: ServiceCard[] }) {
+  return (
+    <div className="svc-cards">
+      {cards.map((c, i) => (
+        <Link href={c.href} className="svc-card" key={c.href}>
+          <span className="svc-media">
+            {"img" in c.media ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={c.media.img} alt="" loading="eager" />
+            ) : (
+              <video src={c.media.video} poster={c.media.poster} muted loop playsInline preload="metadata" data-svc-video />
+            )}
+          </span>
+          <span className="svc-body">
+            <span className="svc-top">
+              <span className="svc-idx">( {String(i + 1).padStart(2, "0")} )</span>
+              <span className="svc-arrow" aria-hidden="true">→</span>
+            </span>
+            <span className="svc-title display">{c.title}</span>
+            <span className="svc-line">{c.line}</span>
+            <span className="svc-list">{c.services.map((s) => s.roleLabel).join(" · ")}</span>
+          </span>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+export const serviceRows =(services: ServiceItem[], short = false) =>
   services.map((s) => ({ role: s.roleLabel, title: s.title, desc: short && s.summary ? s.summary : s.description }));
 
 export function FaqSection({ faqs, slate = "Questions", heading = "Before you ask." }: { faqs: Faq[]; slate?: string; heading?: string }) {
@@ -142,21 +179,43 @@ export function CtaBand({ slate, heading, lede, primary, secondary }: {
   );
 }
 
+/**
+ * Fallback pull-quote when none is set in Admin: the first sentence, or, if that runs long,
+ * its first clause with an ellipsis (always their own words, never rewritten).
+ */
+const firstSentence = (q: string) => {
+  const sentence = (q.match(/^.*?[.!?](\s|$)/)?.[0] ?? q).trim();
+  if (sentence.split(/\s+/).length <= 12) return sentence;
+  const clause = sentence.match(/^[^;,:]+/)?.[0]?.trim();
+  return clause && clause !== sentence ? `${clause}…` : sentence;
+};
+
+/**
+ * Testimonials (Shed-style): a full-bleed track of big pull-quotes. Each quote has a faint copy
+ * (sets the layout) and a solid copy that enhancements.ts splits into masked lines and animates.
+ */
 export function Testimonials({ items }: { items: Testimonial[] }) {
   if (!items.length) return null;
   return (
-    <section className="section">
+    <section className="section tq-section">
       <div className="wrap">
         <span className="slate-tag reveal">In Their Words</span>
-        <div className="tsl reveal" data-testimonials role="group" aria-roledescription="carousel" aria-label="Client testimonials">
-          <div className="tsl-track">
-            {items.map((t, i) => (
-              <figure className="testimonial" role="group" aria-roledescription="slide" aria-label={`${i + 1} of ${items.length}`} key={t.id}>
-                <blockquote className="quote">&ldquo;{t.quote}&rdquo;</blockquote>
-                <figcaption className="quote-cite">{t.roleLabel} <span>{t.name}</span></figcaption>
+      </div>
+      <div className="tq" data-testimonials role="group" aria-roledescription="carousel" aria-label="Client testimonials" tabIndex={-1}>
+        <div className="tq-track">
+          {items.map((t, i) => {
+            const pull = t.pullQuote || firstSentence(t.quote);
+            return (
+              <figure className="tq-slide" role="group" aria-roledescription="slide" aria-label={`${i + 1} of ${items.length}`} key={t.id}>
+                <blockquote className="tq-quote">
+                  <span className="tq-pale">&ldquo;{pull}&rdquo;</span>
+                  <span className="tq-ink" aria-hidden="true">&ldquo;{pull}&rdquo;</span>
+                </blockquote>
+                <figcaption className="tq-cite">&mdash; {t.name}, {t.roleLabel}</figcaption>
+                {pull !== t.quote && <p className="tq-full">&ldquo;{t.quote}&rdquo;</p>}
               </figure>
-            ))}
-          </div>
+            );
+          })}
         </div>
       </div>
     </section>

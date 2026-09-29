@@ -6,6 +6,35 @@ in `CLAUDE.md`. The `humanize-writing` skill referenced in `CLAUDE.md` wasn't av
 environment (there is no `.claude/skills/` folder in the repo), so a humanize pass is still
 worth doing.
 
+## Sep 2026: homepage hero + Creative Materials retired
+- Hero is now type-led and centred: h1 **"Meraki Creative"**, then "The story is already there."
+  and the two buttons. Removed from the hero: the meta strip ("Meraki Creative · Est. 2026" /
+  "A creative studio for storytellers · Now Booking") and the lede paragraph. The Los Angeles /
+  film editing / website design wording still lives in the page title, description, and the
+  sections below.
+- New hero row: "( Services )" · "Two crafts, one studio". Cards: **Web Design**, "We build the
+  home for it." and **Post-Production**, "We cut the story." (both existing canon lines).
+- Statement: "…then build everything around it, from the edit to the site." (was "The edit, the
+  site, the materials.")
+- Services page: title "Film Editing & Website Design Services in LA | Meraki Creative"; lede
+  "Two crafts, one studio standard. We edit the work and build the home for it. The story is
+  already there. We help it come across."
+- Packages, Work, About, footer, and schema descriptions drop decks/lookbooks/materials.
+- Filmmaker Package: removed "Pitch deck or lookbook"; tagline now "The site and the cut,
+  designed as one to carry the project." **Still to decide:** the Acting Package line
+  "Materials set up to match." (it may mean headshots/bio, not decks).
+- Published Supabase rows for the category are hidden in code; archive them in Admin whenever
+  convenient, and edit the Filmmaker Package there too (the seed only covers fresh databases).
+
+## Sep 2026: testimonials (Shed-style)
+Each testimonial now shows a short pull-quote large, with the full quote small beneath it.
+Pull-quotes, verbatim from each quote (edit in Admin → Testimonials → "Pull-quote"):
+- Liquid Theatre Collective: "A true asset to any production."
+- Nicky Chartraw: "An incredible gift for storytelling through her editing."
+- Yonatan Shaham Vitos: "The reel also helped me land my first feature film."
+Until they're entered in Admin (needs the `pull_quote` migration applied), the site shows the
+first clause of each quote, e.g. "Working with Merivelle was nothing short of amazing…".
+
 ## Navigation
 - Primary nav is now: Home · Web Design · Post-Production · Work · About · Start a Project ·
   Client Login (was Home · Services · Packages · Portfolio · About · Contact).

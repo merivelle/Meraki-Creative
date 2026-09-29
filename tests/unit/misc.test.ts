@@ -24,7 +24,7 @@ describe("package prices", () => {
       expect(block).toContain(`<h3>${p.name}</h3>`);
       expect(block).toContain(`<p class="price"><b>${p.priceDisplay}</b></p>`);
     }
-    expect(seedPackages).toHaveLength(14);
+    expect(seedPackages).toHaveLength(12); // legacy 14 minus the two retired Creative Materials packages
   });
 });
 
@@ -55,9 +55,9 @@ describe("inquiry preselection", () => {
   it("ignores unknown values", () => {
     expect(preselect(seedPackages, { service: "<script>", package: "nope" })).toEqual({});
   });
-  it("deck and lookbook links keep the package but add no service (not offered in the form)", () => {
+  it("retired deck and lookbook links preselect nothing", () => {
     expect(preselect(seedPackages, { service: "creative-materials" })).toEqual({});
-    expect(preselect(seedPackages, { package: "Pitch Deck Package" })).toEqual({ package: "pitch-deck" });
+    expect(preselect(seedPackages, { package: "Pitch Deck Package" })).toEqual({});
   });
   it("bundles preselect the package but no single service", () => {
     expect(preselect(seedPackages, { package: "acting-package" })).toEqual({ package: "acting-package" });

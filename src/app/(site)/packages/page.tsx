@@ -7,7 +7,7 @@ import { CtaBand, PackageGroups, PageHero } from "@/components/site/blocks";
 
 const TITLE = "Editing & Website Packages With Pricing | Meraki Creative";
 const DESCRIPTION =
-  "Real starting prices for demo reel edits, scene edits, trailers, actor and director websites, and pitch decks. Every package can be tailored.";
+  "Real starting prices for demo reel edits, scene edits, trailers, and actor and director websites. Every package can be tailored.";
 
 export const metadata = pageMetadata({ path: "/packages", title: TITLE, description: DESCRIPTION });
 
@@ -16,7 +16,6 @@ export const metadata = pageMetadata({ path: "/packages", title: TITLE, descript
 const ORDER: { id: CategoryId; anchor: string }[] = [
   { id: "post-production", anchor: "post-production" },
   { id: "web-design", anchor: "web-design" },
-  { id: "creative-materials", anchor: "creative-materials" },
   { id: "bundles", anchor: "bundles" },
 ];
 
@@ -31,7 +30,7 @@ export default async function PackagesPage() {
       <PageHero
         meta={["Packages", "Clear scope, clear price"]}
         title={<>Where<br />to begin.</>}
-        lede="Starting points organized by craft: post-production, digital presence, and creative materials, plus two bundles that cover everything together. Every package can be tailored. If you don't see your exact fit, we'll build a custom quote."
+        lede="Starting points organized by craft: post-production and digital presence, plus two bundles that cover everything together. Every package can be tailored. If you don't see your exact fit, we'll build a custom quote."
       >
         <div className="btn-group">
           <Link href="/start" className="btn btn-primary">Start Your Project</Link>
