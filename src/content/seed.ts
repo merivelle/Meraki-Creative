@@ -55,7 +55,7 @@ const site = (n: number, slug: string, title: string, typeLabel: string, img: st
 export const seedPortfolio: PortfolioItem[] = [
   {
     id: id(301), slug: "director-demo-reel", title: "Director Demo Reel", clientName: "Merivelle", categories: ["post-production"], layout: "reel", typeLabel: "Demo Reel",
-    description: null, contribution: "Edit", images: [{ src: "/assets/work/showreel-poster.jpg", alt: "Director demo reel poster frame", role: "poster" }],
+    description: null, contribution: "Edit", images: [{ src: "/assets/work/showreel-poster.jpg", alt: "Director demo reel poster frame", role: "poster", width: 1280, height: 720 }],
     video: { kind: "file", src: "/assets/work/showreel.mp4", poster: "/assets/work/showreel-poster.jpg", title: "Director demo reel preview" },
     videoLinks: [{ label: "Watch the full reel", url: "https://vimeo.com/merivelle/director-demo-reel" }], liveUrl: null, featured: true, sort: 10,
   },
@@ -68,7 +68,7 @@ export const seedPortfolio: PortfolioItem[] = [
   site(316, "nicky-chartraw", "Nicky Chartraw", "Actor Site", "/assets/work/site-nicky.jpg", "Nicky Chartraw actor website homepage", "https://merakicreativeco.wixsite.com/nickychartraw", "Nicky Chartraw — Actor", 70),
   {
     id: id(321), slug: "the-sitdown", title: "The Sitdown", clientName: null, categories: ["post-production"], layout: "film", typeLabel: "Short Film",
-    description: null, contribution: "Edit", images: [{ src: "/assets/work/reel-sitdown-poster.jpg", alt: "The Sitdown poster frame", role: "poster" }],
+    description: null, contribution: "Edit", images: [{ src: "/assets/work/reel-sitdown-poster.jpg", alt: "The Sitdown poster frame", role: "poster", width: 1280, height: 676 }],
     video: { kind: "file", src: "/assets/work/reel-sitdown.mp4", poster: "/assets/work/reel-sitdown-poster.jpg", title: "The Sitdown excerpt preview" },
     videoLinks: [{ label: "Watch full", url: "https://vimeo.com/1031819637" }], liveUrl: null, featured: true, sort: 80,
   },

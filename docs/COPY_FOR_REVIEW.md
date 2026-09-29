@@ -26,6 +26,14 @@ worth doing.
 - Published Supabase rows for the category are hidden in code; archive them in Admin whenever
   convenient, and edit the Filmmaker Package there too (the seed only covers fresh databases).
 
+## Sep 2026: "What we do" + "Featured Work" (Estrela-style)
+Replaces the homepage's two pillar sections and "The reel". Row copy reuses existing service summaries.
+- Intro under "What we do": "Film editing and website design for actors, directors, and production
+  companies in Los Angeles." (keeps the local search words the pillar sections carried)
+- 01 Film & trailer editing · 02 Demo reels & scenes · 03 Actor & director websites ·
+  04 Production company & film websites. Closing band: "Start with the story." → View all services.
+- Featured Work card: "Stories we've helped shape." · "All Work →".
+
 ## Sep 2026: testimonials (Shed-style)
 Each testimonial now shows a short pull-quote large, with the full quote small beneath it.
 Pull-quotes, verbatim from each quote (edit in Admin → Testimonials → "Pull-quote"):

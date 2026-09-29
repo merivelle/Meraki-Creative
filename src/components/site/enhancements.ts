@@ -550,31 +550,99 @@ export function initEnhancements(root: Document = document): Cleanup {
     }
   });
 
-  /* ---- Showreel: cutting-room frame (autoplay in view + synced playhead/timecode) ---- */
-  root.querySelectorAll<HTMLElement>(".showreel[data-showreel]").forEach((sr) => {
-    const v = sr.querySelector("video");
-    const fill = sr.querySelector<HTMLElement>(".sr-progress-fill");
-    const tc = sr.querySelector<HTMLElement>(".sr-tc");
-    if (!v) return;
-    const fmt = (s: number) => {
-      s = Math.max(0, s || 0);
-      const m = Math.floor(s / 60);
-      const ss = Math.floor(s % 60);
-      return (m < 10 ? "0" : "") + m + ":" + (ss < 10 ? "0" : "") + ss;
-    };
-    v.addEventListener("timeupdate", () => {
-      if (v.duration) {
-        if (fill) fill.style.transform = "scaleX(" + v.currentTime / v.duration + ")";
-        if (tc) tc.textContent = fmt(v.currentTime);
+  /* ---- What we do: one row open at a time (hover / focus; on touch, first tap opens) ---- */
+  root.querySelectorAll<HTMLElement>("[data-wwd]").forEach((list) => {
+    const rows = Array.from(list.querySelectorAll<HTMLElement>(".wwd-row:not(.wwd-close)"));
+    const open = (row: HTMLElement) => rows.forEach((r) => r.classList.toggle("is-open", r === row));
+    rows.forEach((row) => {
+      row.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse") open(row); }, { signal });
+      row.addEventListener("focusin", () => open(row), { signal });
+      row.querySelector("a")?.addEventListener("click", (e) => {
+        if (!row.classList.contains("is-open")) { e.preventDefault(); open(row); }
+      }, { signal });
+    });
+  });
+
+  /* ---- Featured Work: hovered tile grows; "View project" pill follows the cursor; the row
+     drags sideways with the mouse (trackpads and touch scroll it natively) ---- */
+  root.querySelectorAll<HTMLElement>("[data-fw]").forEach((fw) => {
+    const tiles = Array.from(fw.querySelectorAll<HTMLElement>(".fw-tile"));
+    const pill = fw.querySelector<HTMLElement>(".fw-pill");
+    const grow = (tile: HTMLElement | null) => {
+      fw.classList.toggle("has-open", !!tile);
+      tiles.forEach((t) => {
+      const on = t === tile;
+      t.classList.toggle("is-open", on);
+      const v = t.querySelector("video");
+      if (!v || reduceMotion) return;
+      if (on) {
+        v.preload = "auto";
+        const start = Number(v.dataset.start ?? 0); // skip the page load at the top of a site recording
+        if (start && v.currentTime < start) v.currentTime = start;
+        v.play().then(() => t.classList.add("is-playing")).catch(() => {});
       }
+      else { v.pause(); t.classList.remove("is-playing"); }
+      });
+    };
+    tiles.forEach((t) => {
+      t.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse") grow(t); }, { signal });
+      t.addEventListener("focusin", () => grow(t), { signal });
+    });
+    fw.addEventListener("pointerleave", () => grow(null), { signal });
+    fw.addEventListener("focusout", (e) => { if (!fw.contains(e.relatedTarget as Node)) grow(null); }, { signal });
+
+    // Site recordings loop back to their start mark, not to the page load at 0s.
+    fw.querySelectorAll<HTMLVideoElement>("video[data-start]").forEach((v) => {
+      v.loop = false;
+      v.addEventListener("ended", () => { v.currentTime = Number(v.dataset.start); v.play().catch(() => {}); }, { signal });
+    });
+
+    // Drag to scroll (mouse only). A drag of more than a few pixels cancels the click.
+    let dragX = 0, dragLeft = 0, dragged = false, dragging = false;
+    fw.addEventListener("pointerdown", (e) => {
+      if (e.pointerType !== "mouse" || e.button !== 0) return;
+      dragging = true; dragged = false; dragX = e.clientX; dragLeft = fw.scrollLeft;
     }, { signal });
-    if (reduceMotion) return; // poster + static; no autoplay
-    if (!("IntersectionObserver" in window)) { v.play().catch(() => {}); return; }
-    const iosr = new IntersectionObserver((entries) => {
-      entries.forEach((en) => { if (en.isIntersecting) v.play().catch(() => {}); else v.pause(); });
-    }, { threshold: 0.3 });
-    iosr.observe(v);
-    cleanups.push(() => { iosr.disconnect(); v.pause(); });
+    window.addEventListener("pointermove", (e) => {
+      if (!dragging) return;
+      const dx = e.clientX - dragX;
+      if (!dragged && Math.abs(dx) > 5) { dragged = true; fw.classList.add("is-dragging"); }
+      if (dragged) fw.scrollLeft = dragLeft - dx;
+    }, { signal });
+    window.addEventListener("pointerup", () => {
+      if (!dragging) return;
+      dragging = false;
+      // Let the click that follows this pointerup see the drag, then clear it.
+      setTimeout(() => fw.classList.remove("is-dragging"), 0);
+    }, { signal });
+    fw.addEventListener("click", (e) => { if (dragged) { e.preventDefault(); dragged = false; } }, { capture: true, signal });
+
+    // Rise in when the row first comes into view.
+    if ("IntersectionObserver" in window) {
+      const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { fw.classList.add("in"); io.disconnect(); } }, { threshold: 0.15 });
+      io.observe(fw);
+      cleanups.push(() => io.disconnect());
+    } else fw.classList.add("in");
+
+    if (!pill || reduceMotion || !window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    let tx = 0, ty = 0, x = 0, y = 0, raf = 0;
+    const follow = () => {
+      x += (tx - x) * 0.18;
+      y += (ty - y) * 0.18;
+      pill.style.transform = `translate(${x}px, ${y}px)`;
+      raf = Math.abs(tx - x) + Math.abs(ty - y) > 0.3 ? requestAnimationFrame(follow) : 0;
+    };
+    fw.addEventListener("pointermove", (e) => {
+      const r = fw.getBoundingClientRect();
+      tx = e.clientX - r.left + fw.scrollLeft + 14; // the pill lives inside the scrolling row
+      ty = e.clientY - r.top + 14;
+      const overProject = !!(e.target as HTMLElement).closest(".fw-project");
+      if (overProject && !pill.classList.contains("is-on")) { x = tx; y = ty; }
+      pill.classList.toggle("is-on", overProject);
+      if (!raf) raf = requestAnimationFrame(follow);
+    }, { signal });
+    fw.addEventListener("pointerleave", () => pill.classList.remove("is-on"), { signal });
+    cleanups.push(() => cancelAnimationFrame(raf));
   });
 
   /* ---- Reel hover/tap preview (muted loop) ---- */

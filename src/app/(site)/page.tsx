@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getBlock, getContent } from "@/lib/content/queries";
 import { graph, pageMetadata, pageNode, personNode, studioNode } from "@/lib/seo";
 import { JsonLd } from "@/components/site/JsonLd";
-import { CtaBand, IndexList, PackageCard, Rule, Schedule, ServiceCards, Testimonials, serviceRows } from "@/components/site/blocks";
+import { CtaBand, FeaturedWork, PackageCard, Rule, Schedule, ServiceCards, Testimonials, WhatWeDo } from "@/components/site/blocks";
 
 const TITLE = "Meraki Creative — Film Editing & Website Design in Los Angeles";
 const DESCRIPTION =
@@ -28,6 +28,28 @@ const EDIT_STILLS = [
   ["grade1-after.jpg", "GRADE_A01.mov"],
 ].map(([file, name]) => ({ img: `/assets/work/${file}`, name }));
 
+// "What we do" rows: the four kinds of work, each with a real image. Copy is the services' own summaries.
+const SERVICE_ROWS = [
+  { title: "Film & trailer editing", img: "/assets/work/film-opa-poster.jpg", alt: "Still from Opa, a short film edited by Meraki Creative", href: "/post-production",
+    desc: "Story-first cuts that hold an audience from first frame to last, and the two minutes that make a festival or a buyer want the rest." },
+  { title: "Demo reels & scenes", img: "/assets/work/still-reel-cu.jpg", alt: "Still from a demo reel scene edited by Meraki Creative", href: "/post-production",
+    desc: "Your strongest moments cut to lead, with a first ten seconds that hold. Scenes cut and balanced so the performance is what reads." },
+  { title: "Actor & director websites", img: "/assets/work/site-emily.jpg", alt: "Emily Loaiza's actor website", href: "/web-design",
+    desc: "The one clean link you put everywhere: reel, headshots, contact. For directors, a work-first portfolio." },
+  { title: "Production company & film websites", img: "/assets/work/site-boomerang.jpg", alt: "Boomerang's studio website", href: "/web-design",
+    desc: "A credible home for your slate, team, and contact. Trailer, stills, credits, and press in one cinematic place." },
+];
+
+// Featured Work tiles, in order (a mix of edits and sites).
+const FEATURED_WORK = ["director-demo-reel", "emily-loaiza", "the-sitdown", "boomerang"];
+
+// Hover previews for the website tiles: a recorded scroll through the live site
+// (scripts/record-site-scroll.mjs). `start` skips the page load at the top of the recording.
+const FEATURED_PREVIEW: Record<string, { src: string; start: number }> = {
+  "emily-loaiza": { src: "/assets/work/scroll-emily.webm", start: 5.4 },
+  boomerang: { src: "/assets/work/scroll-boomerang.webm", start: 8.3 },
+};
+
 /** The domain shown in the browser's URL bar (a path slug when the site has no clean domain). */
 const domainOf = (label: string | null | undefined, url: string | null) =>
   label && !/\s/.test(label) ? label : (url ?? "").replace(/\/+$/, "").split("/").pop() ?? "";
@@ -45,6 +67,20 @@ export default async function HomePage() {
   const sites = content.portfolio
     .filter((p) => p.categories.includes("web-design") && p.images[0] && p.slug !== "meraki-creative") // client work only
     .map((p) => ({ img: p.images[0].src, domain: domainOf(p.urlLabel, p.liveUrl), title: p.title }));
+  const featuredWork = FEATURED_WORK.map((slug) => content.portfolio.find((p) => p.slug === slug))
+    .filter((p) => !!p && !!p.images[0])
+    .map((p) => {
+      const cover = p!.images.find((i) => i.role === "poster" || i.role === "cover") ?? p!.images[0];
+      const preview = FEATURED_PREVIEW[p!.slug];
+      const isSite = p!.categories.includes("web-design");
+      return {
+        href: `/work/${p!.slug}`, title: p!.title, label: p!.typeLabel ?? "", img: cover.src, alt: cover.alt,
+        // The tile takes the media's own shape, so nothing is cropped.
+        ratio: cover.width && cover.height ? cover.width / cover.height : isSite ? 4 / 3 : 16 / 9,
+        video: preview?.src ?? (p!.video?.kind === "file" ? p!.video.src : undefined),
+        start: preview?.start,
+      };
+    });
   const featured = FEATURED_SLUGS.map((slug) => content.packages.find((p) => p.slug === slug)).filter((p) => !!p);
 
   return (
@@ -92,7 +128,6 @@ export default async function HomePage() {
 
           <div className="svc-rule">
             <span className="slate-tag">( Services )</span>
-            <span className="slate hide-sm">Two crafts, one studio</span>
           </div>
           <ServiceCards
             cards={[
@@ -121,64 +156,13 @@ export default async function HomePage() {
 
       <Rule />
 
-      {/* ============ PILLAR 1 — POST-PRODUCTION ============ */}
-      <section className="section" id="post">
-        <div className="wrap">
-          <div className="split">
-            <div className="reveal">
-              <div className="index-head">
-                <span className="slate-tag">Post-Production</span>
-                <h2 className="display display-lg">We cut the story.</h2>
-              </div>
-              <p className="body-2" style={{ marginTop: "1.2rem", maxWidth: "42ch" }}>Film editing and post-production for actors and filmmakers in Los Angeles. Narrative edits, trailers, and reels cut with a director&apos;s instinct for tension and release. The footage is yours; the shape is ours.</p>
-              <Link href="/post-production" className="txt-link" style={{ display: "inline-block", marginTop: "1.5rem" }}>All post-production</Link>
-            </div>
-            <IndexList rows={serviceRows(services("post-production"), true)} />
-          </div>
-        </div>
-      </section>
+      {/* ============ WHAT WE DO ============ */}
+      <WhatWeDo rows={SERVICE_ROWS} intro="Film editing and website design for actors, directors, and production companies in Los Angeles." />
 
       <Rule />
 
-      {/* ============ PILLAR 2 — DIGITAL PRESENCE ============ */}
-      <section className="section" id="digital">
-        <div className="wrap">
-          <div className="split reverse">
-            <div className="reveal">
-              <div className="index-head">
-                <span className="slate-tag">Digital Presence</span>
-                <h2 className="display display-lg">We build the home for it.</h2>
-              </div>
-              <p className="body-2" style={{ marginTop: "1.2rem", maxWidth: "42ch" }}>Website design for actors, directors, and production companies. Clean, cinematic websites that read as seriously as the work actors, directors, and companies put into them.</p>
-              <Link href="/web-design" className="txt-link" style={{ display: "inline-block", marginTop: "1.5rem" }}>All digital presence</Link>
-            </div>
-            <IndexList rows={serviceRows(services("web-design"), true)} />
-          </div>
-        </div>
-      </section>
-
-      <Rule />
-
-      {/* ============ SHOWREEL (cutting-room frame) ============ */}
-      <section className="section" style={{ paddingTop: 0 }}>
-        <div className="wrap">
-          <div className="index-head reveal" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
-            <div><span className="slate-tag">Selected Work</span><h2 className="display display-md" style={{ marginTop: "0.8rem" }}>The reel.</h2></div>
-            <a href="https://vimeo.com/merivelle/director-demo-reel" target="_blank" rel="noopener" className="txt-link">Watch the full reel</a>
-          </div>
-          <figure className="showreel reveal" data-showreel>
-            <video src="/assets/work/showreel.mp4" poster="/assets/work/showreel-poster.jpg" muted loop playsInline preload="metadata" aria-label="Director demo reel excerpt by Merivelle" />
-            <span className="sr-grain" aria-hidden="true" />
-            <span className="sr-label">TL / CUT · Director Demo Reel</span>
-            <span className="sr-tc" id="sr-tc">00:00</span>
-            <a className="sr-cta" href="https://vimeo.com/merivelle/director-demo-reel" target="_blank" rel="noopener" aria-label="Watch the full reel on Vimeo">
-              <span className="sr-cta-play" aria-hidden="true" /><span className="sr-cta-txt">Watch the full reel</span>
-            </a>
-            <span className="sr-ticks" aria-hidden="true" />
-            <span className="sr-progress" aria-hidden="true"><span className="sr-progress-fill" /></span>
-          </figure>
-        </div>
-      </section>
+      {/* ============ FEATURED WORK ============ */}
+      <FeaturedWork items={featuredWork} />
 
       <Rule />
 

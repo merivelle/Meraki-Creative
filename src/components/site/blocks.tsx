@@ -128,6 +128,83 @@ export function ServiceCards({ cards }: { cards: ServiceCard[] }) {
   );
 }
 
+/** "What we do" (Estrela-style): stacked rows, each a shade darker; the open row shows its
+ *  full image and description, the rest collapse to strips (open state set in enhancements.ts). */
+export type ServiceRow = { title: string; img: string; alt: string; desc: string; href: string };
+
+export function WhatWeDo({ rows, intro }: { rows: ServiceRow[]; intro: string }) {
+  return (
+    <section className="section wwd-section">
+      <div className="wrap">
+        <div className="wwd-head reveal">
+          <h2 className="display display-lg">What we do</h2>
+          <p className="body-2">{intro}</p>
+        </div>
+        <ol className="wwd" data-wwd>
+          {rows.map((r, i) => (
+            <li className={`wwd-row wwd-tone-${i}${i === 0 ? " is-open" : ""}`} key={r.title}>
+              <Link href={r.href} className="wwd-link">
+                <span className="wwd-media">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={r.img} alt={r.alt} loading="lazy" />
+                </span>
+                <span className="wwd-text">
+                  <span className="wwd-title">{r.title}</span>
+                  <span className="wwd-desc">{r.desc}</span>
+                </span>
+                <span className="wwd-num">{String(i + 1).padStart(2, "0")}</span>
+              </Link>
+            </li>
+          ))}
+          <li className="wwd-row wwd-close">
+            <span className="wwd-media" />
+            <span className="wwd-text">
+              <span className="wwd-statement display">Start with the story.</span>
+              <Link href="/services" className="txt-link">View all services</Link>
+            </span>
+          </li>
+        </ol>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * "Featured Work" (Estrela-style): a black card, then project tiles that grow on hover. Every tile
+ * keeps its media's own aspect ratio (nothing cropped) at one tall shared height, so the row runs
+ * past the edge and scrolls sideways (drag, trackpad, or keyboard).
+ */
+export type FeaturedTile = { href: string; title: string; label: string; img: string; alt: string; ratio: number; video?: string; start?: number };
+
+export function FeaturedWork({ items }: { items: FeaturedTile[] }) {
+  return (
+    <section className="section fw-section">
+      <div className="wrap">
+        <div className="fw" data-fw>
+          <div className="fw-tile fw-card" style={{ "--ar": 0.72 } as React.CSSProperties}>
+            <div className="fw-card-top">
+              <h2 className="fw-card-title">Featured Work</h2>
+              <p className="fw-card-line">Stories we&apos;ve helped shape.</p>
+            </div>
+            <Link href="/work" className="fw-card-all">All Work <span aria-hidden="true">→</span></Link>
+          </div>
+          {items.map((t) => (
+            <Link href={t.href} className="fw-tile fw-project" key={t.href} style={{ "--ar": t.ratio } as React.CSSProperties}>
+              <span className="fw-media">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={t.img} alt={t.alt} loading="lazy" />
+                {t.video && <video src={t.video} muted loop playsInline preload="none" aria-hidden="true" data-start={t.start} />}
+              </span>
+              <span className="fw-cap"><b>{t.title}</b> {t.label}</span>
+            </Link>
+          ))}
+          <span className="fw-pill" aria-hidden="true">View project</span>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export const serviceRows = (services: ServiceItem[], short = false) =>
   services.map((s) => ({ role: s.roleLabel, title: s.title, desc: short && s.summary ? s.summary : s.description }));
 
