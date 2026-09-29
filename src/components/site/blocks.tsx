@@ -23,14 +23,87 @@ export function IndexList({ rows }: { rows: { role: string; title: string; desc:
   );
 }
 
-/** Homepage hero: one tall card per craft, media from real work. */
+/** Homepage hero: one card per craft. The media is a small motion graphic of real work. */
+export type BrowserSite = { img: string; domain: string; title: string };
+export type EditStill = { img: string; name: string };
 export type ServiceCard = {
   href: string;
   title: string;
   line: string;
-  media: { img: string } | { video: string; poster: string };
+  media: { kind: "browser"; sites: BrowserSite[] } | { kind: "timeline"; stills: EditStill[] };
   services: ServiceItem[];
 };
+
+/** Web Design: a browser window that types each domain and loads the site (enhancements.ts). */
+function BrowserMedia({ sites }: { sites: BrowserSite[] }) {
+  return (
+    <span className="svc-browser" data-svc-browser aria-hidden="true">
+      <span className="brw-window">
+        <span className="brw-bar">
+          <span className="brw-dots"><i /><i /><i /></span>
+          <span className="brw-nav">‹ ›</span>
+          <span className="brw-url">
+            <span className="brw-lock" />
+            <span className="brw-domain" data-domain>{sites[0]?.domain}</span>
+            <span className="brw-caret" />
+          </span>
+          <span className="brw-count">( <b data-count>1</b> / {sites.length} )</span>
+        </span>
+        <span className="brw-view">
+          <span className="brw-load" />
+          {sites.map((site, i) => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img key={site.img} src={site.img} alt="" data-domain={site.domain} className={i === 0 ? "is-on" : undefined} loading="lazy" />
+          ))}
+        </span>
+      </span>
+    </span>
+  );
+}
+
+// Timeline layout, in % of the sequence. V1 is the cut; V2 holds shorter overlays.
+const V1 = [15, 12, 16, 11, 17, 14, 15];
+const V2: [number, number][] = [[6, 9], [33, 8], [58, 10], [80, 11]];
+const WAVE = Array.from({ length: 48 }, (_, i) => 22 + ((i * 37) % 70));
+
+/** Post-Production: the reel plays in the program monitor over an edit timeline of real stills. */
+function TimelineMedia({ stills }: { stills: EditStill[] }) {
+  let x = 0;
+  const v1 = V1.map((w, i) => { const clip = { left: x, width: w, still: stills[i % stills.length] }; x += w; return clip; });
+  const v2 = V2.map(([left, width], i) => ({ left, width, still: stills[(V1.length + i) % stills.length] }));
+  const clip = (c: { left: number; width: number; still: EditStill }, track: string) => (
+    <span className="edt-clip" key={track + c.left} data-track={track} data-img={c.still.img}
+      style={{ left: `${c.left}%`, width: `${c.width}%`, backgroundImage: `url(${c.still.img})` }}>
+      <span className="edt-clip-name">{c.still.name}</span>
+    </span>
+  );
+  return (
+    <span className="svc-edit" data-svc-edit aria-hidden="true">
+      <span className="edt-monitor">
+        <video src="/assets/work/showreel.mp4" poster="/assets/work/showreel-poster.jpg" muted loop playsInline preload="metadata" data-reel-monitor />
+        <span className="edt-safe" />
+        <span className="edt-label">Program · MERAKI_CUT_v3</span>
+        <span className="edt-tc" data-tc>00:00:00:00</span>
+      </span>
+      <span className="edt-timeline">
+        <span className="edt-ruler">
+          {Array.from({ length: 17 }, (_, i) => <i key={i}>{i % 4 === 0 ? `00:${String(i * 4).padStart(2, "0")}` : ""}</i>)}
+        </span>
+        <span className="edt-lanes">
+          <span className="edt-lane"><span className="edt-tag">V2</span><span className="edt-track">{v2.map((c) => clip(c, "v2"))}</span></span>
+          <span className="edt-lane"><span className="edt-tag">V1</span><span className="edt-track">{v1.map((c) => clip(c, "v1"))}</span></span>
+          {["A1", "A2"].map((a) => (
+            <span className={`edt-lane edt-audio edt-${a.toLowerCase()}`} key={a}>
+              <span className="edt-tag">{a}</span>
+              <span className="edt-track"><span className="edt-wave">{WAVE.map((h, i) => <i key={i} style={{ height: `${a === "A2" ? 100 - h : h}%` }} />)}</span></span>
+            </span>
+          ))}
+          <span className="edt-playhead" />
+        </span>
+      </span>
+    </span>
+  );
+}
 
 export function ServiceCards({ cards }: { cards: ServiceCard[] }) {
   return (
@@ -38,12 +111,7 @@ export function ServiceCards({ cards }: { cards: ServiceCard[] }) {
       {cards.map((c, i) => (
         <Link href={c.href} className="svc-card" key={c.href}>
           <span className="svc-media">
-            {"img" in c.media ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={c.media.img} alt="" loading="eager" />
-            ) : (
-              <video src={c.media.video} poster={c.media.poster} muted loop playsInline preload="metadata" data-svc-video />
-            )}
+            {c.media.kind === "browser" ? <BrowserMedia sites={c.media.sites} /> : <TimelineMedia stills={c.media.stills} />}
           </span>
           <span className="svc-body">
             <span className="svc-top">
@@ -60,7 +128,7 @@ export function ServiceCards({ cards }: { cards: ServiceCard[] }) {
   );
 }
 
-export const serviceRows =(services: ServiceItem[], short = false) =>
+export const serviceRows = (services: ServiceItem[], short = false) =>
   services.map((s) => ({ role: s.roleLabel, title: s.title, desc: short && s.summary ? s.summary : s.description }));
 
 export function FaqSection({ faqs, slate = "Questions", heading = "Before you ask." }: { faqs: Faq[]; slate?: string; heading?: string }) {

@@ -62,6 +62,7 @@ export const seedPortfolio: PortfolioItem[] = [
   site(311, "meraki-creative", "Meraki Creative", "Studio Site", "/assets/work/site-meraki.jpg", "Meraki Creative website homepage", "https://www.merakicreative.co/", "merakicreative.co", 20),
   site(312, "merivelle", "Merivelle", "Director Site", "/assets/work/site-merivelle.jpg", "Merivelle director website homepage", "https://merivelle.net", "merivelle.net", 30),
   site(313, "yonatan-shaham-vitos", "Yonatan Shaham Vitos", "Actor Site", "/assets/work/site-yonatan.jpg", "Yonatan Shaham Vitos actor website homepage", "https://yonatanshahamvitos.com", "yonatanshahamvitos.com", 40),
+  site(317, "emily-loaiza", "Emily Loaiza", "Actor Site", "/assets/work/site-emily.jpg", "Emily Loaiza actor website homepage", "https://www.emilyloaiza.com", "emilyloaiza.com", 45),
   site(314, "angelique-antoniou", "Angelique Antoniou", "Fine Art Photographer Site", "/assets/work/site-angelique.jpg", "Angelique Antoniou fine art photography website homepage", "https://angeliqueantoniou.com", "angeliqueantoniou.com", 50),
   site(315, "boomerang", "Boomerang", "Trailer Music Studio Site", "/assets/work/site-boomerang.jpg", "Boomerang trailer music website homepage", "https://boomerang-music.com", "boomerang-music.com", 60),
   site(316, "nicky-chartraw", "Nicky Chartraw", "Actor Site", "/assets/work/site-nicky.jpg", "Nicky Chartraw actor website homepage", "https://merakicreativeco.wixsite.com/nickychartraw", "Nicky Chartraw — Actor", 70),

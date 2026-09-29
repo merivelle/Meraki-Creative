@@ -11,6 +11,8 @@ type GsapTimeline = {
   set: (targets: unknown, vars: object, position?: number | string) => GsapTimeline;
   call: (fn: () => void, params?: unknown[], position?: number | string) => GsapTimeline;
   progress: (value: number) => GsapTimeline;
+  pause: () => GsapTimeline;
+  resume: () => GsapTimeline;
   kill: () => void;
 };
 
@@ -386,14 +388,124 @@ export function initEnhancements(root: Document = document): Cleanup {
     });
   }
 
-  /* ---- Hero service card: the Post clip plays while it's on screen ---- */
-  root.querySelectorAll<HTMLVideoElement>("video[data-svc-video]").forEach((v) => {
-    if (reduceMotion || !("IntersectionObserver" in window)) return; // poster only
-    const iosv = new IntersectionObserver((entries) => {
-      entries.forEach((en) => { if (en.isIntersecting) v.play().catch(() => {}); else v.pause(); });
-    }, { threshold: 0.25 });
-    iosv.observe(v);
-    cleanups.push(() => { iosv.disconnect(); v.pause(); });
+  /* ---- Service cards: motion graphics of real work. Each runs only while on screen, with the
+     tab visible and the hero intro finished. ---- */
+  const whenLive = (el: Element, play: () => void, pause: () => void) => {
+    let inView = false;
+    const sync = () => (inView && !document.hidden && !html.classList.contains("intro") ? play() : pause());
+    const io = new IntersectionObserver(([e]) => { inView = e.isIntersecting; sync(); }, { threshold: 0.2 });
+    io.observe(el);
+    const mo = new MutationObserver(sync);
+    mo.observe(html, { attributes: true, attributeFilter: ["class"] });
+    document.addEventListener("visibilitychange", sync, { signal });
+    cleanups.push(() => { io.disconnect(); mo.disconnect(); pause(); });
+  };
+
+  // Web Design: the browser deletes the domain, types the next, loads, and wipes the site in.
+  root.querySelectorAll<HTMLElement>("[data-svc-browser]").forEach((brw) => {
+    const pages = Array.from(brw.querySelectorAll<HTMLImageElement>(".brw-view img"));
+    const domainEl = brw.querySelector<HTMLElement>("[data-domain]")!;
+    const countEl = brw.querySelector<HTMLElement>("[data-count]");
+    const load = brw.querySelector<HTMLElement>(".brw-load");
+    if (pages.length < 2 || reduceMotion || !("IntersectionObserver" in window)) return;
+    pages.forEach((img) => (img.loading = "eager"));
+    loadGsap(signal).then(() => {
+      const g = window.gsap;
+      if (signal.aborted || !g) return;
+      const HOLD = 1.9;
+      const CHAR = 0.035;
+      let k = 0;
+      let tl: GsapTimeline | null = null;
+      g.set(pages, { transformOrigin: "50% 0%" });
+      const step = () => {
+        const cur = pages[k];
+        const nextK = (k + 1) % pages.length;
+        const next = pages[nextK];
+        const from = cur.dataset.domain ?? "";
+        const to = next.dataset.domain ?? "";
+        const t = g.timeline({ onComplete: () => { k = nextK; step(); } });
+        tl = t;
+        for (let i = from.length - 1; i >= 0; i--) t.call(() => { domainEl.textContent = from.slice(0, i); }, undefined, HOLD + (from.length - 1 - i) * CHAR * 0.6);
+        const typeAt = HOLD + from.length * CHAR * 0.6 + 0.15;
+        for (let i = 1; i <= to.length; i++) t.call(() => { domainEl.textContent = to.slice(0, i); }, undefined, typeAt + i * CHAR);
+        const loadAt = typeAt + to.length * CHAR + 0.1;
+        if (load) t.fromTo(load, { scaleX: 0, opacity: 1 }, { scaleX: 1, duration: 0.55, ease: "power2.out" }, loadAt).to(load, { opacity: 0, duration: 0.2 }, loadAt + 0.55);
+        t.fromTo(next, { opacity: 1, zIndex: 2, scale: 1.04, clipPath: "inset(100% 0% 0% 0%)" },
+          { clipPath: "inset(0% 0% 0% 0%)", scale: 1, duration: 0.75, ease: "power3.inOut" }, loadAt + 0.3);
+        t.call(() => { if (countEl) countEl.textContent = String(nextK + 1); }, undefined, loadAt + 0.45);
+        t.set(cur, { opacity: 0, zIndex: 0, scale: 1 }, loadAt + 1.1);
+        t.set(next, { zIndex: 1 }, loadAt + 1.1);
+      };
+      whenLive(brw, () => (tl ? tl.resume() : step()), () => tl?.pause());
+      cleanups.push(() => tl?.kill());
+    });
+  });
+
+  // Post-Production: the clips snap onto the timeline, then the playhead sweeps and lights up the
+  // clip it's crossing (V2 over V1). The program monitor plays the reel; its timecode is the reel's.
+  root.querySelectorAll<HTMLElement>("[data-svc-edit]").forEach((ed) => {
+    const clipEls = Array.from(ed.querySelectorAll<HTMLElement>(".edt-clip"));
+    const clips = clipEls.map((el) => ({
+      el, track: el.dataset.track, img: el.dataset.img ?? "",
+      left: parseFloat(el.style.left), right: parseFloat(el.style.left) + parseFloat(el.style.width),
+    }));
+    const reel = ed.querySelector<HTMLVideoElement>("[data-reel-monitor]");
+    const tc = ed.querySelector<HTMLElement>("[data-tc]");
+    const playhead = ed.querySelector<HTMLElement>(".edt-playhead");
+    const track = ed.querySelector<HTMLElement>(".edt-track");
+    const bars = ed.querySelectorAll(".edt-wave i");
+    if (!clips.length || !playhead || !track) return;
+    const SWEEP = 14000; // ms per pass
+    const pad = (n: number) => String(n).padStart(2, "0");
+    let live: (typeof clips)[number] | undefined;
+
+    const render = (p: number) => {
+      playhead.style.transform = `translateX(${p * track.clientWidth}px)`;
+      const pct = p * 100;
+      const inside = (c: (typeof clips)[number]) => pct >= c.left && pct < c.right;
+      const hit = clips.find((c) => c.track === "v2" && inside(c)) ?? clips.find((c) => c.track === "v1" && inside(c));
+      if (hit !== live) {
+        live?.el.classList.remove("is-live");
+        hit?.el.classList.add("is-live");
+        live = hit;
+      }
+      if (tc && reel) {
+        const f = Math.floor(reel.currentTime * 24);
+        tc.textContent = `00:${pad(Math.floor(f / 1440) % 60)}:${pad(Math.floor(f / 24) % 60)}:${pad(f % 24)}`;
+      }
+    };
+
+    if (reduceMotion || !("IntersectionObserver" in window)) { render(0.42); return; }
+    loadGsap(signal).then(() => {
+      const g = window.gsap;
+      if (signal.aborted || !g) return;
+      g.set(clipEls, { scaleX: 0, opacity: 0 });
+      g.set(bars, { scaleY: 0.1 });
+      render(0);
+      let assembled = false;
+      let raf = 0;
+      let t0 = 0;
+      let elapsed = 0;
+      const tick = (now: number) => {
+        if (!t0) t0 = now - elapsed;
+        elapsed = now - t0;
+        render((elapsed % SWEEP) / SWEEP);
+        raf = requestAnimationFrame(tick);
+      };
+      const play = () => {
+        if (raf) return;
+        if (!assembled) {
+          assembled = true;
+          g.timeline({ defaults: { ease: "power3.out" } })
+            .to(clipEls, { scaleX: 1, opacity: 1, duration: 0.5, stagger: 0.07 }, 0)
+            .to(bars, { scaleY: 1, duration: 0.4, stagger: 0.01 }, 0.3);
+        }
+        reel?.play().catch(() => {});
+        raf = requestAnimationFrame(tick);
+      };
+      const pause = () => { if (raf) cancelAnimationFrame(raf); raf = 0; t0 = 0; reel?.pause(); };
+      whenLive(ed, play, pause);
+    });
   });
 
   /* ---- Before/after sliders ---- */

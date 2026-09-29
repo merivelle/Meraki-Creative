@@ -13,6 +13,25 @@ export const metadata = pageMetadata({ path: "/", title: TITLE, description: DES
 // Homepage "Pick a starting point" — same four packages as the original page.
 const FEATURED_SLUGS = ["acting-package", "reel-refresh", "scene-edit", "trailer"];
 
+// Stills from real edits, laid onto the Post-Production card's timeline (V1 first, then V2).
+const EDIT_STILLS = [
+  ["tl-demoreel-table.jpg", "DEMOREEL_TABLE.mov"],
+  ["tl-sunflower-cu.jpg", "SUNFLOWER_CU.mov"],
+  ["film-opa-poster.jpg", "OPA_SC04.mov"],
+  ["tl-butterflies.jpg", "BUTTERFLIES_WS.mov"],
+  ["tl-demoreel-bar.jpg", "DEMOREEL_BAR.mov"],
+  ["reel-sitdown-poster.jpg", "SITDOWN_MCU.mov"],
+  ["tl-car.jpg", "CAR_INT.mov"],
+  ["scene-butterflies-poster.jpg", "BUTTERFLIES_CU.mov"],
+  ["tl-demoreel-end.jpg", "DEMOREEL_END.mov"],
+  ["scene-sunflower-poster.jpg", "SUNFLOWER_WS.mov"],
+  ["grade1-after.jpg", "GRADE_A01.mov"],
+].map(([file, name]) => ({ img: `/assets/work/${file}`, name }));
+
+/** The domain shown in the browser's URL bar (a path slug when the site has no clean domain). */
+const domainOf = (label: string | null | undefined, url: string | null) =>
+  label && !/\s/.test(label) ? label : (url ?? "").replace(/\/+$/, "").split("/").pop() ?? "";
+
 export default async function HomePage() {
   const content = await getContent();
   const process = await getBlock("home.process");
@@ -23,6 +42,9 @@ export default async function HomePage() {
   const plates = Array.from({ length: Math.max(web.length, post.length) }, (_, i) => [web[i], post[i]])
     .flat()
     .filter((s) => !!s);
+  const sites = content.portfolio
+    .filter((p) => p.categories.includes("web-design") && p.images[0] && p.slug !== "meraki-creative") // client work only
+    .map((p) => ({ img: p.images[0].src, domain: domainOf(p.urlLabel, p.liveUrl), title: p.title }));
   const featured = FEATURED_SLUGS.map((slug) => content.packages.find((p) => p.slug === slug)).filter((p) => !!p);
 
   return (
@@ -74,8 +96,8 @@ export default async function HomePage() {
           </div>
           <ServiceCards
             cards={[
-              { href: "/web-design", title: "Web Design", line: "We build the home for it.", media: { img: "/assets/work/site-angelique.jpg" }, services: web },
-              { href: "/post-production", title: "Post-Production", line: "We cut the story.", media: { video: "/assets/work/scene-sunflower.mp4", poster: "/assets/work/scene-sunflower-poster.jpg" }, services: post },
+              { href: "/web-design", title: "Web Design", line: "We build the home for it.", media: { kind: "browser", sites }, services: web },
+              { href: "/post-production", title: "Post-Production", line: "We cut the story.", media: { kind: "timeline", stills: EDIT_STILLS }, services: post },
             ]}
           />
         </div>
