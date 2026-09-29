@@ -422,10 +422,34 @@ p { text-wrap: pretty; max-width: 68ch; }
 /* =================================================================
    STATEMENT
    ================================================================= */
-.statement { display: grid; grid-template-columns: 1fr 1.3fr; gap: clamp(1.5rem, 5vw, 5rem); align-items: start; }
-@media (max-width: 820px) { .statement { grid-template-columns: 1fr; gap: 1.5rem; } }
-.statement .lead-note { position: sticky; top: 120px; }
-@media (max-width: 820px) { .statement .lead-note { position: static; } }
+/* "The studio": a big centred statement whose letters roll (see .roll), then two columns of copy. */
+.studio { text-align: center; }
+.studio-kicker {
+  max-width: none; font-family: var(--font-mono); font-size: 0.74rem; font-weight: 500;
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2);
+}
+.studio-line {
+  display: flex; flex-direction: column; align-items: center; margin-top: clamp(1.4rem, 3vw, 2.2rem);
+  font-family: var(--font-display); font-weight: 800; font-size: clamp(2.1rem, 4.9vw, 4.6rem);
+  line-height: 0.95; letter-spacing: -0.035em;
+}
+.studio-body {
+  display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1.5rem, 5vw, 5rem); text-align: left;
+  margin-top: clamp(2.6rem, 6vw, 4.5rem); padding-top: clamp(1.4rem, 3vw, 2rem); border-top: 1px solid var(--line);
+}
+@media (max-width: 820px) { .studio-body { grid-template-columns: 1fr; gap: 1.2rem; } }
+
+/* Letter roll: each letter rolls up out of its own window while an identical copy (::after)
+   rolls in from below. Removing .is-rolling snaps back to 0, which looks the same. */
+.roll { display: block; }
+.roll-word { display: inline-block; white-space: nowrap; }
+.roll-word + .roll-word { margin-left: 0.24em; }
+.roll-ch { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.2em; margin-bottom: -0.2em; }
+.roll-in { display: inline-block; position: relative; }
+.roll-in::after { content: attr(data-ch); position: absolute; left: 0; top: 1.25em; }
+.roll.is-rolling .roll-in { animation: roll .45s cubic-bezier(.7,0,.2,1) var(--d, 0s) both; }
+@keyframes roll { to { transform: translateY(-1.25em); } }
+@media (prefers-reduced-motion: reduce) { .roll.is-rolling .roll-in { animation: none; } }
 
 /* Testimonials — Shed-style quote track. Big oxblood pull-quotes; neighbours peek in faint.
    Without JS the slides simply stack (solid copy only). */

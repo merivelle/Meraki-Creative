@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getBlock, getContent } from "@/lib/content/queries";
 import { graph, pageMetadata, pageNode, personNode, studioNode } from "@/lib/seo";
 import { JsonLd } from "@/components/site/JsonLd";
-import { CtaBand, FeaturedWork, PackageCard, Rule, Schedule, ServiceCards, Testimonials, WhatWeDo } from "@/components/site/blocks";
+import { CtaBand, FeaturedWork, PackageCard, RollText, Rule, Schedule, ServiceCards, Testimonials, WhatWeDo } from "@/components/site/blocks";
 
 const TITLE = "Meraki Creative — Film Editing & Website Design in Los Angeles";
 const DESCRIPTION =
@@ -142,13 +142,14 @@ export default async function HomePage() {
 
       {/* ============ STATEMENT ============ */}
       <section className="section">
-        <div className="wrap statement">
-          <div className="lead-note reveal">
-            <span className="slate-tag">The studio</span>
-            <p className="display display-sm" style={{ marginTop: "1.2rem" }}>The work matters. So does how it&apos;s experienced.</p>
-          </div>
-          <div className="reveal">
-            <p className="lede" style={{ marginBottom: "1.4rem" }}>We start with the story you&apos;re trying to tell, then build everything around it, from the edit to the site. Every project gets treated like its own film: one set of hands, real care, nothing left generic.</p>
+        <div className="wrap studio">
+          <p className="studio-kicker">( The studio )</p>
+          <h2 className="studio-line">
+            <RollText text="The work matters." />
+            <RollText text="So does how it’s experienced." />
+          </h2>
+          <div className="studio-body reveal">
+            <p className="lede">We start with the story you&apos;re trying to tell, then build everything around it, from the edit to the site. Every project gets treated like its own film: one set of hands, real care, nothing left generic.</p>
             <p className="body-2">That care is the whole point. <i>Meraki</i> means doing something with soul, creativity, and love, and leaving a piece of yourself in it. We bring that same care to your work, so your story lands the way you felt it.</p>
           </div>
         </div>

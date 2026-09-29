@@ -550,6 +550,30 @@ export function initEnhancements(root: Document = document): Cleanup {
     }
   });
 
+  /* ---- Letter roll (the studio statement): fires once as it comes into view, replays on hover ---- */
+  root.querySelectorAll<HTMLElement>(".studio-line").forEach((line) => {
+    const rolls = Array.from(line.querySelectorAll<HTMLElement>(".roll"));
+    if (reduceMotion || !rolls.length) return;
+    let busy = false;
+    const timers: number[] = [];
+    const roll = () => {
+      if (busy) return;
+      busy = true;
+      rolls.forEach((r, k) => {
+        timers.push(window.setTimeout(() => r.classList.add("is-rolling"), k * 120));
+        timers.push(window.setTimeout(() => r.classList.remove("is-rolling"), k * 120 + 800));
+      });
+      timers.push(window.setTimeout(() => { busy = false; }, rolls.length * 120 + 820));
+    };
+    if ("IntersectionObserver" in window) {
+      const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { roll(); io.disconnect(); } }, { threshold: 0.6 });
+      io.observe(line);
+      cleanups.push(() => io.disconnect());
+    }
+    line.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse") roll(); }, { signal });
+    cleanups.push(() => timers.forEach((t) => window.clearTimeout(t)));
+  });
+
   /* ---- What we do: one row open at a time (hover / focus; on touch, first tap opens) ---- */
   root.querySelectorAll<HTMLElement>("[data-wwd]").forEach((list) => {
     const rows = Array.from(list.querySelectorAll<HTMLElement>(".wwd-row:not(.wwd-close)"));

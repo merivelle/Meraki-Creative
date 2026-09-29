@@ -205,6 +205,31 @@ export function FeaturedWork({ items }: { items: FeaturedTile[] }) {
   );
 }
 
+/**
+ * A line whose letters roll up through their own windows and are replaced by identical copies
+ * (Made With GSAP–style), fired by enhancements.ts. Delays come from a fixed scatter so server and
+ * client render the same markup; screen readers read the sentence from aria-label.
+ */
+export function RollText({ text }: { text: string }) {
+  let i = 0;
+  return (
+    <span className="roll" aria-label={text}>
+      {text.split(" ").map((word, w) => (
+        <span className="roll-word" aria-hidden="true" key={w}>
+          {Array.from(word).map((ch) => {
+            const d = (((i++ * 37) % 11) / 11) * 0.28;
+            return (
+              <span className="roll-ch" key={i} style={{ "--d": `${d.toFixed(2)}s` } as React.CSSProperties}>
+                <span className="roll-in" data-ch={ch}>{ch}</span>
+              </span>
+            );
+          })}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 export const serviceRows = (services: ServiceItem[], short = false) =>
   services.map((s) => ({ role: s.roleLabel, title: s.title, desc: short && s.summary ? s.summary : s.description }));
 
