@@ -574,6 +574,40 @@ export function initEnhancements(root: Document = document): Cleanup {
     cleanups.push(() => timers.forEach((t) => window.clearTimeout(t)));
   });
 
+  /* ---- Web Design quick views: "Quick view" links open their <dialog> as a modal. Escape,
+     the close button, or a backdrop click closes it; Tab stays inside; the page behind is
+     inert and doesn't scroll; focus returns to the button that opened it. Without
+     showModal support the link simply goes to the service page. ---- */
+  root.querySelectorAll<HTMLAnchorElement>("a[data-quick-view]").forEach((trigger) => {
+    const dialog = root.getElementById(`qv-${trigger.dataset.quickView}`) as HTMLDialogElement | null;
+    if (!dialog || typeof dialog.showModal !== "function") return;
+    trigger.addEventListener("click", (e) => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; // let new-tab clicks through
+      e.preventDefault();
+      dialog.showModal();
+      document.documentElement.classList.add("qv-lock");
+      const onClose = () => {
+        document.documentElement.classList.remove("qv-lock");
+        trigger.focus({ preventScroll: true });
+      };
+      dialog.addEventListener("close", onClose, { once: true });
+    }, { signal });
+  });
+  root.querySelectorAll<HTMLDialogElement>("dialog.qv").forEach((dialog) => {
+    // A click on the backdrop lands on the <dialog> itself (the content fills it).
+    dialog.addEventListener("click", (e) => { if (e.target === dialog) dialog.close(); }, { signal });
+    dialog.addEventListener("keydown", (e) => {
+      if (e.key !== "Tab") return;
+      const items = Array.from(dialog.querySelectorAll<HTMLElement>("a[href], button:not([disabled])"));
+      if (!items.length) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }, { signal });
+    cleanups.push(() => { if (dialog.open) dialog.close(); document.documentElement.classList.remove("qv-lock"); });
+  });
+
   /* ---- What we do: one row open at a time (hover / focus; on touch, first tap opens) ---- */
   root.querySelectorAll<HTMLElement>("[data-wwd]").forEach((list) => {
     const rows = Array.from(list.querySelectorAll<HTMLElement>(".wwd-row:not(.wwd-close)"));
@@ -584,6 +618,21 @@ export function initEnhancements(root: Document = document): Cleanup {
       row.querySelector("a")?.addEventListener("click", (e) => {
         if (!row.classList.contains("is-open")) { e.preventDefault(); open(row); }
       }, { signal });
+    });
+  });
+
+  /* ---- Web Design process: same as "What we do" (hover / focus opens one row; tap on touch) ---- */
+  root.querySelectorAll<HTMLElement>("[data-wd-steps]").forEach((list) => {
+    const rows = Array.from(list.querySelectorAll<HTMLElement>(".wd-step"));
+    const open = (row: HTMLElement) => rows.forEach((r) => {
+      const on = r === row;
+      r.classList.toggle("is-open", on);
+      r.querySelector(".wd-step-head")?.setAttribute("aria-expanded", String(on));
+    });
+    rows.forEach((row) => {
+      row.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse") open(row); }, { signal });
+      row.addEventListener("focusin", () => open(row), { signal });
+      row.querySelector(".wd-step-head")?.addEventListener("click", () => open(row), { signal });
     });
   });
 

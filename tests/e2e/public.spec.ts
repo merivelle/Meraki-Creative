@@ -40,9 +40,15 @@ test("public pages render their key content", async ({ page }) => {
 
 test("prices are shown exactly as before", async ({ page }) => {
   await page.goto("/packages");
-  for (const [id, price] of [["reel-refresh", "From $95"], ["scene-edit", "From $100"], ["trailer", "From $850"], ["pitch-deck", "From $750"], ["actor-website", "Quote on request"]]) {
+  for (const [id, price] of [["reel-refresh", "From $95"], ["scene-edit", "From $100"], ["trailer", "From $850"]]) {
     await expect(page.locator(`#${id} .price`)).toHaveText(price);
   }
+});
+
+test("website prices live on the web design service pages", async ({ page }) => {
+  await page.goto("/web-design/actor-websites");
+  await expect(page.locator(".wsp-price b")).toHaveText("From $650");
+  await expect(page.locator("a[href='/start?package=actor-website']").first()).toBeVisible();
 });
 
 test("the old package links preselect the service and show the package", async ({ page }) => {

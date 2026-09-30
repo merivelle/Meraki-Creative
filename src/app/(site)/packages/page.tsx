@@ -5,17 +5,17 @@ import { breadcrumbs, graph, pageMetadata, pageNode, personNode, studioNode } fr
 import { JsonLd } from "@/components/site/JsonLd";
 import { CtaBand, PackageGroups, PageHero } from "@/components/site/blocks";
 
-const TITLE = "Editing & Website Packages With Pricing | Meraki Creative";
+const TITLE = "Editing Packages With Pricing | Meraki Creative";
 const DESCRIPTION =
-  "Real starting prices for demo reel edits, scene edits, trailers, and actor and director websites. Every package can be tailored.";
+  "Real starting prices for demo reel edits, scene edits, and trailers, plus two bundles. Every package can be tailored.";
 
 export const metadata = pageMetadata({ path: "/packages", title: TITLE, description: DESCRIPTION });
 
 // Organized by service category, each with its own anchor, so visitors can jump
 // straight to their craft. The original per-package anchors (#reel-refresh …) still work.
+// Website pricing lives on the Web Design pages (/web-design and /web-design/<service>).
 const ORDER: { id: CategoryId; anchor: string }[] = [
   { id: "post-production", anchor: "post-production" },
-  { id: "web-design", anchor: "web-design" },
   { id: "bundles", anchor: "bundles" },
 ];
 
@@ -30,7 +30,7 @@ export default async function PackagesPage() {
       <PageHero
         meta={["Packages", "Clear scope, clear price"]}
         title={<>Where<br />to begin.</>}
-        lede="Starting points organized by craft: post-production and digital presence, plus two bundles that cover everything together. Every package can be tailored. If you don't see your exact fit, we'll build a custom quote."
+        lede={<>Starting points for editing, plus two bundles that cover everything together. Every package can be tailored, and if you don&apos;t see your exact fit, we&apos;ll build a custom quote. Website prices are on the <Link href="/web-design#services" className="txt-link">Web Design</Link> pages.</>}
       >
         <div className="btn-group">
           <Link href="/start" className="btn btn-primary">Start Your Project</Link>

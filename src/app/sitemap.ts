@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { CANONICAL_ORIGIN } from "@/lib/env";
 import { getContent } from "@/lib/content/queries";
+import { WEB_SERVICES } from "@/content/web-design";
 
 const STATIC: { path: string; priority: number }[] = [
   { path: "/", priority: 1.0 },
@@ -17,6 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const { portfolio } = await getContent();
   return [
     ...STATIC.map((s) => ({ url: CANONICAL_ORIGIN + s.path, priority: s.priority })),
+    ...WEB_SERVICES.map((s) => ({ url: `${CANONICAL_ORIGIN}/web-design/${s.path}`, priority: 0.8 })),
     ...portfolio.map((p) => ({ url: `${CANONICAL_ORIGIN}/work/${p.slug}`, priority: 0.5 })),
   ];
 }

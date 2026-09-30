@@ -26,6 +26,45 @@ worth doing.
 - Published Supabase rows for the category are hidden in code; archive them in Admin whenever
   convenient, and edit the Filmmaker Package there too (the seed only covers fresh databases).
 
+## Sep 2026: Web Design in three stages (main page → quick view → service page)
+All website copy and prices come from one file, `src/content/web-design.ts` (services, card
+sentences, popup highlights, service-page scope, add-ons, materials, service FAQs, process).
+The website packages in `seed.ts` are generated from it, so prices can't drift.
+
+- **Main page `/web-design`:** short intro · three selected sites (Emily, Boomerang, Angelique) ·
+  six service cards (price, Quick view, Full details) · four "included" highlights · four-step
+  process · five general FAQs (cost, timing, domain and hosting, updates, account control) · CTA.
+- **Quick view popups:** name, one line, "From $… · one-time starting price, USD", 4–5
+  highlights, one add-on note, More details / Start your project, and "Hosting and domain fees
+  are separate. Final scope is confirmed before booking."
+- **Service pages `/web-design/<service>-websites`:** who it's for, price, relevant real work,
+  starting package (core pages / project entries / included), relevant add-ons, what to prepare,
+  3–4 FAQs, and a specific CTA ("Start your actor website.").
+- **Prices** (one-time starting, USD): Actor $650 · Director $1,000 · Production company
+  $1,500 · Portfolio $900 · Film $750 · Creative business $1,200. Add-ons as before.
+- **Packages page** now covers editing and bundles only, and links to Web Design for website prices.
+- Wording: "go live" instead of "launch" (house banned-word list), e.g. "Going live included",
+  "Go live and hand over".
+- Portfolio labels: Meraki Creative → "Our Studio Site"; Merivelle → "Personal Director Site".
+
+**Canny-style pass (Sep 29):** services heading is now "A site for every story."; hero tags read
+"Actors", "Filmmakers", "Creative businesses"; service cards, popups, and service pages use the
+Start a Project engravings instead of site screenshots; service pages no longer show example
+sites; add-ons are grouped as "Pages & content", "Reach", "Tools & access", "Support"; the
+process and FAQs are dropdowns. Selected sites (Emily, Boomerang, Angelique) sit below services.
+
+**To confirm before publishing** (the copy is written conditionally around these):
+1. Build platform(s). This decides "Can I update it myself?", editor setup pricing, and handover (Nicky's site is on Wix).
+2. Who holds domain, hosting, and platform accounts, and how access is shared.
+3. Hosting and ongoing costs, and whether you offer ongoing updates.
+4. The 14-day post-launch fix period, and what counts as a consolidated revision round.
+5. Deposit and payment terms, and what the "proposal" is.
+6. Typical timelines, if you want to state any (none are given).
+7. Translation workflow; which booking and newsletter services you'll integrate.
+8. Font, template, and third-party licensing, and what you hand over.
+9. Whether a password-protected area is possible on your platform (offered as "quoted by platform").
+10. Service details aren't editable in Admin yet; edits go through `src/content/web-design.ts`.
+
 ## Sep 2026: "What we do" + "Featured Work" (Estrela-style)
 Replaces the homepage's two pillar sections and "The reel". Row copy reuses existing service summaries.
 - Intro under "What we do": "Film editing and website design for actors, directors, and production

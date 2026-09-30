@@ -3,9 +3,11 @@
  * - `npm run seed:content` writes this into Supabase and publishes it.
  * - The public site falls back to this data only when Supabase isn't configured
  *   (e.g. a preview build with no database), so pages always render.
- * Prices are verbatim from legacy/packages.html. Do not compute or reformat them.
+ * Prices are verbatim strings; do not compute or reformat them. Editing and bundle prices come
+ * from legacy/packages.html; website prices come from src/content/web-design.ts.
  */
 import type { ContentBlocks, Faq, PackageItem, PortfolioItem, PublicContent, ServiceItem, Testimonial } from "@/lib/content/types";
+import { WEB_SERVICES } from "./web-design";
 
 // Stable ids so re-seeding updates rows instead of duplicating them.
 const id = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
@@ -20,14 +22,25 @@ export const seedServices: ServiceItem[] = [
   { id: id(106), categoryId: "post-production", roleLabel: "Social", title: "Social Media Editing", description: "Vertical cutdowns and clips paced for the feed, cut from your film and kept on-tone, not chopped into noise.", summary: "Vertical cutdowns paced for the feed, true to the film's tone.", sort: 60 },
   { id: id(107), categoryId: "post-production", roleLabel: "Color", title: "Color Grading", description: "A grade that matches sources to each other and holds the tone of the film. See the before-and-after sliders in the work for what that changes.", summary: null, sort: 70 },
   // Web design (legacy/website-design.html)
-  { id: id(111), categoryId: "web-design", roleLabel: "Actor", title: "Actor Websites", description: "A fast, mobile-ready site that puts your reel, headshots, and contact in one place. The single link you drop on Backstage, Spotlight, Casting Networks, and in every email signature.", summary: "The one clean link you put everywhere: reel, headshots, contact.", sort: 10 },
-  { id: id(112), categoryId: "web-design", roleLabel: "Director", title: "Director Websites", description: "A work-first portfolio that lets your films lead and gets out of the way. Credible, current, and easy to update as your reel grows.", summary: "A work-first portfolio built to send to reps, financiers, and festivals.", sort: 20 },
-  { id: id(113), categoryId: "web-design", roleLabel: "Co.", title: "Production Company Websites", description: "A proper home for your slate, team, and contact. The page that tells a financier or distributor you are a real operation, without the corporate stock-photo gloss.", summary: "A credible home for your slate, team, and contact.", sort: 30 },
-  { id: id(114), categoryId: "web-design", roleLabel: "Folio", title: "Portfolio Websites", description: "For any storyteller, a writer, DP, designer, who needs their body of work in one place, presented with intent.", summary: "For any storyteller who needs their body of work in one place.", sort: 40 },
-  { id: id(115), categoryId: "web-design", roleLabel: "Film", title: "Film Websites", description: "A dedicated, cinematic page for a single film or series: trailer, stills, synopsis, credits, and press. Built for festival runs and distribution conversations.", summary: "Trailer, stills, credits, and press in one cinematic place.", sort: 50 },
-  // NEW copy (see docs/COPY_FOR_REVIEW.md)
-  { id: id(117), categoryId: "web-design", roleLabel: "Studio", title: "Creative Business Websites", description: "For studios, composers, and other creative businesses whose work deserves the same care they put into it.", summary: null, sort: 70 },
+  { id: id(111), categoryId: "web-design", roleLabel: "Actor", title: "Actor Websites", description: "A one-page site with your biography, headshots, reel, résumé, representation, casting links, and contact.", summary: "Your bio, headshots, reel, and résumé on one clear page.", sort: 10 },
+  { id: id(112), categoryId: "web-design", roleLabel: "Director", title: "Director Websites", description: "Up to four pages, with up to three projects shown in one shared layout: video, stills, description, and credits.", summary: "Your work, bio, and contact across up to four pages.", sort: 20 },
+  { id: id(113), categoryId: "web-design", roleLabel: "Co.", title: "Production Company Websites", description: "Up to five pages for your company, slate, team or services, and inquiries, with four projects in a shared layout.", summary: "Your company, slate, team, and inquiries in one place.", sort: 30 },
+  { id: id(114), categoryId: "web-design", roleLabel: "Folio", title: "Portfolio Websites", description: "For individual creatives, like cinematographers, photographers, writers, designers, and composers: up to three pages and four projects.", summary: "Your body of work in one place, up to four projects.", sort: 40 },
+  { id: id(115), categoryId: "web-design", roleLabel: "Film", title: "Film Websites", description: "A one-page site for a single film: poster, synopsis, trailer, stills, credits, festival information, press kit, and where to watch.", summary: "Poster, trailer, stills, and credits for one film.", sort: 50 },
+  { id: id(117), categoryId: "web-design", roleLabel: "Studio", title: "Creative Business Websites", description: "Up to four pages that explain your services, show your work, and make it easy for clients to inquire.", summary: null, sort: 60 },
 ];
+
+// Website packages are generated from the Web Design source so prices and scope can't drift.
+// Ids are fixed per slug (the CMS keys rows by id).
+const WEB_PACKAGE_IDS: Record<string, number> = {
+  "actor-website": 208, "director-website": 209, "production-website": 210,
+  "portfolio-website": 215, "film-website": 216, "creative-business-website": 217,
+};
+const webPackages: PackageItem[] = WEB_SERVICES.map((w, i) => ({
+  id: id(WEB_PACKAGE_IDS[w.pkg]), slug: w.pkg, categoryId: "web-design", groupTitle: "Websites",
+  label: `Web / ${w.name.replace(/ websites$/, "")}`, name: w.name.replace(/websites$/, "Website").replace(/^\w/, (c) => c.toUpperCase()),
+  priceDisplay: w.price, included: w.highlights.slice(0, 4), tagline: w.card, featured: false, sort: (i + 1) * 10,
+}));
 
 export const seedPackages: PackageItem[] = [
   { id: id(201), slug: "reel-refresh", categoryId: "post-production", groupTitle: "Demo Reels", label: "Post / Refresh", name: "Demo Reel Refresh", priceDisplay: "From $95", included: ["Up to two new clips added", "Existing reel trimmed and tightened", "Export-ready for casting platforms"], tagline: "A quick refresh to keep your reel current.", featured: false, sort: 10 },
@@ -37,9 +50,7 @@ export const seedPackages: PackageItem[] = [
   { id: id(205), slug: "scene-cinematic", categoryId: "post-production", groupTitle: "Scene Edits", label: "Post / Most booked", name: "Cinematic Scene Edit", priceDisplay: "From $150", included: ["Professional color grade", "Sound design and pacing adjustments", "Subtle effects", "Multiple exports"], tagline: "One scene, finished with a film's eye.", featured: true, sort: 50 },
   { id: id(206), slug: "scene-premium", categoryId: "post-production", groupTitle: "Scene Edits", label: "Post / Premium", name: "Premium Scene Polish", priceDisplay: "From $250", included: ["Full cinematic finish", "Advanced color grade and audio mix", "Titles where needed", "Social teaser included"], tagline: "A scene taken all the way, plus a cut for the feed.", featured: false, sort: 60 },
   { id: id(207), slug: "trailer", categoryId: "post-production", groupTitle: "Trailer", label: "Post / Trailer", name: "Trailer Package", priceDisplay: "From $850", included: ["Trailer or teaser cut", "Festival-spec exports", "Music & sound design pass", "Color balanced", "Revisions included"], tagline: "The two minutes that make programmers and audiences want the rest.", featured: false, sort: 70 },
-  { id: id(208), slug: "actor-website", categoryId: "web-design", groupTitle: "Digital Presence", label: "Web / Actor", name: "Actor Website", priceDisplay: "Quote on request", included: ["Multi-page actor website", "Reel, headshots & contact", "Mobile-ready & fast-loading", "Connected to your domain"], tagline: "The one clean link you put everywhere.", featured: false, sort: 10 },
-  { id: id(209), slug: "director-website", categoryId: "web-design", groupTitle: "Digital Presence", label: "Web / Most booked", name: "Director Website", priceDisplay: "Quote on request", included: ["Work-first portfolio site", "Embedded films, trailers & stills", "Bio, contact & press", "Festival-ready, mobile-ready"], tagline: "A credible home for your films, built to send anywhere.", featured: true, sort: 20 },
-  { id: id(210), slug: "production-website", categoryId: "web-design", groupTitle: "Digital Presence", label: "Web / Company", name: "Production Company Website", priceDisplay: "Quote on request", included: ["Slate & work showcase", "Team, about & contact", "Embedded films & trailers", "Mobile-ready & shareable"], tagline: "The page that tells a financier you're a real operation.", featured: false, sort: 30 },
+  ...webPackages,
   { id: id(213), slug: "acting-package", categoryId: "bundles", groupTitle: "Bundles", label: "Bundle / Actor", name: "Acting Package", priceDisplay: "Quote on request", included: ["Actor website", "Demo reel edit", "One scene edit", "Materials set up to match"], tagline: "Your whole on-screen presence, edited and online in one go.", featured: true, sort: 10 },
   { id: id(214), slug: "filmmaker-package", categoryId: "bundles", groupTitle: "Bundles", label: "Bundle / Filmmaker", name: "Filmmaker Package", priceDisplay: "Quote on request", included: ["Director or company website", "Trailer or teaser edit", "One cohesive presentation"], tagline: "The site and the cut, designed as one to carry the project.", featured: true, sort: 20 },
 ];
@@ -58,8 +69,8 @@ export const seedPortfolio: PortfolioItem[] = [
     video: { kind: "file", src: "/assets/work/showreel.mp4", poster: "/assets/work/showreel-poster.jpg", title: "Director demo reel preview" },
     videoLinks: [{ label: "Watch the full reel", url: "https://vimeo.com/merivelle/director-demo-reel" }], liveUrl: null, featured: true, sort: 10,
   },
-  site(311, "meraki-creative", "Meraki Creative", "Studio Site", "/assets/work/site-meraki.jpg", "Meraki Creative website homepage", "https://www.merakicreative.co/", "merakicreative.co", 20),
-  site(312, "merivelle", "Merivelle", "Director Site", "/assets/work/site-merivelle.jpg", "Merivelle director website homepage", "https://merivelle.net", "merivelle.net", 30),
+  site(311, "meraki-creative", "Meraki Creative", "Our Studio Site", "/assets/work/site-meraki.jpg", "Meraki Creative website homepage", "https://www.merakicreative.co/", "merakicreative.co", 20),
+  site(312, "merivelle", "Merivelle", "Personal Director Site", "/assets/work/site-merivelle.jpg", "Merivelle director website homepage", "https://merivelle.net", "merivelle.net", 30),
   site(313, "yonatan-shaham-vitos", "Yonatan Shaham Vitos", "Actor Site", "/assets/work/site-yonatan.jpg", "Yonatan Shaham Vitos actor website homepage", "https://yonatanshahamvitos.com", "yonatanshahamvitos.com", 40),
   site(317, "emily-loaiza", "Emily Loaiza", "Actor Site", "/assets/work/site-emily.jpg", "Emily Loaiza actor website homepage", "https://www.emilyloaiza.com", "emilyloaiza.com", 45),
   site(314, "angelique-antoniou", "Angelique Antoniou", "Fine Art Photographer Site", "/assets/work/site-angelique.jpg", "Angelique Antoniou fine art photography website homepage", "https://angeliqueantoniou.com", "angeliqueantoniou.com", 50),
@@ -137,14 +148,12 @@ export const seedFaqs: Faq[] = [
   // NEW (see docs/COPY_FOR_REVIEW.md)
   { id: id(506), scope: "post-production", question: "How do I send large footage?", answer: "Through a private transfer link from whatever you already use: Frame.io, Google Drive, Dropbox, or WeTransfer. You paste the link into your project page, so nothing has to squeeze through email.", sort: 60 },
   { id: id(507), scope: "post-production", question: "How do notes work?", answer: "Each cut goes up in your project page with a review link. You collect everyone's notes in one place, add timestamps where they help, and send them back as a single set. When a cut is right, you approve that version.", sort: 70 },
-  // legacy/website-design.html (the out-of-LA answer is updated for the no-calls process)
-  { id: id(511), scope: "web-design", question: "Do I need to own a domain first?", answer: "No. If you already have one, the site connects to it. If you do not, we will talk through what to register before the build starts.", sort: 10 },
-  { id: id(512), scope: "web-design", question: "Will I be able to update it myself?", answer: "Yes. Sites are built to be updated as your reel and credits grow, and you get a walkthrough of how to make those changes at handover.", sort: 20 },
-  { id: id(513), scope: "web-design", question: "Do you design for people outside Los Angeles?", answer: "Yes. The studio is in Los Angeles and works with actors, directors, and companies wherever they are. The whole process runs in writing, through your project page and email, so there's no need to schedule calls.", sort: 30 },
-  { id: id(514), scope: "web-design", question: "What do you need from me?", answer: "Your reel, headshots or stills, credits, and a sense of who the site is for. If you are missing pieces, we will tell you which ones actually matter.", sort: 40 },
-  { id: id(515), scope: "web-design", question: "How is this different from a template builder?", answer: "Templates are built to fit anyone, which is why they read as generic. These sites are designed around your work first, then built to load fast on a phone.", sort: 50 },
-  // NEW
-  { id: id(516), scope: "web-design", question: "Who owns the site when it's done?", answer: "You do. Your domain, hosting, and content stay in accounts you control, and handoff includes what you need to keep it running or bring someone else in later.", sort: 60 },
+  // Web design: general questions (service-specific ones live in src/content/web-design.ts)
+  { id: id(511), scope: "web-design", question: "How much will my website cost?", answer: "Each service has a starting price for a defined scope, from $650 for an actor site to $1,500 for a production company site. Your proposal confirms the total, including any optional additions, before anything starts.", sort: 10 },
+  { id: id(512), scope: "web-design", question: "How long will it take?", answer: "It depends on the scope, how ready your materials are, and how quickly notes come back. Your proposal includes a timeline for your project.", sort: 20 },
+  { id: id(513), scope: "web-design", question: "Do I need a domain or hosting already?", answer: "No. If you have a domain, we connect it; if not, we help you register one in your own name. Domain renewal and hosting or a platform subscription are billed to you by those providers, and your proposal lists what applies.", sort: 30 },
+  { id: id(514), scope: "web-design", question: "Can I update it myself?", answer: "That depends on the platform we agree on. Some sites include an editor for the parts you'll change most, like headshots, credits, or projects; others are updated by us as a small paid change. Your proposal says which before you commit.", sort: 40 },
+  { id: id(515), scope: "web-design", question: "Who controls the website and accounts?", answer: "You do. Your domain, hosting, and platform accounts are set up in your name, and we work through collaborator access. What's handed over, including any custom work and third-party licenses like fonts, is set out in your proposal.", sort: 50 },
 ];
 
 const asyncSteps = [
