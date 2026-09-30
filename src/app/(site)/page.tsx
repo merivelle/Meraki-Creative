@@ -2,16 +2,13 @@ import Link from "next/link";
 import { getBlock, getContent } from "@/lib/content/queries";
 import { graph, pageMetadata, pageNode, personNode, studioNode } from "@/lib/seo";
 import { JsonLd } from "@/components/site/JsonLd";
-import { CtaBand, FeaturedWork, PackageCard, RollText, Rule, Schedule, ServiceCards, Testimonials, WhatWeDo } from "@/components/site/blocks";
+import { CtaBand, FeaturedWork, RollText, Rule, Schedule, ServiceCards, Testimonials, WhatWeDo } from "@/components/site/blocks";
 
 const TITLE = "Meraki Creative — Film Editing & Website Design in Los Angeles";
 const DESCRIPTION =
   "Meraki Creative is a Los Angeles studio that edits films, reels, and trailers and designs websites for actors, directors, and production companies.";
 
 export const metadata = pageMetadata({ path: "/", title: TITLE, description: DESCRIPTION, ogType: "website" });
-
-// Homepage "Pick a starting point" — same four packages as the original page.
-const FEATURED_SLUGS = ["acting-package", "reel-refresh", "scene-edit", "trailer"];
 
 // Stills from real edits, laid onto the Post-Production card's timeline (V1 first, then V2).
 const EDIT_STILLS = [
@@ -81,7 +78,6 @@ export default async function HomePage() {
         start: preview?.start,
       };
     });
-  const featured = FEATURED_SLUGS.map((slug) => content.packages.find((p) => p.slug === slug)).filter((p) => !!p);
 
   return (
     <>
@@ -169,22 +165,6 @@ export default async function HomePage() {
 
       <Testimonials items={content.testimonials} />
 
-      <Rule />
-
-      {/* ============ FEATURED PACKAGES ============ */}
-      <section className="section">
-        <div className="wrap">
-          <div className="index-head reveal" style={{ justifyContent: "space-between" }}>
-            <h2 className="display display-md">Pick a starting point.</h2>
-            <Link href="/packages" className="txt-link">See all packages</Link>
-          </div>
-          <div className="pkg-feature cols-4 reveal">
-            {featured.map((p) => (
-              <PackageCard key={p.id} pkg={p} withId={false} compact detailsHref={`/packages#${p.slug}`} />
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ============ WHY (DARK BAND) ============ */}
       <section className="section band-night on-night">

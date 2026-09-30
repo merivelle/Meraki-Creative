@@ -132,8 +132,8 @@ Fonts (Google): **Archivo** (display + body, weight contrast) + **JetBrains Mono
 - Every public page: canonical, Open Graph, Twitter card, `theme-color`, and JSON-LD
   (`ProfessionalService` + `Person` + per-page type + breadcrumbs). OG image lives at
   `assets/social/og-default.jpg` (1200×630).
-- Service pages `/post-production` and `/web-design` are now in the primary nav (seven items:
-  Home, Web Design, Post-Production, Work, About, Start a Project, Client Login — changed at
+- Service pages `/post-production` and `/web-design` are now in the primary nav (six items:
+  Web Design, Post-Production, Work, About, Start a Project, Client Login — changed at
   Merivelle's request, Sep 2026). `/services` is footer-linked.
 - Positioning for search is **Los Angeles / local**. Keep the city in titles, descriptions,
   and schema. The plain-language service words ("film editing", "post-production",

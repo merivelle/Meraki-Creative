@@ -1,6 +1,5 @@
 /** Site-wide navigation and identity. Keep the city in titles and schema (local SEO). */
 export const PRIMARY_NAV = [
-  { href: "/", label: "Home" },
   { href: "/web-design", label: "Web Design" },
   { href: "/post-production", label: "Post-Production" },
   { href: "/work", label: "Work" },
