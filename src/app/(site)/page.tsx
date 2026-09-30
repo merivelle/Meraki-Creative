@@ -22,7 +22,6 @@ const EDIT_STILLS = [
   ["scene-butterflies-poster.jpg", "BUTTERFLIES_CU.mov"],
   ["tl-demoreel-end.jpg", "DEMOREEL_END.mov"],
   ["scene-sunflower-poster.jpg", "SUNFLOWER_WS.mov"],
-  ["grade1-after.jpg", "GRADE_A01.mov"],
 ].map(([file, name]) => ({ img: `/assets/work/${file}`, name }));
 
 // "What we do" rows: the four kinds of work, each with a real image. Copy is the services' own summaries.
@@ -192,7 +191,7 @@ export default async function HomePage() {
             <div className="why">
               <span className="k">Fast</span>
               <h3>Built to share</h3>
-              <p>Clear packages, a simple process, and quick turnarounds. You&apos;re sending the link and submitting the work in days, not someday.</p>
+              <p>Clear starting prices, a simple process, and quick turnarounds. You&apos;re sending the link and submitting the work in days, not someday.</p>
             </div>
           </div>
         </div>
@@ -205,7 +204,7 @@ export default async function HomePage() {
         slate="Ready when you are"
         heading={<>Start with<br />the story.</>}
         primary={{ href: "/start", label: "Start Your Project" }}
-        secondary={{ href: "/packages", label: "View Packages" }}
+        secondary={{ href: "/services", label: "View Services" }}
       />
     </>
   );

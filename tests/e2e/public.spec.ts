@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 const REDIRECTS: [string, string][] = [
   ["/index.html", "/"],
   ["/services.html", "/services"],
-  ["/packages.html", "/packages"],
+  ["/packages.html", "/services"],
   ["/portfolio.html", "/work"],
   ["/about.html", "/about"],
   ["/contact.html", "/start"],
@@ -18,6 +18,9 @@ test("every old .html URL permanently redirects to its new page", async ({ reque
     expect(res.status(), from).toBe(308);
     expect(new URL(res.headers().location, "http://x").pathname, from).toBe(to);
   }
+  const pk = await request.get("/packages", { maxRedirects: 0 });
+  expect(pk.status()).toBe(308);
+  expect(new URL(pk.headers().location, "http://x").pathname).toBe("/services");
   const q = await request.get("/contact.html?package=Trailer%20Package", { maxRedirects: 0 });
   expect(q.headers().location).toContain("/start?package=Trailer%20Package");
 });
@@ -26,8 +29,7 @@ test("public pages render their key content", async ({ page }) => {
   const checks: [string, string][] = [
     ["/", "The story is"],
     ["/web-design", "Website design"],
-    ["/post-production", "Post-production,"],
-    ["/packages", "Where"],
+    ["/post-production", "for storytellers."],
     ["/work", "Stories we"],
     ["/about", "Made with meraki."],
     ["/start", "Hi there."],
@@ -38,11 +40,12 @@ test("public pages render their key content", async ({ page }) => {
   }
 });
 
-test("prices are shown exactly as before", async ({ page }) => {
-  await page.goto("/packages");
-  for (const [id, price] of [["reel-refresh", "From $95"], ["scene-edit", "From $100"], ["trailer", "From $850"]]) {
-    await expect(page.locator(`#${id} .price`)).toHaveText(price);
-  }
+test("editing prices live on the post-production service pages", async ({ page }) => {
+  await page.goto("/post-production/demo-reel-editing");
+  await expect(page.locator(".wsp-price b")).toHaveText("From $150");
+  await page.goto("/post-production/trailer-editing");
+  await expect(page.locator(".wsp-price b")).toHaveText("From $850");
+  await expect(page.locator("a[href='/start?package=trailer']").first()).toBeVisible();
 });
 
 test("website prices live on the web design service pages", async ({ page }) => {
@@ -51,12 +54,12 @@ test("website prices live on the web design service pages", async ({ page }) => 
   await expect(page.locator("a[href='/start?package=actor-website']").first()).toBeVisible();
 });
 
-test("the old package links preselect the service and show the package", async ({ page }) => {
-  await page.goto("/contact.html?package=Demo%20Reel%20Refresh");
+test("package links preselect the service and show the package", async ({ page }) => {
+  await page.goto("/contact.html?package=Demo%20Reel%20Edit");
   await expect(page).toHaveURL(/\/start\?package=/);
   await page.getByRole("button", { name: "Begin" }).click();
-  await expect(page.locator('input[name="package"]')).toHaveValue("reel-refresh");
-  await expect(page.locator(".ob-pkg")).toContainText("Demo Reel Refresh");
+  await expect(page.locator('input[name="package"]')).toHaveValue("demo-reel");
+  await expect(page.locator(".ob-pkg")).toContainText("Demo Reel Edit");
   await expect(page.locator('input[name="services"][value="post-production"]')).toBeChecked();
 });
 

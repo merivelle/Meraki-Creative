@@ -62,7 +62,7 @@ export const studioNode = {
   ],
   founder: { "@id": abs("/#merivelle") },
   knowsAbout: [
-    "Film editing", "Post-production", "Demo reel editing", "Trailer editing", "Color grading",
+    "Film editing", "Post-production", "Demo reel editing", "Trailer editing",
     "Website design for actors", "Website design for filmmakers",
   ],
 };

@@ -3,24 +3,25 @@
  * - `npm run seed:content` writes this into Supabase and publishes it.
  * - The public site falls back to this data only when Supabase isn't configured
  *   (e.g. a preview build with no database), so pages always render.
- * Prices are verbatim strings; do not compute or reformat them. Editing and bundle prices come
- * from legacy/packages.html; website prices come from src/content/web-design.ts.
+ * Prices are verbatim strings; do not compute or reformat them. Bundle prices come from
+ * legacy/packages.html; editing prices from src/content/post-production.ts; website prices from
+ * src/content/web-design.ts. Bundles are retired from the public site (hidden in getContent()).
  */
 import type { ContentBlocks, Faq, PackageItem, PortfolioItem, PublicContent, ServiceItem, Testimonial } from "@/lib/content/types";
 import { WEB_SERVICES } from "./web-design";
+import { POST_SERVICES } from "./post-production";
 
 // Stable ids so re-seeding updates rows instead of duplicating them.
 const id = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
 
 export const seedServices: ServiceItem[] = [
   // Post-production (legacy/post-production.html + services.html)
-  { id: id(101), categoryId: "post-production", roleLabel: "Film", title: "Short Film Editing", description: "Story-first cuts that hold an audience from first frame to last. Structure, pacing, performance, and rhythm shaped to serve the film, with color and sound balanced across the whole piece.", summary: "Story-first cuts that hold an audience from first frame to last.", sort: 10 },
+  { id: id(101), categoryId: "post-production", roleLabel: "Film", title: "Short Film Editing", description: "Story-first cuts that hold an audience from first frame to last. Structure, pacing, performance, and rhythm shaped to serve the film, with sound balanced across the whole piece.", summary: "Story-first cuts that hold an audience from first frame to last.", sort: 10 },
   { id: id(102), categoryId: "post-production", roleLabel: "Trailer", title: "Trailer Editing", description: "The two minutes that make programmers and audiences want the rest. Built to meet festival and distributor requirements.", summary: "The two minutes that make a festival or a buyer want the rest.", sort: 20 },
   { id: id(103), categoryId: "post-production", roleLabel: "Teaser", title: "Teaser Editing", description: "A short, sharp first look designed to travel: social-ready, mood-forward, and true to the world of the film.", summary: "A short, sharp first look built to travel and leave a mark.", sort: 30 },
-  { id: id(104), categoryId: "post-production", roleLabel: "Reel", title: "Demo Reel Editing", description: "Your strongest work cut to lead, opening on a moment that holds and kept tight enough to get watched to the end. Color and sound balanced across sources, and exported ready for casting platforms.", summary: "Your strongest moments cut to lead, with a first ten seconds that hold.", sort: 40 },
+  { id: id(104), categoryId: "post-production", roleLabel: "Reel", title: "Demo Reel Editing", description: "Your strongest work cut to lead, opening on a moment that holds and kept tight enough to get watched to the end. Sound balanced across sources, and exported ready for casting platforms.", summary: "Your strongest moments cut to lead, with a first ten seconds that hold.", sort: 40 },
   { id: id(105), categoryId: "post-production", roleLabel: "Scene", title: "Scene Editing", description: "Individual scenes cut, trimmed, and balanced so the performance, not the production, is what reads. Ideal for fresh reel material or a specific submission.", summary: "Individual scenes cut and balanced so the performance is what reads.", sort: 50 },
   { id: id(106), categoryId: "post-production", roleLabel: "Social", title: "Social Media Editing", description: "Vertical cutdowns and clips paced for the feed, cut from your film and kept on-tone, not chopped into noise.", summary: "Vertical cutdowns paced for the feed, true to the film's tone.", sort: 60 },
-  { id: id(107), categoryId: "post-production", roleLabel: "Color", title: "Color Grading", description: "A grade that matches sources to each other and holds the tone of the film. See the before-and-after sliders in the work for what that changes.", summary: null, sort: 70 },
   // Web design (legacy/website-design.html)
   { id: id(111), categoryId: "web-design", roleLabel: "Actor", title: "Actor Websites", description: "A one-page site with your biography, headshots, reel, résumé, representation, casting links, and contact.", summary: "Your bio, headshots, reel, and résumé on one clear page.", sort: 10 },
   { id: id(112), categoryId: "web-design", roleLabel: "Director", title: "Director Websites", description: "Up to four pages, with up to three projects shown in one shared layout: video, stills, description, and credits.", summary: "Your work, bio, and contact across up to four pages.", sort: 20 },
@@ -42,14 +43,19 @@ const webPackages: PackageItem[] = WEB_SERVICES.map((w, i) => ({
   priceDisplay: w.price, included: w.highlights.slice(0, 4), tagline: w.card, featured: false, sort: (i + 1) * 10,
 }));
 
+// Editing packages are generated from the Post-Production source the same way (one starting
+// price per service; no tiers). 201/204/207 keep their old ids; the old tiers are gone.
+const POST_PACKAGE_IDS: Record<string, number> = {
+  "demo-reel": 201, "scene-edit": 204, "teaser": 218, "trailer": 207, "short-film-edit": 219, "social-cutdowns": 220,
+};
+const postPackages: PackageItem[] = POST_SERVICES.map((p, i) => ({
+  id: id(POST_PACKAGE_IDS[p.pkg]), slug: p.pkg, categoryId: "post-production", groupTitle: "Editing",
+  label: `Post / ${p.pkgName.replace(/ Edit$/, "")}`, name: p.pkgName,
+  priceDisplay: p.price, included: p.highlights.slice(0, 4), tagline: p.card, featured: false, sort: (i + 1) * 10,
+}));
+
 export const seedPackages: PackageItem[] = [
-  { id: id(201), slug: "reel-refresh", categoryId: "post-production", groupTitle: "Demo Reels", label: "Post / Refresh", name: "Demo Reel Refresh", priceDisplay: "From $95", included: ["Up to two new clips added", "Existing reel trimmed and tightened", "Export-ready for casting platforms"], tagline: "A quick refresh to keep your reel current.", featured: false, sort: 10 },
-  { id: id(202), slug: "reel-professional", categoryId: "post-production", groupTitle: "Demo Reels", label: "Post / Most booked", name: "Professional Demo Reel Edit", priceDisplay: "From $225", included: ["All footage reviewed, strongest scenes chosen", "Cut to a tight 60–90 second reel", "Audio cleaned, color balanced, titles", "Two revisions"], tagline: "A reel built to lead with your best work.", featured: true, sort: 20 },
-  { id: id(203), slug: "reel-premium", categoryId: "post-production", groupTitle: "Demo Reels", label: "Post / Premium", name: "Premium Demo Reel", priceDisplay: "From $350", included: ["Everything in the Professional edit", "Advanced color grade and sound polish", "Scene-order consultation", "Multiple exports (drama, comedy, commercial)", "Three revisions"], tagline: "The full treatment, shaped genre by genre.", featured: false, sort: 30 },
-  { id: id(204), slug: "scene-edit", categoryId: "post-production", groupTitle: "Scene Edits", label: "Post / Scene", name: "Basic Scene Edit", priceDisplay: "From $100", included: ["One scene, up to three minutes", "Dialogue cleaned up", "Color correction, music if wanted"], tagline: "Fresh, polished material for a reel or submission.", featured: false, sort: 40 },
-  { id: id(205), slug: "scene-cinematic", categoryId: "post-production", groupTitle: "Scene Edits", label: "Post / Most booked", name: "Cinematic Scene Edit", priceDisplay: "From $150", included: ["Professional color grade", "Sound design and pacing adjustments", "Subtle effects", "Multiple exports"], tagline: "One scene, finished with a film's eye.", featured: true, sort: 50 },
-  { id: id(206), slug: "scene-premium", categoryId: "post-production", groupTitle: "Scene Edits", label: "Post / Premium", name: "Premium Scene Polish", priceDisplay: "From $250", included: ["Full cinematic finish", "Advanced color grade and audio mix", "Titles where needed", "Social teaser included"], tagline: "A scene taken all the way, plus a cut for the feed.", featured: false, sort: 60 },
-  { id: id(207), slug: "trailer", categoryId: "post-production", groupTitle: "Trailer", label: "Post / Trailer", name: "Trailer Package", priceDisplay: "From $850", included: ["Trailer or teaser cut", "Festival-spec exports", "Music & sound design pass", "Color balanced", "Revisions included"], tagline: "The two minutes that make programmers and audiences want the rest.", featured: false, sort: 70 },
+  ...postPackages,
   ...webPackages,
   { id: id(213), slug: "acting-package", categoryId: "bundles", groupTitle: "Bundles", label: "Bundle / Actor", name: "Acting Package", priceDisplay: "Quote on request", included: ["Actor website", "Demo reel edit", "One scene edit", "Materials set up to match"], tagline: "Your whole on-screen presence, edited and online in one go.", featured: true, sort: 10 },
   { id: id(214), slug: "filmmaker-package", categoryId: "bundles", groupTitle: "Bundles", label: "Bundle / Filmmaker", name: "Filmmaker Package", priceDisplay: "Quote on request", included: ["Director or company website", "Trailer or teaser edit", "One cohesive presentation"], tagline: "The site and the cut, designed as one to carry the project.", featured: true, sort: 20 },
@@ -112,24 +118,6 @@ export const seedPortfolio: PortfolioItem[] = [
     video: { kind: "youtube", src: "https://www.youtube-nocookie.com/embed/G6sOHBuDL08", title: "Opa — official trailer, edited by Meraki Creative" },
     videoLinks: [], liveUrl: null, featured: false, sort: 130,
   },
-  {
-    id: id(351), slug: "narrative-scene-grade", title: "Narrative scene", clientName: null, categories: ["post-production"], layout: "grade", typeLabel: "Color Grade",
-    description: null, contribution: "Color grade",
-    images: [
-      { src: "/assets/work/grade1-before.jpg", alt: "Narrative scene frame before color grading", role: "before", width: 1600, height: 900 },
-      { src: "/assets/work/grade1-after.jpg", alt: "The same narrative scene frame after color grading by Meraki Creative", role: "after", width: 1600, height: 900 },
-    ],
-    video: null, videoLinks: [], liveUrl: null, featured: false, sort: 140,
-  },
-  {
-    id: id(352), slug: "reel-frame-grade", title: "Reel frame", clientName: null, categories: ["post-production"], layout: "grade", typeLabel: "Color Grade",
-    description: null, contribution: "Color grade",
-    images: [
-      { src: "/assets/work/grade2-before.jpg", alt: "Demo reel frame before color grading", role: "before", width: 1600, height: 900 },
-      { src: "/assets/work/grade2-after.jpg", alt: "The same demo reel frame after color grading by Meraki Creative", role: "after", width: 1600, height: 900 },
-    ],
-    video: null, videoLinks: [], liveUrl: null, featured: false, sort: 150,
-  },
 ];
 
 export const seedTestimonials: Testimonial[] = [
@@ -143,8 +131,8 @@ export const seedFaqs: Faq[] = [
   { id: id(501), scope: "post-production", question: "Do you work with people outside Los Angeles?", answer: "Yes. The studio is in Los Angeles, but editing happens on files, so where you are is not a limit. Footage comes in over a link and cuts go back the same way.", sort: 10 },
   { id: id(502), scope: "post-production", question: "What do you need from me to start?", answer: "Your footage and a sense of where you are trying to get: a rep, a festival, a casting submission. Notes on favourite takes help, but they are not required.", sort: 20 },
   { id: id(503), scope: "post-production", question: "How long does an edit take?", answer: "It depends on scope, so you get a specific timeline with your quote rather than a guess up front. Most inquiries are answered within a couple of business days.", sort: 30 },
-  { id: id(504), scope: "post-production", question: "Can you cut a reel from footage I already have?", answer: "That is most of the work. Scenes come from different shoots with different color and sound, and the job is to balance them so the performance reads as one piece.", sort: 40 },
-  { id: id(505), scope: "post-production", question: "Do you handle color and sound too?", answer: "Yes. Color grading, audio balance, and sound design are part of the edit rather than a separate vendor you have to brief again.", sort: 50 },
+  { id: id(504), scope: "post-production", question: "Can you cut a reel from footage I already have?", answer: "That is most of the work. Scenes come from different shoots with different sound, and the job is to balance them so the performance reads as one piece.", sort: 40 },
+  { id: id(505), scope: "post-production", question: "Do you handle sound and color too?", answer: "Sound is part of every edit: dialogue cleaned up and levels balanced, rather than a separate vendor you have to brief again. Color grading is available as an additional cost.", sort: 50 },
   // NEW (see docs/COPY_FOR_REVIEW.md)
   { id: id(506), scope: "post-production", question: "How do I send large footage?", answer: "Through a private transfer link from whatever you already use: Frame.io, Google Drive, Dropbox, or WeTransfer. You paste the link into your project page, so nothing has to squeeze through email.", sort: 60 },
   { id: id(507), scope: "post-production", question: "How do notes work?", answer: "Each cut goes up in your project page with a review link. You collect everyone's notes in one place, add timestamps where they help, and send them back as a single set. When a cut is right, you approve that version.", sort: 70 },

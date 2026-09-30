@@ -30,6 +30,11 @@ type Pkg = Pick<PackageItem, "slug" | "name" | "categoryId">;
 export async function processInquiry(fd: FormData, packages: Pkg[]): Promise<InquiryState> {
   const def = inquiryDefinition(packages);
   const values = formDataToAnswers(def, fd);
+  // A session saved before Sep 2026 can still carry retired options (package tiers, bundles,
+  // color grading). Drop them quietly instead of failing the whole inquiry.
+  const livePackages = new Set([...packages.map((p) => p.slug), "single-service"]);
+  if (typeof values.package === "string" && !livePackages.has(values.package)) delete values.package;
+  if (Array.isArray(values.post_type)) values.post_type = (values.post_type as string[]).filter((v) => v !== "reel-refresh" && v !== "color");
 
   // Honeypot: real people never fill the hidden field. Pretend success, save nothing.
   if (String(fd.get("botcheck") ?? "") !== "") return { status: "saved" };

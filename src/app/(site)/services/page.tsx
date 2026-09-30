@@ -27,7 +27,7 @@ export default async function ServicesPage() {
       >
         <div className="btn-group">
           <Link href="/start" className="btn btn-primary">Start Your Project</Link>
-          <Link href="/packages" className="btn btn-secondary">View Packages</Link>
+          <Link href="/work" className="btn btn-secondary">See the Work</Link>
         </div>
       </PageHero>
 
@@ -71,7 +71,7 @@ export default async function ServicesPage() {
         heading={<>Tell us about the work.<br />We&apos;ll handle the rest.</>}
         lede="Tell us where you're trying to get, a rep, a festival, a release, and we'll suggest the right mix of work and a clear quote."
         primary={{ href: "/start", label: "Start Your Project" }}
-        secondary={{ href: "/packages", label: "View Packages" }}
+        secondary={{ href: "/work", label: "See the Work" }}
       />
     </>
   );

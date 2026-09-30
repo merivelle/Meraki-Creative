@@ -8,7 +8,7 @@ import { CtaBand, PageHero } from "@/components/site/blocks";
 
 const TITLE = "Portfolio — Reels, Film Edits & Client Websites | Meraki Creative";
 const DESCRIPTION =
-  "Selected work from a Los Angeles studio: demo reels, short films, trailers, color grades, and client websites for actors and filmmakers.";
+  "Selected work from a Los Angeles studio: demo reels, short films, trailers, and client websites for actors and filmmakers.";
 
 export const metadata = pageMetadata({ path: "/work", title: TITLE, description: DESCRIPTION });
 

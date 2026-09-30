@@ -71,7 +71,8 @@ client portal (`/portal`), studio admin (`/admin`). Read `docs/ARCHITECTURE.md` 
 
 ```
 src/app/(site)/     Public pages: /, /web-design, /post-production,
-                    /services, /packages, /work(/[slug]), /about
+                    /services, /work(/[slug]), /about; service pages at
+                    /web-design/[service] and /post-production/[service]
 src/app/(onboarding) /start(/thanks): full-screen guided inquiry (no site header/footer);
                     screens in src/lib/inquiry/steps.ts, UI in src/components/onboarding/
 src/app/portal/     Client portal (invited clients, per-project access)
@@ -116,7 +117,10 @@ Fonts (Google): **Archivo** (display + body, weight contrast) + **JetBrains Mono
 > `single-font` (one grotesk by choice) and, on the homepage, the justified `Call 01–04` schedule.
 
 ## Before launch — status
-1. ~~**Pricing**~~ — done; `packages.html` carries real "From $" prices.
+1. ~~**Pricing**~~ — done. Since Sep 2026 there are **no packages or tiers**: each service has one
+   "From $" starting price in `src/content/web-design.ts` / `src/content/post-production.ts`
+   (shown on its own service page). `/packages` 308s to `/services`; bundles are hidden like
+   Creative Materials. Color grading is not a service, only an add-on on an edit.
 2. ~~**Contact form**~~ — replaced by the branching inquiry at `/start` (saved to Supabase,
    emailed via Resend). Web3Forms is no longer called by the new site.
 3. ~~**Socials**~~ — done; real Instagram / IMDb / Vimeo links are in every footer.
@@ -132,9 +136,9 @@ Fonts (Google): **Archivo** (display + body, weight contrast) + **JetBrains Mono
 - Every public page: canonical, Open Graph, Twitter card, `theme-color`, and JSON-LD
   (`ProfessionalService` + `Person` + per-page type + breadcrumbs). OG image lives at
   `assets/social/og-default.jpg` (1200×630).
-- Service pages `/post-production` and `/web-design` are now in the primary nav (six items:
-  Web Design, Post-Production, Work, About, Start a Project, Client Login — changed at
-  Merivelle's request, Sep 2026). `/services` is footer-linked.
+- Service pages `/post-production` and `/web-design` are now in the primary nav (five items:
+  Web Design, Post-Production, Work, About, Start a Project — changed at Merivelle's
+  request, Sep 2026; Client Login lives in the footer only). `/services` is footer-linked.
 - Positioning for search is **Los Angeles / local**. Keep the city in titles, descriptions,
   and schema. The plain-language service words ("film editing", "post-production",
   "website design") must stay in the copy — they are what people actually search for, and

@@ -36,7 +36,7 @@ function Fields({ type, r }: { type: string; r: R | null }) {
     case "package":
       return (<>
         <Category r={r} />
-        <div className="form-row"><F k="name" label="Name" r={r} /><F k="slug" label="Slug (anchor id)" r={r} help="Used in links like /packages#reel-refresh. Changing it breaks old links." /></div>
+        <div className="form-row"><F k="name" label="Name" r={r} /><F k="slug" label="Slug" r={r} help="Used in links like /start?package=demo-reel. Changing it breaks old links." /></div>
         <div className="form-row"><F k="price_display" label="Price, exactly as shown" r={r} help="e.g. From $95, or Quote on request" /><F k="group_title" label="Group heading" r={r} /></div>
         <F k="label" label="Small label" r={r} />
         <div className="field"><label htmlFor="c-included">Included (one per line)</label><textarea id="c-included" name="included" rows={5} defaultValue={((r?.included as string[]) ?? []).join("\n")} /></div>

@@ -5,14 +5,12 @@ export const PRIMARY_NAV = [
   { href: "/work", label: "Work" },
   { href: "/about", label: "About" },
   { href: "/start", label: "Start a Project" },
-  { href: "/login", label: "Client Login" },
 ] as const;
 
 export const FOOTER_EXPLORE = [
   { href: "/web-design", label: "Web Design" },
   { href: "/post-production", label: "Post-Production" },
   { href: "/services", label: "All Services" },
-  { href: "/packages", label: "Packages" },
   { href: "/work", label: "Work" },
   { href: "/about", label: "About" },
 ] as const;

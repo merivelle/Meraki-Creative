@@ -98,7 +98,6 @@ export const WORK_SECTIONS: { layout: PortfolioItem["layout"]; slate: string; he
   { layout: "film", slate: "Post-Production", heading: "Films.", grid: "work-grid-2" },
   { layout: "scene", slate: "Editing", heading: "Scenes.", grid: "work-grid-2" },
   { layout: "trailer", slate: "Post-Production", heading: "Trailers.", grid: "work-grid-2" },
-  { layout: "grade", slate: "Color", heading: "Color grade, before & after.", grid: "work-grid-2", lede: "Drag to compare the ungraded frame with the final grade." },
 ];
 
 export function WorkSections({ items }: { items: PortfolioItem[] }) {

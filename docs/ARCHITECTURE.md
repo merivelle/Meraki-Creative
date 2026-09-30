@@ -4,7 +4,7 @@ Meraki Creative is one Next.js (App Router, TypeScript) application with three a
 
 | Area | Routes | Who |
 |---|---|---|
-| Public site | `/`, `/web-design`, `/post-production`, `/creative-materials`, `/services`, `/packages`, `/work`, `/work/[slug]`, `/about`, `/start` | Everyone |
+| Public site | `/`, `/web-design`, `/post-production`, `/web-design/[service]`, `/post-production/[service]`, `/services`, `/work`, `/work/[slug]`, `/about`, `/start` | Everyone |
 | Client portal | `/portal/**` | Invited clients, per project |
 | Studio admin | `/admin/**` | Staff (rows in `staff_roles`) |
 
@@ -26,8 +26,8 @@ its REST API), **Stripe** (optional hosted invoices; unconfigured until keys are
 
 The previous static site lived at the repo root as `.html` files (kept in `legacy/` for
 reference). Every old URL 308-redirects to its new route (`src/lib/redirects.ts`, wired in
-`next.config.ts`). Query strings and `#anchors` carry through, so `contact.html?package=…` and
-`packages.html#reel-refresh` still work.
+`next.config.ts`). Query strings carry through, so `contact.html?package=…` still works.
+`/packages` and `packages.html` now 308 to `/services` (packages retired, Sep 2026).
 
 ## Public content
 

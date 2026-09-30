@@ -24,13 +24,11 @@ export const postProductionDiscovery: FormDefinition = {
           id: "project_type", type: "select", label: "What are we making?", required: true,
           options: [
             { value: "demo-reel", label: "Demo reel" },
-            { value: "reel-refresh", label: "Reel refresh" },
             { value: "scene", label: "Scene edit" },
             { value: "trailer", label: "Trailer" },
             { value: "teaser", label: "Teaser" },
             { value: "short-film", label: "Short film" },
             { value: "social", label: "Social edits" },
-            { value: "color", label: "Color grade only" },
             { value: "other", label: "Something else" },
           ],
         },
@@ -133,13 +131,12 @@ export const postProductionDiscovery: FormDefinition = {
     },
     {
       id: "finishing",
-      title: "Color and sound",
+      title: "Sound and finishing",
       questions: [
         {
-          id: "color_work", type: "radio", label: "Color", allowUnknown: true,
+          id: "color_work", type: "radio", label: "Color grading (an additional cost)", allowUnknown: true,
           options: [
-            { value: "grade", label: "A full grade" },
-            { value: "correct", label: "Basic correction and matching" },
+            { value: "grade", label: "Yes, please quote it" },
             { value: "none", label: "None needed" },
           ],
         },

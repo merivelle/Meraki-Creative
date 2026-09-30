@@ -4,8 +4,8 @@ import { breadcrumbs, faqNode, graph, pageMetadata, pageNode, serviceNode } from
 import { JsonLd } from "@/components/site/JsonLd";
 import { WorkCard } from "@/components/site/WorkCard";
 import { CtaBand } from "@/components/site/blocks";
-import { Faqs, LineIcon, ProcessRows, QuickViews, WebServiceCards, cardIndex } from "@/components/site/WebDesign";
-import { INCLUDED_HIGHLIGHTS, PRICING_NOTE_SHORT, PROCESS, WEB_SERVICES } from "@/content/web-design";
+import { Faqs, LineIcon, ProcessRows, QuickViews, ServiceCards, cardIndex } from "@/components/site/Services";
+import { INCLUDED_HIGHLIGHTS, PRICING_NOTE_SHORT, PROCESS, WEB_AREA, WEB_STUDIO } from "@/content/web-design";
 
 const PATH = "/web-design";
 const TITLE = "Website Design for Actors & Filmmakers | Los Angeles";
@@ -60,7 +60,7 @@ export default async function WebDesignPage() {
             <h2 className="display display-md">A site for every story.</h2>
             <p className="body-2">{PRICING_NOTE_SHORT}</p>
           </div>
-          <WebServiceCards services={WEB_SERVICES} />
+          <ServiceCards services={WEB_STUDIO} area={WEB_AREA} />
         </div>
       </section>
 
@@ -127,7 +127,7 @@ export default async function WebDesignPage() {
         primary={{ href: startHref, label: "Start Your Project" }}
       />
 
-      <QuickViews services={WEB_SERVICES} />
+      <QuickViews services={WEB_STUDIO} area={WEB_AREA} />
     </>
   );
 }

@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { legacyRedirects } from "@/lib/redirects";
 import { seedPackages } from "@/content/seed";
 import { ADDON_GROUPS, ADDONS, WEB_SERVICES } from "@/content/web-design";
+import { POST_SERVICES } from "@/content/post-production";
 import { parseTimecode, formatTimecode } from "@/lib/timecode";
 import { preselect } from "@/lib/inquiry/definition";
 import { checkFormToken, issueFormToken } from "@/lib/security/abuse";
@@ -17,17 +18,17 @@ describe("legacy redirects", () => {
 });
 
 describe("package prices", () => {
-  // Website packages were repriced in Sep 2026 (introductory starting prices), so only the
-  // other packages still carry the legacy prices verbatim.
-  it("match legacy/packages.html exactly (non-web packages)", () => {
+  // Website and editing packages were repriced in Sep 2026 (one starting price per service),
+  // so only the (retired, admin-only) bundles still carry the legacy prices verbatim.
+  it("match legacy/packages.html exactly (bundles)", () => {
     const html = readFileSync("legacy/packages.html", "utf8");
-    for (const p of seedPackages.filter((x) => x.categoryId !== "web-design")) {
+    for (const p of seedPackages.filter((x) => x.categoryId === "bundles")) {
       const block = html.split(`id="${p.slug}"`)[1]?.split("</article>")[0];
       expect(block, `anchor #${p.slug} exists in legacy page`).toBeDefined();
       expect(block).toContain(`<h3>${p.name}</h3>`);
       expect(block).toContain(`<p class="price"><b>${p.priceDisplay}</b></p>`);
     }
-    expect(seedPackages).toHaveLength(15); // 9 legacy (post + bundles) + 6 website packages
+    expect(seedPackages).toHaveLength(14); // 6 editing + 6 website + 2 bundles
   });
 
   it("website packages come straight from the Web Design source", () => {
@@ -39,6 +40,38 @@ describe("package prices", () => {
       expect(p.priceDisplay).toBe(svc.price);
       expect(p.priceDisplay).toMatch(/^From \$[\d,]+$/);
       expect(p.label).not.toMatch(/most booked/i);
+    }
+  });
+
+  it("editing packages come straight from the Post-Production source", () => {
+    const post = seedPackages.filter((p) => p.categoryId === "post-production");
+    expect(post.map((p) => p.slug)).toEqual(POST_SERVICES.map((s) => s.pkg));
+    for (const p of post) {
+      const svc = POST_SERVICES.find((s) => s.pkg === p.slug)!;
+      expect(p.priceDisplay).toBe(svc.price);
+      expect(p.priceDisplay).toMatch(/^(From \$[\d,]+( per clip)?|Quote on request)$/);
+      expect(p.name).toBe(svc.pkgName);
+    }
+  });
+});
+
+describe("post-production services", () => {
+  it.each(POST_SERVICES.map((s) => [s.name, s] as const))("%s has a complete, consistent entry", (_, s) => {
+    expect(s.highlights.length).toBeGreaterThanOrEqual(4);
+    expect(s.highlights.length).toBeLessThanOrEqual(5);
+    expect(s.faqs.length).toBeGreaterThanOrEqual(3);
+    expect(s.faqs.length).toBeLessThanOrEqual(4);
+    expect(s.addonGroups.length).toBeGreaterThan(0);
+    expect(existsSync(`public${s.art}`), s.art).toBe(true);
+  });
+  it("uses unique paths and package slugs", () => {
+    expect(new Set(POST_SERVICES.map((s) => s.path)).size).toBe(POST_SERVICES.length);
+    expect(new Set(POST_SERVICES.map((s) => s.pkg)).size).toBe(POST_SERVICES.length);
+  });
+  it("never offers color grading as a service, only as an add-on", () => {
+    for (const s of POST_SERVICES) {
+      expect(s.name.toLowerCase()).not.toContain("color");
+      for (const sec of s.sections) for (const i of sec.items) expect(i.toLowerCase()).not.toContain("grade");
     }
   });
 });
@@ -80,7 +113,8 @@ describe("timecodes", () => {
 
 describe("inquiry preselection", () => {
   it("accepts the original ?package=<name> links", () => {
-    expect(preselect(seedPackages, { package: "Demo Reel Refresh" })).toEqual({ package: "reel-refresh", services: ["post-production"] });
+    expect(preselect(seedPackages, { package: "Demo Reel Edit" })).toEqual({ package: "demo-reel", services: ["post-production"] });
+    expect(preselect(seedPackages, { package: "Trailer Edit" })).toEqual({ package: "trailer", services: ["post-production"] });
   });
   it("accepts ?service=", () => {
     expect(preselect(seedPackages, { service: "web-design" })).toEqual({ services: ["web-design"] });
@@ -92,8 +126,10 @@ describe("inquiry preselection", () => {
     expect(preselect(seedPackages, { service: "creative-materials" })).toEqual({});
     expect(preselect(seedPackages, { package: "Pitch Deck Package" })).toEqual({});
   });
-  it("bundles preselect the package but no single service", () => {
-    expect(preselect(seedPackages, { package: "acting-package" })).toEqual({ package: "acting-package" });
+  it("retired tiers and bundles preselect nothing on the public site", () => {
+    const live = seedPackages.filter((p) => p.categoryId !== "bundles");
+    expect(preselect(live, { package: "acting-package" })).toEqual({});
+    expect(preselect(live, { package: "Demo Reel Refresh" })).toEqual({});
   });
 });
 

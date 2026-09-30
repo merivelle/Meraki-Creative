@@ -10,7 +10,7 @@ export const CONTENT_TAG = "public-content";
 
 // Creative Materials was retired from the public site (Sep 2026). Rows may still be
 // published in Supabase (and past projects reference the category), so hide them here.
-const RETIRED: CategoryId[] = ["creative-materials"];
+const RETIRED: CategoryId[] = ["creative-materials", "bundles"];
 const offered = (x: { categoryId: CategoryId }) => !RETIRED.includes(x.categoryId);
 
 const bySort = <T extends { sort: number }>(a: T, b: T) => a.sort - b.sort;

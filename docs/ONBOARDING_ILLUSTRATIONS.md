@@ -67,6 +67,22 @@ My suggestion: **A**. It says "website" at a glance and still sits with the othe
 The welcome screen is dark, so this one is shown inverted, as cream line art. Generate it as
 black ink like the others.
 
+## Post-Production cards (optional, Sep 2026)
+
+The six Post-Production service cards borrow engravings from the set above for now. To give
+each its own, generate these with the same style block, save them to `design/onboarding/`,
+run `npm run optimize:art`, then point that service's `art` in
+`src/content/post-production.ts` at the new `.webp`.
+
+| File | Service | Subject line to add after the style block |
+|---|---|---|
+| `post-reel.png` | Demo reels | Subject: a coiled strip of 35mm film loosely unspooling from a small reel. |
+| `post-scene.png` | Scene edits | Subject: an antique wooden film clapperboard with hinged striped sticks, slightly open. |
+| `post-teaser.png` | Teasers | Subject: a small brass handheld film viewer with a film strip threaded through it. |
+| `post-trailer.png` | Trailers | Subject: a 1920s cinema projector with two reels, three-quarter view. |
+| `post-film.png` | Short films | Subject: a vintage upright Moviola editing machine with two reels on top. |
+| `post-social.png` | Social cutdowns | Subject: a pair of antique film-editing splicer scissors resting on a short strip of film. |
+
 ## Notes
 
 - Keep them as a set: same line weight, similar object size, and lots of empty space around

@@ -3,7 +3,7 @@
  * exactly so styles.css (src/styles/site.css) applies unchanged.
  */
 import Link from "next/link";
-import type { Faq, PackageItem, ProcessStep, ServiceItem, Testimonial } from "@/lib/content/types";
+import type { Faq, ProcessStep, ServiceItem, Testimonial } from "@/lib/content/types";
 
 export function Rule() {
   return <hr className="rule" />;
@@ -245,63 +245,6 @@ export function FaqSection({ faqs, slate = "Questions", heading = "Before you as
         <IndexList rows={faqs.map((f) => ({ role: "Q", title: f.question, desc: f.answer }))} />
       </div>
     </section>
-  );
-}
-
-/** Start-a-project link for a package. Keeps the original ?package=<name> contract. */
-export const packageHref = (p: Pick<PackageItem, "name">) => `/start?package=${encodeURIComponent(p.name)}`;
-
-export function PackageCard({ pkg, withId = true, compact = false, detailsHref }: {
-  pkg: PackageItem;
-  withId?: boolean;
-  compact?: boolean;
-  detailsHref?: string;
-}) {
-  const items = compact ? pkg.included.slice(0, 3) : pkg.included;
-  return (
-    <article className={`pkg-item${pkg.featured ? " is-featured" : ""}`} id={withId ? pkg.slug : undefined}>
-      <span className="pkg-meta">{pkg.label}</span>
-      <h3>{pkg.name}</h3>
-      <p className="price"><b>{pkg.priceDisplay}</b></p>
-      <ul className="incl">
-        {items.map((i) => <li key={i}>{i}</li>)}
-      </ul>
-      {!compact && pkg.tagline && (
-        <p className="muted" style={{ fontStyle: "italic", fontSize: "0.88rem" }}>{pkg.tagline}</p>
-      )}
-      {detailsHref ? (
-        <Link href={detailsHref} className="txt-link">Details</Link>
-      ) : (
-        <Link href={packageHref(pkg)} className="txt-link">Start Your Project</Link>
-      )}
-    </article>
-  );
-}
-
-/** Packages grouped under slate headings (Demo Reels, Scene Edits, …) in their stored order. */
-export function PackageGroups({ packages, firstPadded = true }: { packages: PackageItem[]; firstPadded?: boolean }) {
-  const groups: { title: string; items: PackageItem[] }[] = [];
-  for (const p of packages) {
-    const g = groups.find((x) => x.title === p.groupTitle);
-    if (g) g.items.push(p);
-    else groups.push({ title: p.groupTitle, items: [p] });
-  }
-  return (
-    <>
-      {groups.map((g, i) => {
-        const cols = g.items.length === 1 ? "1fr" : g.items.length === 2 ? "repeat(2,1fr)" : undefined;
-        return (
-          <section className="section" key={g.title} style={i === 0 && firstPadded ? undefined : { paddingTop: 0 }}>
-            <div className="wrap">
-              <div className="index-head reveal"><span className="slate-tag">{g.title}</span></div>
-              <div className="pkg-feature reveal" style={cols ? { gridTemplateColumns: cols } : undefined}>
-                {g.items.map((p) => <PackageCard key={p.id} pkg={p} />)}
-              </div>
-            </div>
-          </section>
-        );
-      })}
-    </>
   );
 }
 

@@ -6,6 +6,7 @@
  * New copy is logged in docs/COPY_FOR_REVIEW.md for sign-off.
  */
 import type { ProcessStep } from "@/lib/content/types";
+import type { ServiceArea, StudioService } from "./services";
 
 /** Optional additions at their approved one-time starting prices. */
 export const ADDONS = {
@@ -271,3 +272,32 @@ export const PROCESS: ProcessStep[] = [
   { tag: "Step 03", title: "Design, build, refine", body: "You review a working preview and send one set of notes per round." },
   { tag: "Step 04", title: "Go live and hand over", body: "We connect your domain, run final checks, and show you around." },
 ];
+
+/** Web services in the shared shape the cards, popups, and service pages render from. */
+export const WEB_AREA: ServiceArea = {
+  base: "/web-design",
+  allLabel: "All web design services",
+  pricingNote: PRICING_NOTE_SHORT,
+  popupNote: POPUP_NOTE,
+  addonsNote: SUBSCRIPTIONS_NOTE,
+  prepareNote: PREPARE_NOTE,
+  ctaLede: "Tell us what you're making, what materials you have, and when you'd like it live. We'll help define the scope and send a clear quote.",
+};
+
+export const toStudio = (s: WebService): StudioService => ({
+  key: s.key, path: s.path, pkg: s.pkg, name: s.name, price: s.price, card: s.card, art: s.art,
+  highlights: s.highlights, addonNote: s.addonNote, audience: s.audience,
+  sections: [
+    { title: "Core pages", items: s.core },
+    ...(s.entries ? [{ title: "Project entries", items: [s.entries] }] : []),
+    { title: "Included", items: s.includes },
+  ],
+  separate: s.separate,
+  addonGroups: ADDON_GROUPS
+    .map((g) => ({ title: g.title, items: g.keys.filter((k) => s.addons.includes(k)).map((k) => ADDONS[k]) }))
+    .filter((g) => g.items.length),
+  addonFootnote: s.key === "production" ? "A custom client portal or dashboard is its own project, not an add-on." : undefined,
+  materials: s.materials, faqs: s.faqs, cta: s.cta,
+});
+
+export const WEB_STUDIO: StudioService[] = WEB_SERVICES.map(toStudio);

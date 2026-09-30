@@ -116,13 +116,11 @@ export function inquiryDefinition(packages: Pkg[]): FormDefinition {
             id: "post_type", type: "multiselect", label: "What kind of edit?", required: true,
             options: [
               { value: "demo-reel", label: "Demo reel" },
-              { value: "reel-refresh", label: "Reel refresh" },
               { value: "scene", label: "Scene edit" },
               { value: "trailer", label: "Trailer" },
               { value: "teaser", label: "Teaser" },
               { value: "short-film", label: "Short film" },
               { value: "social", label: "Social edits" },
-              { value: "color", label: "Color grading" },
               { value: "other", label: "Something else" },
             ],
           },

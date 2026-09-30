@@ -26,6 +26,43 @@ worth doing.
 - Published Supabase rows for the category are hidden in code; archive them in Admin whenever
   convenient, and edit the Filmmaker Package there too (the seed only covers fresh databases).
 
+## Sep 2026: Post-Production in three stages (same as Web Design) — please review
+`/post-production` now mirrors `/web-design`: hero, six service cards with quick views, three
+selected edits, "Included in every edit.", a hover-opening process, FAQs, and a page per
+service at `/post-production/<service>`. All copy lives in `src/content/post-production.ts`.
+
+**Packages retired.** No tiers anywhere: one starting price per service. `/packages` (and
+`packages.html`) 308 to `/services`; the Acting / Filmmaker bundles are hidden (kept in admin).
+"View Packages" buttons now read "View Services" (homepage) or "See the Work" (services page).
+
+**Color grading is not a service.** Removed: the Color Grading service row, the two
+before/after grade pieces from the Work, "color grades" in page copy and SEO keywords, and the
+"Color grading" / "Reel refresh" options in the Start questionnaire. It survives only as the
+add-on "Color grading — Quoted separately" and a yes/no in the post discovery form.
+
+**Starting prices** (researched for a new studio; LA reel editors charge from about $150,
+editors roughly $100 per finished minute, social clips $50–150):
+
+| Service | Price | Notes |
+|---|---|---|
+| Demo reels | From $150 | You asked for reel lower than scene |
+| Scene edits | From $200 | One scene, up to three minutes |
+| Teasers | From $350 | Your price |
+| Trailers | From $850 | Your price |
+| Short films | Quote on request | Quoted on runtime and footage |
+| Social cutdowns | From $75 per clip | |
+
+**To confirm:**
+- "Two revision rounds" is now stated as included in every edit (old packages said it for some).
+- Add-ons are all "Quoted separately" except a social cutdown (from $75 per clip): color
+  grading, captions or subtitles, extra version or aspect ratio, extra revision round, rush.
+- FAQ "Do you handle color and sound too?" now reads "Do you handle sound and color too?":
+  sound is part of every edit; color grading is an additional cost.
+- Card art borrows existing engravings; prompts for dedicated ones are in
+  `docs/ONBOARDING_ILLUSTRATIONS.md`.
+- Hero line: "Post-production for storytellers." Services heading: "An edit for every story."
+  Work heading: "Stories we've helped shape." Process: "How an edit comes together."
+
 ## Sep 2026: Web Design in three stages (main page → quick view → service page)
 All website copy and prices come from one file, `src/content/web-design.ts` (services, card
 sentences, popup highlights, service-page scope, add-ons, materials, service FAQs, process).

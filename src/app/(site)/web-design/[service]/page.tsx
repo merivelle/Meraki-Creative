@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import { breadcrumbs, faqNode, graph, pageMetadata, pageNode, serviceNode } from "@/lib/seo";
 import { JsonLd } from "@/components/site/JsonLd";
-import { WebServicePage } from "@/components/site/WebServicePage";
-import { WEB_SERVICES, webServiceByPath } from "@/content/web-design";
+import { ServiceDetailPage } from "@/components/site/Services";
+import { WEB_AREA, WEB_SERVICES, toStudio, webServiceByPath } from "@/content/web-design";
 
 type Params = { params: Promise<{ service: string }> };
 
@@ -41,7 +41,7 @@ export default async function WebServiceRoute({ params }: Params) {
         breadcrumbs([{ name: "Home", path: "/" }, { name: "Web Design", path: "/web-design" }, { name: s.name, path }]),
         faqNode(path, faqs),
       )} />
-      <WebServicePage s={s} />
+      <ServiceDetailPage s={toStudio(s)} area={WEB_AREA} />
     </>
   );
 }
