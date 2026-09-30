@@ -5,7 +5,9 @@ import { seedPackages } from "@/content/seed";
 import { ADDON_GROUPS, ADDONS, WEB_SERVICES } from "@/content/web-design";
 import { POST_SERVICES } from "@/content/post-production";
 import { parseTimecode, formatTimecode } from "@/lib/timecode";
-import { inquiryDefinition, preselect } from "@/lib/inquiry/definition";
+import { briefDefinition, inquiryDefinition, preselect } from "@/lib/inquiry/definition";
+import { validate, validateDefinition, visibleQuestions } from "@/lib/forms/engine";
+import { formDataToAnswers } from "@/lib/forms/formdata";
 import { answerLines, answerSections } from "@/lib/inquiry/summary";
 import { inquiryStudioEmail } from "@/lib/email/inquiry-email";
 import { checkFormToken, issueFormToken } from "@/lib/security/abuse";
@@ -164,6 +166,56 @@ describe("studio inquiry email", () => {
   it("escapes what visitors type", () => {
     expect(e.html).not.toContain("<script>");
     expect(e.html).toContain("Ada &lt;script&gt;");
+  });
+});
+
+describe("start: links, web questions, and the design brief", () => {
+  const def = inquiryDefinition(seedPackages);
+  const base = { name: "Ada", email: "ada@example.test", client_type: "actor", services: ["web-design"], goal: "A site", description: "Hi", budget: "unsure", web_scope: "small", web_domain: "no", web_content: "some", web_updates: "self" };
+
+  it("both definitions are valid", () => {
+    expect(validateDefinition(def)).toEqual([]);
+    expect(validateDefinition(briefDefinition())).toEqual([]);
+  });
+
+  it("reads link rows with notes from the form, skipping empty rows", () => {
+    const fd = new FormData();
+    fd.set("links.0.url", "vimeo.com/123");
+    fd.set("links.0.note", "My reel");
+    fd.set("links.1.url", "");
+    fd.set("links.1.note", "");
+    fd.set("links.2.url", "https://example.test/site");
+    const r = validate(def, { ...base, links: formDataToAnswers(def, fd).links }, {}, "submit");
+    expect(r.cleaned.links).toEqual([{ url: "https://vimeo.com/123", note: "My reel" }, { url: "https://example.test/site" }]);
+  });
+
+  it("asks web clients the three new questions", () => {
+    const { errors } = validate(def, { ...base, web_domain: undefined, web_content: undefined, web_updates: undefined }, {}, "submit");
+    expect(Object.keys(errors)).toEqual(expect.arrayContaining(["web_domain", "web_content", "web_updates", "brief_gate"]));
+  });
+
+  it("shows the brief only to web clients who opt in", () => {
+    const ids = (a: Record<string, unknown>) => visibleQuestions(def, a as never).map((q) => q.id);
+    expect(ids({ ...base, brief_gate: "no" })).not.toContain("brief_mood");
+    expect(ids({ ...base, services: ["post-production"], brief_gate: "yes" })).not.toContain("brief_mood");
+    expect(ids({ ...base, brief_gate: "yes" })).toEqual(expect.arrayContaining(["brief_mood", "brief_sections", "brief_self_edit"]));
+    expect(ids({ ...base, web_updates: "studio", brief_gate: "yes" })).not.toContain("brief_self_edit");
+  });
+
+  it("keeps the homepage section order as given", () => {
+    const r = validate(def, { ...base, brief_gate: "yes", brief_sections: ["contact", "hero", "about"] }, {}, "submit");
+    expect(r.cleaned.brief_sections).toEqual(["contact", "hero", "about"]);
+  });
+
+  it("emails the brief as its own part, with swatches and the order", () => {
+    const a = { ...base, brief_gate: "yes", brief_mood: "cinematic", brief_hex: "#7b2d26, #17150f", brief_sections: ["hero", "work"] };
+    const e = inquiryStudioEmail({ sections: answerSections(def, a) });
+    expect(e.text).toContain("DESIGN BRIEF");
+    expect(e.text).toContain("Which feels closest?: Cinematic & dark");
+    expect(e.html).toContain("background:#7b2d26");
+    expect(e.html).toContain("Showreel or opening image");
+    const b = inquiryStudioEmail({ sections: answerSections(briefDefinition(), { name: "Ada", email: "ada@example.test", brief_mood: "warm" }), kind: "brief" });
+    expect(b.subject).toBe("Design brief: Ada");
   });
 });
 

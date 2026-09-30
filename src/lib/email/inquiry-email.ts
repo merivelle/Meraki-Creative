@@ -20,10 +20,16 @@ const mono = (size = 11, color = C.soft) =>
   `font-family:${MONO};font-size:${size}px;line-height:1.4;letter-spacing:0.12em;text-transform:uppercase;color:${color};`;
 
 /** Answers that the header block already shows; the sections below skip them. */
-const IN_HEADER = new Set(["name", "email", "client_type", "business_name", "services", "package", "goal", "description"]);
+const IN_HEADER = new Set(["name", "email", "client_type", "business_name", "services", "package", "goal", "description", "brief_gate"]);
 const SECTION_TITLES: Record<string, string> = { project: "Links" };
 
-export function inquiryStudioEmail(p: { sections: AnswerSection[]; received?: Date }): EmailContent {
+const isBrief = (id: string) => id.startsWith("brief_");
+// Main answers first, then links, then the design brief (with its own divider).
+const rank = (id: string) => (isBrief(id) ? 2 : id === "project" ? 1 : 0);
+const HEX = /^#[0-9a-f]{6}$/i;
+
+export function inquiryStudioEmail(p: { sections: AnswerSection[]; received?: Date; kind?: "inquiry" | "brief" }): EmailContent {
+  const kind = p.kind ?? "inquiry";
   const all = new Map(p.sections.flatMap((s) => s.rows.map((r) => [r.id, r] as const)));
   const get = (id: string) => all.get(id)?.value ?? "";
   const name = get("name");
@@ -39,14 +45,35 @@ export function inquiryStudioEmail(p: { sections: AnswerSection[]; received?: Da
   const rest = p.sections
     .map((s) => ({ ...s, title: SECTION_TITLES[s.id] ?? s.title, rows: s.rows.filter((r) => !IN_HEADER.has(r.id)) }))
     .filter((s) => s.rows.length)
-    .sort((x, y) => Number(x.id === "project") - Number(y.id === "project")); // links read best last
+    .sort((x, y) => rank(x.id) - rank(y.id));
 
-  const value = (r: AnswerSection["rows"][number]) =>
-    r.id === "links" && r.items
-      ? r.items.map((u) => `<a href="${esc(u.split(" (")[0])}" style="color:${C.accent};text-decoration:underline;word-break:break-all">${esc(u)}</a>`).join("<br>")
-      : esc(r.value).replace(/\n/g, "<br>");
+  const link = (u: string) => {
+    const [href, ...note] = u.split(" (");
+    const text = note.length ? `${esc(href)}<br><span style="color:${C.ink2};font-size:14px">${esc(note.join(" (").replace(/\)$/, ""))}</span>` : esc(href);
+    return `<a href="${esc(href)}" style="color:${C.accent};text-decoration:underline;word-break:break-all">${text}</a>`;
+  };
+  const value = (r: AnswerSection["rows"][number]) => {
+    if (r.items && r.items.every((u) => /^https?:\/\//.test(u))) return r.items.map(link).join(`<div style="height:10px"></div>`);
+    if (r.id === "brief_sections" && r.items) {
+      return r.items.map((x, i) => `<span style="${mono(10, C.accent)}">${String(i + 1).padStart(2, "0")}</span>&nbsp;&nbsp;${esc(x)}`).join("<br>");
+    }
+    if (r.id === "brief_hex") {
+      return r.value.split(/[\s,]+/).filter((h) => HEX.test(h)).map((h) =>
+        `<span style="display:inline-block;margin:0 10px 6px 0;white-space:nowrap"><span style="display:inline-block;width:18px;height:18px;vertical-align:middle;background:${h};border:1px solid ${C.line}"></span>&nbsp;<span style="${mono(10, C.ink)}">${esc(h)}</span></span>`).join("");
+    }
+    return esc(r.value).replace(/\n/g, "<br>");
+  };
+  const firstBrief = rest.findIndex((s) => isBrief(s.id));
 
-  const sectionsHtml = rest.map((s, i) => `
+  const sectionsHtml = rest.map((s, i) => `${i === firstBrief && kind === "inquiry" ? `
+    <tr><td style="padding:10px 32px 26px">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+        <td style="background:${C.night};padding:16px 20px">
+          <div style="${mono(10, C.accentSoft)}">Design brief</div>
+          <div style="margin-top:6px;font-family:${SANS};font-size:15px;color:${C.paper}">${esc(first)} went deeper on the look, pages, and practicalities.</div>
+        </td>
+      </tr></table>
+    </td></tr>` : ""}
     <tr><td style="padding:0 32px 26px">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid ${C.ink}">
         <tr><td colspan="2" style="padding:14px 0 6px;${mono(11, C.ink)}">
@@ -65,7 +92,7 @@ export function inquiryStudioEmail(p: { sections: AnswerSection[]; received?: Da
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<title>New inquiry from ${esc(name)}</title>
+<title>${kind === "brief" ? "Design brief from" : "New inquiry from"} ${esc(name)}</title>
 </head>
 <body style="margin:0;padding:0;background:${C.paper2}">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">${esc([get("goal"), tags.join(", ")].filter(Boolean).join(" · "))}</div>
@@ -76,7 +103,7 @@ export function inquiryStudioEmail(p: { sections: AnswerSection[]; received?: Da
   <tr><td style="background:${C.night};padding:20px 32px">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
       <td style="font-family:${SANS};font-size:18px;font-weight:800;letter-spacing:-0.02em;color:${C.paper}">Meraki Creative<span style="color:${C.accentSoft}">.</span></td>
-      <td align="right" style="${mono(10, C.accentSoft)}">New inquiry</td>
+      <td align="right" style="${mono(10, C.accentSoft)}">${kind === "brief" ? "Design brief" : "New inquiry"}</td>
     </tr></table>
   </td></tr>
 
@@ -110,7 +137,7 @@ export function inquiryStudioEmail(p: { sections: AnswerSection[]; received?: Da
   ${sectionsHtml}
 
   <tr><td style="background:${C.night};padding:22px 32px">
-    <div style="${mono(10, C.accentSoft)}">Start a Project · merakicreative.co</div>
+    <div style="${mono(10, C.accentSoft)}">${kind === "brief" ? "Design brief" : "Start a Project"} · merakicreative.co</div>
     <div style="margin-top:8px;font-family:${SANS};font-size:13px;line-height:1.5;color:#B9B3A6">Replying to this email goes straight to ${esc(name)} at ${esc(email)}.</div>
   </td></tr>
 
@@ -120,7 +147,7 @@ export function inquiryStudioEmail(p: { sections: AnswerSection[]; received?: Da
 </body></html>`;
 
   const text = [
-    `NEW INQUIRY · ${when} PT`,
+    `${kind === "brief" ? "DESIGN BRIEF" : "NEW INQUIRY"} · ${when} PT`,
     "",
     name,
     ...(who ? [who] : []),
@@ -129,9 +156,13 @@ export function inquiryStudioEmail(p: { sections: AnswerSection[]; received?: Da
     "",
     ...(get("goal") ? ["THE GOAL", get("goal"), ""] : []),
     ...(get("description") ? ["THE PROJECT", get("description"), ""] : []),
-    ...rest.flatMap((s, i) => [`( ${String(i + 1).padStart(2, "0")} ) ${s.title.toUpperCase()}`, ...s.rows.map((r) => `${r.label}: ${r.value}`), ""]),
+    ...rest.flatMap((s, i) => [
+      ...(i === firstBrief && kind === "inquiry" ? ["———— DESIGN BRIEF ————", ""] : []),
+      `( ${String(i + 1).padStart(2, "0")} ) ${s.title.toUpperCase()}`, ...s.rows.map((r) => `${r.label}: ${r.value}`), "",
+    ]),
     `Reply to this email to answer ${first} directly.`,
   ].join("\n");
 
-  return { subject: `New inquiry: ${name}${tags.length ? ` · ${tags[0]}` : ""}`, text, html };
+  const subject = kind === "brief" ? `Design brief: ${name}` : `New inquiry: ${name}${tags.length ? ` · ${tags[0]}` : ""}`;
+  return { subject, text, html };
 }

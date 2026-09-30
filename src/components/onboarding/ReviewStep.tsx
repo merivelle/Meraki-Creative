@@ -9,7 +9,17 @@ function display(q: Question, v: unknown): string {
   if (v === UNKNOWN) return "I don't know";
   const opts = choiceOptions(q);
   const lbl = (x: string) => opts.find((o) => o.value === x)?.label ?? x;
-  if (Array.isArray(v)) return v.map((x) => (typeof x === "string" ? lbl(x) : JSON.stringify(x))).join(", ");
+  if (Array.isArray(v)) {
+    return v
+      .map((x) => {
+        if (typeof x === "string") return lbl(x);
+        const r = x as { url?: string; note?: string };
+        if (!r.url && !r.note) return "";
+        return [r.url, r.note].filter(Boolean).join(" — ");
+      })
+      .filter(Boolean)
+      .join(q.type === "reference_list" ? " · " : ", ");
+  }
   if (q.type === "date" && typeof v === "string") {
     const d = new Date(v + "T12:00:00");
     return Number.isNaN(d.getTime()) ? v : d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });

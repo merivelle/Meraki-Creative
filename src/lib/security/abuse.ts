@@ -43,6 +43,8 @@ export function checkFormToken(token: string | null, now = Date.now()): "ok" | "
 
 /** Returns true when allowed. Fails open (with a log) if the database is unreachable. */
 export async function rateLimit(key: string, windowSeconds: number, max: number): Promise<boolean> {
+  // Email-only mode (no database yet): nothing to count against, so allow quietly.
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !serverEnv.supabaseServiceRoleKey) return true;
   try {
     const { data, error } = await createAdminClient().rpc("check_rate_limit", {
       p_key: key,

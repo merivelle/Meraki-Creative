@@ -26,6 +26,37 @@ worth doing.
 - Published Supabase rows for the category are hidden in code; archive them in Admin whenever
   convenient, and edit the Filmmaker Package there too (the seed only covers fresh databases).
 
+## Sep 2026: Start a Project, link rows + Web Design deep-dive ("design brief") — please review
+All wording lives in `src/lib/inquiry/steps.ts` (screen titles and leads) and
+`src/lib/inquiry/definition.ts` (questions and options).
+
+**Links step.** Lead: "Your current site, a reel, the film. Add a note so I know what each one
+is." Each row: URL + note ("What is it, or what do you like about it?"), "+ Add another link".
+
+**New required web questions** (after "Do you have a website now?"):
+- "Do you already own a domain?" (lead: "Your own address, like yourname.com.") Yes / No / Not sure
+- "Are your words, photos, and video ready?" Ready / Some of it / Not yet
+- "Once it's live, who makes changes?" I'd like to make small edits myself / The studio makes
+  updates for me / Not sure yet
+
+**The opt-in** (web clients, after contact details): "Want to go deeper?" — "About five
+minutes, and every screen can be skipped. It helps me design what you're picturing."
+Yes, let's go / Skip for now.
+
+**The twelve brief screens** (all optional): Which feels closest? (mood cards + light/dark) ·
+In your words. · Colours. · Type & logo. · Which pages do you need? · What goes on the
+homepage? (ordered) · Anything the site should do? · Which languages? · Sites you love. ·
+Words, photos, and video. · Domain & accounts. · Sign-off & timing.
+
+**Thank-you page offer** (web clients who skipped): "While it's fresh — Want to tell me more
+about the design? The look, the pages, the colours. About five minutes, and you can skip
+anything." → `/start/design` ("Tell me more." / "The look, the feel, the pages. Everything
+you're picturing."), which emails a separate "Design brief: [name]". Its thank-you: "Thank
+you. That helps a lot."
+
+**To confirm:** mood names (Minimal & editorial, Cinematic & dark, Warm & classic, Bold &
+graphic, Soft & romantic), palette names, type style names, and the homepage section list.
+
 ## Sep 2026: Post-Production in three stages (same as Web Design) — please review
 `/post-production` now mirrors `/web-design`: hero, six service cards with quick views, three
 selected edits, "Included in every edit.", a hover-opening process, FAQs, and a page per

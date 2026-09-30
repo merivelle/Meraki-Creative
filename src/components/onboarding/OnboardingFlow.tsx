@@ -14,25 +14,43 @@ import Link from "next/link";
 import { allQuestions, evaluate, validate, visibleQuestions } from "@/lib/forms/engine";
 import type { Answers, FormDefinition, Question } from "@/lib/forms/types";
 import type { InquiryState } from "@/lib/inquiry/submit";
-import { STEPS, STORAGE_KEY, WELCOME_ILLUSTRATION, type Step } from "@/lib/inquiry/steps";
+import { LAST_INQUIRY_KEY, STEPS_WITH_BRIEF, STORAGE_KEY, WELCOME_ILLUSTRATION, type Display, type Step } from "@/lib/inquiry/steps";
 import { submitInquiry } from "@/app/(onboarding)/start/actions";
 import { KEYS, StepChoice, choiceOptions, isMulti } from "./StepChoice";
 import { ReviewStep } from "./ReviewStep";
 import { WordReveal } from "./WordReveal";
+import { ColorPicks, LinkRows, MoodSample, OrderedPicker, PaletteSample, TypeSample } from "./BriefControls";
 
 type Props = {
   def: FormDefinition;
   initial: Answers;
-  packageNames: Record<string, string>;
+  packageNames?: Record<string, string>;
   token: string;
-  preselected: string;
+  preselected?: string;
   turnstileSiteKey: string;
+  /** The screens to walk through. Defaults to the full Start a Project flow. */
+  steps?: Step[];
+  action?: (prev: InquiryState, fd: FormData) => Promise<InquiryState>;
+  storageKey?: string;
+  welcomeArt?: string | null;
+  /** /start/design: prefill name and email from the inquiry just sent in this tab. */
+  prefillFromLast?: boolean;
 };
 
 const AUTO_ADVANCE_MS = 420;
+const CHOICE_DISPLAYS: Display[] = ["cards", "chips", "moodCards", "typeCards", "paletteCards"];
+const SAMPLES: Partial<Record<Display, (v: string) => React.ReactNode>> = {
+  moodCards: (v) => <MoodSample value={v} />,
+  typeCards: (v) => <TypeSample value={v} />,
+  paletteCards: (v) => <PaletteSample value={v} />,
+};
 
-export function OnboardingFlow({ def, initial, packageNames, token, preselected, turnstileSiteKey }: Props) {
-  const [state, formAction, pending] = useActionState<InquiryState, FormData>(submitInquiry, { status: "idle" });
+export function OnboardingFlow({
+  def, initial, packageNames = {}, token, preselected = "", turnstileSiteKey,
+  steps: STEPS = STEPS_WITH_BRIEF, action = submitInquiry, storageKey = STORAGE_KEY,
+  welcomeArt = WELCOME_ILLUSTRATION, prefillFromLast = false,
+}: Props) {
+  const [state, formAction, pending] = useActionState<InquiryState, FormData>(action, { status: "idle" });
   const [answers, setAnswers] = useState<Answers>(initial);
   const [currentId, setCurrentId] = useState<string>("welcome");
   const [hydrated, setHydrated] = useState(false);
@@ -48,7 +66,7 @@ export function OnboardingFlow({ def, initial, packageNames, token, preselected,
   const flowFor = useCallback((a: Answers) => {
     const vis = new Set(visibleQuestions(def, a).map((q) => q.id));
     return { vis, flow: STEPS.filter((s) => s.kind !== "question" || s.questions.some((q) => vis.has(q.id))) };
-  }, [def]);
+  }, [def, STEPS]);
 
   const { vis: visible, flow } = flowFor(answers);
   const index = Math.max(0, flow.findIndex((s) => s.id === currentId));
@@ -59,11 +77,17 @@ export function OnboardingFlow({ def, initial, packageNames, token, preselected,
   // ---- Mount: restore saved progress, work out where "Close" should go ----
   useEffect(() => {
     try {
-      const saved = JSON.parse(sessionStorage.getItem(STORAGE_KEY) ?? "null") as { answers: Answers; currentId: string } | null;
-      if (saved?.answers) {
+      const saved = JSON.parse(sessionStorage.getItem(storageKey) ?? "null") as { answers: Answers; currentId: string } | null;
+      const last = prefillFromLast
+        ? (JSON.parse(sessionStorage.getItem(LAST_INQUIRY_KEY) ?? "null") as { name?: string; email?: string } | null)
+        : null;
+      const fromLast: Answers = last ? { ...(last.name ? { name: last.name } : {}), ...(last.email ? { email: last.email } : {}) } : {};
+      if (saved?.answers || last) {
         // Anything preselected by the link wins over older saved answers.
-        setAnswers({ ...saved.answers, ...initial });
-        if (saved.currentId && saved.currentId !== "welcome") setCurrentId(saved.currentId);
+        const merged = { ...fromLast, ...(saved?.answers ?? {}), ...initial };
+        answersRef.current = merged;
+        setAnswers(merged);
+        if (saved?.currentId && saved.currentId !== "welcome") setCurrentId(saved.currentId);
       }
     } catch { /* storage unavailable: start fresh */ }
     try {
@@ -78,9 +102,9 @@ export function OnboardingFlow({ def, initial, packageNames, token, preselected,
   useEffect(() => {
     if (!hydrated) return;
     try {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ answers, currentId }));
+      sessionStorage.setItem(storageKey, JSON.stringify({ answers, currentId }));
     } catch { /* ignore */ }
-  }, [answers, currentId, hydrated]);
+  }, [answers, currentId, hydrated, storageKey]);
 
   // ---- Server response: show errors on the step they belong to ----
   useEffect(() => {
@@ -181,8 +205,10 @@ export function OnboardingFlow({ def, initial, packageNames, token, preselected,
       return;
     }
     if (typing || e.metaKey || e.ctrlKey || e.altKey || e.key.length !== 1) return;
-    const sq = step.questions.find((q) => q.display === "cards" || q.display === "chips");
-    if (!sq) return;
+    // Letter shortcuts only where a screen has a single visible set of choices.
+    const choices = step.questions.filter((q) => CHOICE_DISPLAYS.includes(q.display) && visible.has(q.id));
+    if (choices.length !== 1) return;
+    const sq = choices[0];
     const q = questions[sq.id];
     const opts = choiceOptions(q);
     const i = KEYS.indexOf(e.key.toUpperCase());
@@ -209,12 +235,23 @@ export function OnboardingFlow({ def, initial, packageNames, token, preselected,
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     // Final client check across every visible step before handing to the server.
-    const r = validate(def, answersRef.current, {}, "submit");
+    const a = answersRef.current;
+    const r = validate(def, a, {}, "submit");
     if (!r.ok) {
       e.preventDefault();
       setErrors(r.errors);
       const first = flow.find((s) => s.questions.some((q) => r.errors[q.id]));
       if (first) setCurrentId(first.id);
+      return;
+    }
+    // Remember who sent it, so the thank-you page can offer the design brief and prefill it.
+    if (!prefillFromLast) {
+      try {
+        const services = Array.isArray(a.services) ? (a.services as string[]) : [];
+        sessionStorage.setItem(LAST_INQUIRY_KEY, JSON.stringify({
+          name: a.name, email: a.email, web: services.includes("web-design"), briefDone: a.brief_gate === "yes",
+        }));
+      } catch { /* ignore */ }
     }
   };
 
@@ -260,9 +297,9 @@ export function OnboardingFlow({ def, initial, packageNames, token, preselected,
             >
               {s.kind === "welcome" ? (
                 <div className="ob-welcome">
-                  {WELCOME_ILLUSTRATION && (
+                  {welcomeArt && (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img className="ob-welcome-art" src={WELCOME_ILLUSTRATION} alt="" width={260} height={260} />
+                    <img className="ob-welcome-art" src={welcomeArt} alt="" width={260} height={260} />
                   )}
                   <h1 id={titleId} className="ob-title display display-xl" tabIndex={-1}>
                     <WordReveal text={s.title} />
@@ -323,11 +360,16 @@ export function OnboardingFlow({ def, initial, packageNames, token, preselected,
                           "aria-labelledby": many ? `${fid}-label` : titleId,
                         } as const;
                         let control: React.ReactNode;
+                        const labelledBy = many ? `${fid}-label` : titleId;
                         switch (sq.display) {
                           case "cards":
                           case "chips":
+                          case "moodCards":
+                          case "typeCards":
+                          case "paletteCards":
                             control = (
-                              <StepChoice q={q} display={sq.display} value={val} labelledBy={many ? `${fid}-label` : titleId}
+                              <StepChoice q={q} display={sq.display === "chips" ? "chips" : "cards"} value={val} labelledBy={labelledBy}
+                                sample={SAMPLES[sq.display]}
                                 onChange={(v) => setAnswer(q.id, v, Boolean(s.autoAdvance) && !isMulti(q))} />
                             );
                             break;
@@ -337,10 +379,24 @@ export function OnboardingFlow({ def, initial, packageNames, token, preselected,
                               onChange={(e) => setAnswer(q.id, e.currentTarget.value)} />;
                             break;
                           case "links":
-                            control = <LinksField common={common} value={val} onChange={(v) => setAnswer(q.id, v)} />;
+                            control = (
+                              <LinkRows name={q.id} firstId={fid} value={val} labelledBy={labelledBy}
+                                noteLabel={q.type === "reference_list" && q.noteLabel ? q.noteLabel : "What is it?"}
+                                max={q.type === "reference_list" && q.maxItems ? q.maxItems : 10}
+                                onChange={(v) => setAnswer(q.id, v)} />
+                            );
+                            break;
+                          case "colors":
+                            control = <ColorPicks name={q.id} firstId={fid} value={val} labelledBy={labelledBy} onChange={(v) => setAnswer(q.id, v)} />;
+                            break;
+                          case "order":
+                            control = (
+                              <OrderedPicker name={q.id} options={"options" in q ? q.options : []} value={val} labelledBy={labelledBy}
+                                onChange={(v) => setAnswer(q.id, v)} />
+                            );
                             break;
                           default:
-                            control = <input {...common} className="ob-input" type={sq.display === "email" ? "email" : sq.display === "date" ? "date" : "text"}
+                            control = <input {...common} className="ob-input" type={sq.display === "email" ? "email" : sq.display === "date" ? "date" : sq.display === "url" ? "url" : "text"}
                               autoComplete={q.id === "name" ? "name" : q.id === "email" ? "email" : q.id === "business_name" ? "organization" : "off"}
                               value={(val as string) ?? ""} placeholder={q.placeholder}
                               maxLength={"maxLength" in q ? q.maxLength : undefined}
@@ -395,26 +451,5 @@ export function OnboardingFlow({ def, initial, packageNames, token, preselected,
         )}
       </form>
     </div>
-  );
-}
-
-function LinksField({ common, value, onChange }: {
-  common: Record<string, unknown>;
-  value: Answers[string];
-  onChange: (v: string[]) => void;
-}) {
-  const [text, setText] = useState(Array.isArray(value) ? (value as string[]).join("\n") : "");
-  return (
-    <textarea
-      {...common}
-      className="ob-input ob-textarea"
-      rows={4}
-      value={text}
-      placeholder="https://"
-      onChange={(e) => {
-        setText(e.currentTarget.value);
-        onChange(e.currentTarget.value.split(/\n+/).map((s) => s.trim()).filter(Boolean));
-      }}
-    />
   );
 }

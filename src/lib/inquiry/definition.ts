@@ -1,8 +1,8 @@
 /**
- * The public inquiry: only the preliminary questions needed to assess and quote a
- * project. Detailed discovery happens later in the client portal questionnaires.
+ * The public inquiry: the questions needed to assess and quote a project, plus an optional
+ * Web Design deep-dive ("design brief") for web clients who want to go further.
  */
-import type { FormDefinition, Option } from "@/lib/forms/types";
+import type { Condition, FormDefinition, Option, Section } from "@/lib/forms/types";
 import type { PackageItem } from "@/lib/content/types";
 
 export const SERVICE_OPTIONS: Option[] = [
@@ -33,7 +33,7 @@ type Pkg = Pick<PackageItem, "slug" | "name" | "categoryId">;
 
 /**
  * Resolve ?service= / ?package= into initial answers. ?package= accepts the package
- * name (the original contact.html contract, e.g. "Demo Reel Refresh") or its slug.
+ * name (the original contact.html contract, e.g. "Demo Reel Edit") or its slug.
  */
 export function preselect(packages: Pkg[], params: { service?: string; package?: string; interest?: string }) {
   const answers: Record<string, string | string[]> = {};
@@ -78,7 +78,7 @@ export function inquiryDefinition(packages: Pkg[]): FormDefinition {
           { id: "package", type: "select", label: "Package of interest", options: packageOptions, help: "Optional. It's fine to leave this blank." },
           { id: "goal", type: "text", label: "What's the goal?", required: true, maxLength: 300, placeholder: "e.g. a reel to send to reps, a site for festival season" },
           { id: "description", type: "textarea", label: "Tell me about the project", required: true, maxLength: 4000 },
-          { id: "links", type: "url_list", label: "Existing website, reel, or relevant links", help: "One per line. Optional.", maxItems: 10 },
+          { id: "links", type: "reference_list", label: "Links to look at", noteLabel: "What is it, or what do you like about it?", maxItems: 10 },
         ],
       },
       {
@@ -95,6 +95,23 @@ export function inquiryDefinition(packages: Pkg[]): FormDefinition {
             ],
           },
           { id: "web_existing", type: "yes_no_unsure", label: "Do you have a website now?" },
+          { id: "web_domain", type: "yes_no_unsure", label: "Do you already own a domain?", required: true },
+          {
+            id: "web_content", type: "radio", label: "Are your words, photos, and video ready?", required: true,
+            options: [
+              { value: "ready", label: "Ready" },
+              { value: "some", label: "Some of it" },
+              { value: "not-yet", label: "Not yet" },
+            ],
+          },
+          {
+            id: "web_updates", type: "radio", label: "Once it's live, who makes changes?", required: true,
+            options: [
+              { value: "self", label: "I'd like to make small edits myself" },
+              { value: "studio", label: "The studio makes updates for me" },
+              { value: "unsure", label: "Not sure yet" },
+            ],
+          },
           {
             id: "web_features", type: "multiselect", label: "Anything beyond pages?",
             options: [
@@ -154,6 +171,259 @@ export function inquiryDefinition(packages: Pkg[]): FormDefinition {
           { id: "notes", type: "textarea", label: "Anything else I should know?", maxLength: 2000 },
         ],
       },
+      {
+        id: "brief_start",
+        title: "Design brief",
+        showIf: { key: "services", op: "includes", value: "web-design" },
+        questions: [
+          {
+            id: "brief_gate", type: "radio", label: "Want to go deeper?", required: true,
+            options: [
+              { value: "yes", label: "Yes, let's go" },
+              { value: "no", label: "Skip for now" },
+            ],
+          },
+        ],
+      },
+      ...briefSections("inline"),
+    ],
+  };
+}
+
+/* ------------------------------------------------------------------------------------------
+ * The optional Web Design deep-dive ("design brief"). Every question in it is optional.
+ * "inline":     inside /start, only for web clients who opt in; a few questions follow
+ *               earlier answers (domain, current site, who updates it).
+ * "standalone": /start/design, offered on the thank-you page to anyone who skipped it.
+ * ---------------------------------------------------------------------------------------- */
+
+export const MOOD_OPTIONS: Option[] = [
+  { value: "minimal", label: "Minimal & editorial" },
+  { value: "cinematic", label: "Cinematic & dark" },
+  { value: "warm", label: "Warm & classic" },
+  { value: "bold", label: "Bold & graphic" },
+  { value: "soft", label: "Soft & romantic" },
+  { value: "unsure", label: "Not sure yet" },
+];
+
+export const PALETTE_OPTIONS: Option[] = [
+  { value: "mono", label: "Black & white" },
+  { value: "neutral", label: "Warm neutrals" },
+  { value: "earth", label: "Earth & rust" },
+  { value: "jewel", label: "Deep jewel tones" },
+  { value: "pastel", label: "Soft pastels" },
+  { value: "slate", label: "Cool slate" },
+  { value: "studio", label: "Let the studio choose" },
+];
+
+export const TYPE_OPTIONS: Option[] = [
+  { value: "serif", label: "Classic serif" },
+  { value: "sans", label: "Clean sans" },
+  { value: "display", label: "Bold display" },
+  { value: "typewriter", label: "Typewriter" },
+  { value: "script", label: "Handwritten accent" },
+];
+
+export const SECTION_OPTIONS: Option[] = [
+  { value: "hero", label: "Showreel or opening image" },
+  { value: "about", label: "About / bio" },
+  { value: "work", label: "Selected work" },
+  { value: "current", label: "Current project" },
+  { value: "credits", label: "Credits" },
+  { value: "press", label: "Press & awards" },
+  { value: "testimonials", label: "Testimonials" },
+  { value: "services", label: "Services" },
+  { value: "instagram", label: "Instagram" },
+  { value: "newsletter", label: "Newsletter signup" },
+  { value: "contact", label: "Contact" },
+];
+
+const READY: Option[] = [
+  { value: "ready", label: "Ready" },
+  { value: "some", label: "Some of it" },
+  { value: "not-yet", label: "Not yet" },
+];
+
+export function briefSections(mode: "inline" | "standalone"): Section[] {
+  const opted: Condition | undefined = mode === "inline"
+    ? { all: [{ key: "services", op: "includes", value: "web-design" }, { key: "brief_gate", op: "equals", value: "yes" }] }
+    : undefined;
+  const when = (c: Condition): Condition | undefined => (mode === "inline" ? c : undefined);
+  return [
+    {
+      id: "brief_look", title: "Look & feel", showIf: opted,
+      questions: [
+        { id: "brief_mood", type: "radio", label: "Which feels closest?", options: MOOD_OPTIONS },
+        {
+          id: "brief_tone", type: "radio", label: "Light or dark?",
+          options: [{ value: "light", label: "Light" }, { value: "dark", label: "Dark" }, { value: "mix", label: "A mix" }],
+        },
+      ],
+    },
+    {
+      id: "brief_words_section", title: "In your words", showIf: opted,
+      questions: [
+        { id: "brief_words", type: "text", label: "Three words for how it should feel", maxLength: 200, placeholder: "e.g. quiet, warm, cinematic" },
+        { id: "brief_avoid", type: "text", label: "Anything it should never feel like?", maxLength: 300 },
+      ],
+    },
+    {
+      id: "brief_color", title: "Colours", showIf: opted,
+      questions: [
+        { id: "brief_palette", type: "radio", label: "Pick a palette", options: PALETTE_OPTIONS },
+        { id: "brief_hex", type: "text", label: "Exact colours, if you have them", maxLength: 120 },
+      ],
+    },
+    {
+      id: "brief_type_logo", title: "Type & logo", showIf: opted,
+      questions: [
+        { id: "brief_type", type: "multiselect", label: "Pick up to two type styles", options: TYPE_OPTIONS, maxItems: 2 },
+        { id: "brief_fonts", type: "text", label: "Font names you love", maxLength: 200 },
+        { id: "brief_logo", type: "yes_no_unsure", label: "Do you have a logo?" },
+        {
+          id: "brief_brand_link", type: "url", label: "Link to your logo or brand guide (Drive, Dropbox…)",
+          showIf: { key: "brief_logo", op: "equals", value: "yes" },
+        },
+      ],
+    },
+    {
+      id: "brief_structure", title: "Pages", showIf: opted,
+      questions: [
+        {
+          id: "brief_pages", type: "multiselect", label: "Which pages do you need?",
+          options: [
+            { value: "home", label: "Home" },
+            { value: "about", label: "About" },
+            { value: "work", label: "Work / portfolio" },
+            { value: "reel", label: "Reel" },
+            { value: "credits", label: "Credits / résumé" },
+            { value: "films", label: "Films" },
+            { value: "press", label: "Press" },
+            { value: "services", label: "Services" },
+            { value: "news", label: "News / blog" },
+            { value: "shop", label: "Shop" },
+            { value: "contact", label: "Contact" },
+          ],
+        },
+      ],
+    },
+    {
+      id: "brief_order", title: "Homepage order", showIf: opted,
+      questions: [{ id: "brief_sections", type: "multiselect", label: "Homepage sections, in order", options: SECTION_OPTIONS }],
+    },
+    {
+      id: "brief_features_section", title: "Features", showIf: opted,
+      questions: [
+        {
+          id: "brief_features", type: "multiselect", label: "Anything the site should do?",
+          options: [
+            { value: "form", label: "Contact form" },
+            { value: "booking", label: "Booking" },
+            { value: "newsletter", label: "Newsletter signup" },
+            { value: "blog", label: "News or blog" },
+            { value: "shop", label: "Shop" },
+            { value: "private", label: "Private or password area" },
+            { value: "instagram", label: "Instagram feed" },
+          ],
+        },
+        {
+          id: "brief_self_edit", type: "multiselect", label: "What would you like to update yourself?",
+          showIf: when({ key: "web_updates", op: "equals", value: "self" }),
+          options: [
+            { value: "news", label: "News" },
+            { value: "work", label: "Work & media" },
+            { value: "bio", label: "Bio" },
+            { value: "press", label: "Press" },
+          ],
+        },
+      ],
+    },
+    {
+      id: "brief_language", title: "Languages", showIf: opted,
+      questions: [
+        { id: "brief_languages", type: "text", label: "Which languages?", maxLength: 200, placeholder: "English only is fine" },
+        {
+          id: "brief_translation", type: "radio", label: "Who provides the translations?",
+          showIf: { key: "brief_languages", op: "answered" },
+          options: [
+            { value: "client", label: "I'll supply them" },
+            { value: "help", label: "I need help" },
+            { value: "unsure", label: "Not sure" },
+          ],
+        },
+      ],
+    },
+    {
+      id: "brief_refs", title: "Sites you love", showIf: opted,
+      questions: [
+        { id: "brief_love", type: "reference_list", label: "Sites you love", noteLabel: "What do you like about it?", maxItems: 6 },
+        { id: "brief_dislike", type: "reference_list", label: "Sites to steer away from", noteLabel: "What would you avoid?", maxItems: 4 },
+      ],
+    },
+    {
+      id: "brief_content", title: "Content & media", showIf: opted,
+      questions: [
+        {
+          id: "brief_bio", type: "radio", label: "Your bio",
+          options: [{ value: "written", label: "Written" }, { value: "edit", label: "Needs editing" }, { value: "write", label: "Needs writing" }],
+        },
+        { id: "brief_photos", type: "radio", label: "Photos", options: READY },
+        { id: "brief_video", type: "radio", label: "Video", options: [...READY, { value: "none", label: "No video" }] },
+        { id: "brief_press", type: "textarea", label: "Credits, press, or awards to include", maxLength: 2000 },
+      ],
+    },
+    {
+      id: "brief_tech", title: "Tech & ownership", showIf: opted,
+      questions: [
+        {
+          id: "brief_domain_name", type: "text", label: mode === "inline" ? "What's the domain?" : "Your domain, if you have one",
+          maxLength: 200, placeholder: "yourname.com", showIf: when({ key: "web_domain", op: "equals", value: "yes" }),
+        },
+        {
+          id: "brief_registrar", type: "text", label: "Where is it registered?", maxLength: 200, placeholder: "e.g. GoDaddy, Squarespace, Namecheap",
+          showIf: when({ key: "web_domain", op: "equals", value: "yes" }),
+        },
+        { id: "brief_email", type: "yes_no_unsure", label: "Want an email address at your domain?" },
+        {
+          id: "brief_current_platform", type: "text", label: "What's your current site built on?", maxLength: 200, placeholder: "e.g. Wix, Squarespace",
+          showIf: when({ key: "web_existing", op: "equals", value: "yes" }),
+        },
+        {
+          id: "brief_accounts", type: "radio", label: "Accounts (domain, hosting)",
+          options: [
+            { value: "client", label: "In my name" },
+            { value: "studio", label: "The studio manages them" },
+            { value: "unsure", label: "Not sure" },
+          ],
+        },
+      ],
+    },
+    {
+      id: "brief_launch", title: "Decision & go-live", showIf: opted,
+      questions: [
+        { id: "brief_approver", type: "text", label: "Who approves the design?", maxLength: 200, placeholder: "e.g. just me, me and my manager" },
+        { id: "brief_launch_notes", type: "textarea", label: "Anything the go-live date depends on?", maxLength: 1000 },
+      ],
+    },
+  ];
+}
+
+/** The deep-dive on its own (/start/design), for people who skipped it in /start. */
+export function briefDefinition(): FormDefinition {
+  return {
+    key: "design-brief",
+    version: 1,
+    title: "Design brief",
+    sections: [
+      {
+        id: "you",
+        title: "About you",
+        questions: [
+          { id: "name", type: "text", label: "Name", required: true, maxLength: 200 },
+          { id: "email", type: "email", label: "Email", required: true, maxLength: 320 },
+        ],
+      },
+      ...briefSections("standalone"),
     ],
   };
 }

@@ -27,7 +27,7 @@ test("every old .html URL permanently redirects to its new page", async ({ reque
 
 test("public pages render their key content", async ({ page }) => {
   const checks: [string, string][] = [
-    ["/", "The story is"],
+    ["/", "Meraki"],
     ["/web-design", "Website design"],
     ["/post-production", "for storytellers."],
     ["/work", "Stories we"],
@@ -90,7 +90,9 @@ test("the onboarding branches, keeps answers on Back and Edit, and survives a re
   // Required text blocks Continue until answered.
   await page.keyboard.press("b");
   await expect(current()).toHaveAttribute("data-step", "web_scope");
-  for (const k of ["b", "a"]) { await page.keyboard.press(k); await page.waitForTimeout(700); }
+  // size, current site, domain, content ready, who updates it
+  for (const k of ["b", "a", "b", "b", "a"]) { await page.keyboard.press(k); await page.waitForTimeout(700); }
+  await expect(current()).toHaveAttribute("data-step", "web_features");
   await page.getByRole("button", { name: "Skip" }).click(); // extras
   await expect(current()).toHaveAttribute("data-step", "goal");
   await page.getByRole("button", { name: "Continue" }).click();
@@ -99,14 +101,22 @@ test("the onboarding branches, keeps answers on Back and Edit, and survives a re
   await page.keyboard.press("Enter");
   await page.locator("#ob-description").fill("A director site with two shorts and a feature in development.");
   await page.getByRole("button", { name: "Continue" }).click();
-  await page.getByRole("button", { name: "Skip" }).click(); // links
+  // Links: a URL with a note, then a second row.
+  await page.locator("#ob-links").fill("vimeo.com/example");
+  await current().getByPlaceholder("What is it, or what do you like about it?").first().fill("My reel");
+  await page.getByRole("button", { name: "+ Add another link" }).click();
+  await expect(current().locator(".ob-link-row")).toHaveCount(2);
+  await page.getByRole("button", { name: "Continue" }).click();
   await page.getByRole("button", { name: "Skip" }).click(); // timing
   await page.keyboard.press("f"); // budget: unsure
   await page.locator("#ob-name").fill("Test Visitor");
   await page.locator("#ob-email").fill("test@example.test");
-  await page.getByRole("button", { name: "Review" }).click();
+  await page.getByRole("button", { name: "Continue" }).click();
+  await expect(current()).toHaveAttribute("data-step", "brief_gate");
+  await page.keyboard.press("b"); // Skip for now → straight to review
   await expect(current()).toHaveAttribute("data-step", "review");
   await expect(page.locator(".ob-review")).toContainText("Director");
+  await expect(page.locator(".ob-review")).toContainText("vimeo.com/example — My reel");
   // Opening the review must not send anything (no server response on screen).
   await page.waitForTimeout(800);
   await expect(current().locator(".form-error")).toHaveCount(0);
@@ -118,6 +128,43 @@ test("the onboarding branches, keeps answers on Back and Edit, and survives a re
   await expect(page.locator(".ob-review")).toContainText("Production company");
 });
 
+test("web clients can opt into the design brief and order homepage sections", async ({ page }) => {
+  await page.goto("/start?service=web-design");
+  await page.evaluate(() => sessionStorage.clear());
+  await page.reload();
+  await page.getByRole("button", { name: "Begin" }).click();
+  const current = () => page.locator(".ob-step.is-current");
+  await page.getByRole("button", { name: "Continue" }).click();
+  await page.keyboard.press("a"); // actor
+  await expect(current()).toHaveAttribute("data-step", "web_scope");
+  for (const k of ["b", "c", "a", "a", "c"]) { await page.keyboard.press(k); await page.waitForTimeout(700); }
+  await page.getByRole("button", { name: "Skip" }).click(); // extras
+  await page.locator("#ob-goal").fill("A site for casting");
+  await page.keyboard.press("Enter");
+  await page.locator("#ob-description").fill("Headshots, reel, résumé.");
+  await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByRole("button", { name: "Skip" }).click(); // links
+  await page.getByRole("button", { name: "Skip" }).click(); // timing
+  await page.keyboard.press("f");
+  await page.locator("#ob-name").fill("Test Actor");
+  await page.locator("#ob-email").fill("actor@example.test");
+  await page.getByRole("button", { name: "Continue" }).click();
+  await page.keyboard.press("a"); // Yes, let's go
+  await expect(current()).toHaveAttribute("data-step", "brief_look");
+  await expect(current().locator(".ob-sample")).toHaveCount(6);
+  for (let i = 0; i < 5; i++) await page.getByRole("button", { name: "Skip" }).click(); // look, words, colours, type, pages
+  await expect(current()).toHaveAttribute("data-step", "brief_order");
+  await page.getByRole("button", { name: "Selected work", exact: true }).click();
+  await page.getByRole("button", { name: "Contact", exact: true }).click();
+  await page.getByRole("button", { name: "Move Contact up" }).click();
+  await expect(current().locator(".ob-order-label")).toHaveText(["Contact", "Selected work"]);
+});
+
+test("the design brief has its own page", async ({ page }) => {
+  await page.goto("/start/design");
+  await expect(page.locator("h1")).toContainText("Tell me more.");
+});
+
 test("work can be filtered by service and has detail pages", async ({ page }) => {
   await page.goto("/work?service=web-design");
   await expect(page.locator(".site-frame").first()).toBeVisible();
@@ -126,9 +173,14 @@ test("work can be filtered by service and has detail pages", async ({ page }) =>
   await expect(page.locator("h1")).toHaveText("Opa");
 });
 
-test("private areas require sign-in", async ({ request }) => {
+test("private areas require sign-in (or don't exist yet, in email-only mode)", async ({ request }) => {
+  const emailOnly = !process.env.NEXT_PUBLIC_SUPABASE_URL;
   for (const path of ["/portal", "/admin", "/portal/projects/00000000-0000-4000-8000-000000000000"]) {
     const res = await request.get(path, { maxRedirects: 0 });
+    if (emailOnly) {
+      expect(res.status(), path).toBe(404);
+      continue;
+    }
     expect([302, 303, 307], path).toContain(res.status());
     expect(res.headers().location, path).toContain("/login");
   }

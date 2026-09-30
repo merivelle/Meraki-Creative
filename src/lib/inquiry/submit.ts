@@ -11,7 +11,7 @@ import { checkFormToken, clientIpHash, rateLimit, userAgent, verifyTurnstile } f
 import { deliver, queueNotifications } from "@/lib/email/outbox";
 import { templates } from "@/lib/email/templates";
 import type { PackageItem } from "@/lib/content/types";
-import { SERVICE_OPTIONS, inquiryDefinition } from "./definition";
+import { SERVICE_OPTIONS, briefDefinition, inquiryDefinition } from "./definition";
 import { answerSections } from "./summary";
 import { inquiryStudioEmail } from "@/lib/email/inquiry-email";
 
@@ -66,9 +66,12 @@ export async function processInquiry(fd: FormData, packages: Pkg[]): Promise<Inq
   const services = (a.services as string[]) ?? [];
 
   const scope: Record<string, unknown> = {};
-  for (const k of ["web_scope", "web_existing", "web_features", "post_type", "post_runtime", "post_footage_ready", "materials_type", "materials_stage"]) {
+  for (const k of ["web_scope", "web_existing", "web_domain", "web_content", "web_updates", "web_features", "post_type", "post_runtime", "post_footage_ready", "materials_type", "materials_stage"]) {
     if (a[k] !== undefined) scope[k] = a[k];
   }
+  // The optional design brief rides along in scope (jsonb), so nothing is lost once stored.
+  for (const [k, v] of Object.entries(a)) if (k.startsWith("brief_") && v !== undefined) scope[k] = v;
+  const links = ((a.links as { url: string; note?: string }[] | undefined) ?? []).map((l) => (l.note ? `${l.url} — ${l.note}` : l.url));
 
   const serviceLabels = services.map((s) => SERVICE_OPTIONS.find((o) => o.value === s)?.label ?? s).join(", ");
 
@@ -96,7 +99,7 @@ export async function processInquiry(fd: FormData, packages: Pkg[]): Promise<Inq
       package_slug: (a.package as string) ?? null,
       goal: a.goal ?? null,
       description: a.description,
-      links: (a.links as string[]) ?? [],
+      links,
       scope,
       deadline: a.deadline ?? null,
       deadline_fixed: a.deadline_fixed ?? null,
@@ -181,5 +184,50 @@ async function emailOnly(def: FormDefinition, a: Answers, values: Answers): Prom
     idempotencyKey: `inquiry:${key}:receipt`,
     ...templates.inquiryReceipt({ name: String(a.name) }),
   }).then((r) => { if (r.status === "failed") console.error("[inquiry] receipt not sent:", r); }));
+  return { status: "saved" };
+}
+
+/**
+ * The design brief sent on its own from /start/design (after an inquiry). Same spam checks
+ * as the inquiry; it is emailed to the studio as "Design brief: <name>". No receipt: the
+ * visitor already has one for their inquiry.
+ */
+export async function processBrief(fd: FormData): Promise<InquiryState> {
+  const def = briefDefinition();
+  const values = formDataToAnswers(def, fd);
+  if (String(fd.get("botcheck") ?? "") !== "") return { status: "saved" };
+  const timing = checkFormToken(String(fd.get("_t") ?? ""));
+  if (timing === "too_fast") return { status: "saved" };
+  if (timing === "invalid") {
+    return { status: "error", values, formError: "This form expired. Please check your answers and send it again." };
+  }
+  if (!(await verifyTurnstile(String(fd.get("cf-turnstile-response") ?? "") || null))) {
+    return { status: "error", values, formError: "We couldn't confirm you're not a bot. Please try again." };
+  }
+  const ipHash = await clientIpHash();
+  if (!(await rateLimit(`brief:ip:${ipHash}`, 3600, 5))) {
+    return { status: "error", values, formError: "Too many sends from here in a short time. Please try again later, or email the studio directly." };
+  }
+  const result = validate(def, values, {}, "submit");
+  if (!result.ok) {
+    return { status: "error", values, errors: result.errors, formError: "A few answers need another look." };
+  }
+  const a = result.cleaned;
+  const live = process.env.VERCEL_ENV === "production" || process.env.VERCEL_ENV === "preview";
+  if (!serverEnv.studioNotifyEmail && live) {
+    console.error("[brief] STUDIO_NOTIFY_EMAIL is not set; cannot deliver the brief.");
+    return { status: "error", values, formError: SEND_FAILED };
+  }
+  const key = createHash("sha256").update(`brief|${a.email}|${JSON.stringify(a)}`).digest("hex").slice(0, 40);
+  const sent = await sendEmail({
+    to: serverEnv.studioNotifyEmail || "studio@localhost",
+    replyTo: String(a.email),
+    idempotencyKey: `brief:${key}`,
+    ...inquiryStudioEmail({ sections: answerSections(def, a), kind: "brief" }),
+  });
+  if (sent.status === "failed" || (sent.status === "dev_skipped" && live)) {
+    console.error("[brief] studio email not sent:", sent);
+    return { status: "error", values, formError: SEND_FAILED };
+  }
   return { status: "saved" };
 }

@@ -24,24 +24,26 @@ export const isMulti = (q: Question) => q.type === "multiselect";
  * Cards (with optional engraved illustration) or chips. Real radio/checkbox inputs,
  * visually restyled, so it works with the keyboard, screen readers, and without JS.
  */
-export function StepChoice({ q, display, value, onChange, labelledBy }: {
+export function StepChoice({ q, display, value, onChange, labelledBy, sample }: {
   q: Question;
   display: "cards" | "chips";
   value: unknown;
   onChange: (v: string | string[]) => void;
   labelledBy: string;
+  /** Design brief cards: a live preview (type, palette, mood) drawn above the label. */
+  sample?: (value: string) => React.ReactNode;
 }) {
   const opts = choiceOptions(q);
   const multi = isMulti(q);
   const selected = new Set(multi ? ((value as string[] | undefined) ?? []) : value ? [String(value)] : []);
 
   return (
-    <div className={display === "cards" ? "ob-cards" : "ob-chips"} role={multi ? "group" : "radiogroup"} aria-labelledby={labelledBy}>
+    <div className={`${display === "cards" ? "ob-cards" : "ob-chips"}${sample ? " ob-cards-sample" : ""}`} role={multi ? "group" : "radiogroup"} aria-labelledby={labelledBy}>
       {opts.map((o, i) => {
         const art = display === "cards" ? ILLUSTRATIONS[`${q.id}:${o.value}`] : undefined;
         const checked = selected.has(o.value);
         return (
-          <label key={o.value} className={`ob-option${checked ? " is-selected" : ""}${art ? " has-art" : ""}`}>
+          <label key={o.value} className={`ob-option${checked ? " is-selected" : ""}${art ? " has-art" : ""}${sample ? " has-sample" : ""}`}>
             <input
               type={multi ? "checkbox" : "radio"}
               name={q.id}
@@ -64,6 +66,7 @@ export function StepChoice({ q, display, value, onChange, labelledBy }: {
               // eslint-disable-next-line @next/next/no-img-element
               <img className="ob-art" src={art} alt="" width={220} height={220} loading="lazy" decoding="async" />
             )}
+            {sample?.(o.value)}
             <span className="ob-option-label">{o.label}</span>
             {multi && <span className="ob-tick" aria-hidden="true" />}
           </label>
