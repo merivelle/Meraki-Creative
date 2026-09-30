@@ -6,7 +6,8 @@ import { ADDON_GROUPS, ADDONS, WEB_SERVICES } from "@/content/web-design";
 import { POST_SERVICES } from "@/content/post-production";
 import { parseTimecode, formatTimecode } from "@/lib/timecode";
 import { inquiryDefinition, preselect } from "@/lib/inquiry/definition";
-import { answerLines } from "@/lib/inquiry/summary";
+import { answerLines, answerSections } from "@/lib/inquiry/summary";
+import { inquiryStudioEmail } from "@/lib/email/inquiry-email";
 import { checkFormToken, issueFormToken } from "@/lib/security/abuse";
 
 describe("legacy redirects", () => {
@@ -142,6 +143,27 @@ describe("email-only inquiry summary", () => {
     expect(lines.some((l) => l.endsWith("A reel from three scenes."))).toBe(true);
     expect(lines.join("\n")).not.toContain("post-production"); // option value replaced by its label
     expect(lines.some((l) => l.includes("Ada"))).toBe(true);
+  });
+});
+
+describe("studio inquiry email", () => {
+  const def = inquiryDefinition(seedPackages);
+  const e = inquiryStudioEmail({
+    sections: answerSections(def, {
+      name: "Ada <script>", email: "ada@example.test", client_type: "actor", services: ["post-production"],
+      package: "demo-reel", goal: "A reel for reps", description: "Three scenes.", post_type: ["demo-reel"], budget: "500-1000",
+    }),
+  });
+  it("groups the answers under their form sections", () => {
+    expect(e.subject).toBe("New inquiry: Ada <script> · Post-production and editing");
+    expect(e.text).toContain("( 01 ) EDITING SCOPE");
+    expect(e.text).toContain("( 02 ) TIMING AND BUDGET");
+    expect(e.text).toContain("Budget range: $500 to $1,000");
+    expect(e.html).toContain("Demo Reel Edit");
+  });
+  it("escapes what visitors type", () => {
+    expect(e.html).not.toContain("<script>");
+    expect(e.html).toContain("Ada &lt;script&gt;");
   });
 });
 

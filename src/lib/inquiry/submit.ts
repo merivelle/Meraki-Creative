@@ -12,7 +12,8 @@ import { deliver, queueNotifications } from "@/lib/email/outbox";
 import { templates } from "@/lib/email/templates";
 import type { PackageItem } from "@/lib/content/types";
 import { SERVICE_OPTIONS, inquiryDefinition } from "./definition";
-import { answerLines } from "./summary";
+import { answerSections } from "./summary";
+import { inquiryStudioEmail } from "@/lib/email/inquiry-email";
 
 export type InquiryState = {
   status: "idle" | "error" | "saved";
@@ -74,7 +75,7 @@ export async function processInquiry(fd: FormData, packages: Pkg[]): Promise<Inq
   // Email-only mode: until Supabase is connected, the inquiry is emailed to the studio (with
   // every answer, since nothing is stored) and a receipt goes to the visitor, through Resend.
   if (!databaseConfigured()) {
-    return emailOnly(def, a, serviceLabels, values);
+    return emailOnly(def, a, values);
   }
 
   let admin: ReturnType<typeof createAdminClient>;
@@ -155,7 +156,7 @@ const databaseConfigured = () => Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL &&
 
 const SEND_FAILED = "Something went wrong sending your inquiry. Please try again in a moment, or email the studio directly.";
 
-async function emailOnly(def: FormDefinition, a: Answers, serviceLabels: string, values: Answers): Promise<InquiryState> {
+async function emailOnly(def: FormDefinition, a: Answers, values: Answers): Promise<InquiryState> {
   // Missing Resend keys in production must never look like a sent inquiry.
   const live = process.env.VERCEL_ENV === "production" || process.env.VERCEL_ENV === "preview";
   if (!serverEnv.studioNotifyEmail && live) {
@@ -163,9 +164,7 @@ async function emailOnly(def: FormDefinition, a: Answers, serviceLabels: string,
     return { status: "error", values, formError: SEND_FAILED };
   }
   const key = createHash("sha256").update(`${a.email}|${a.name}|${a.description}`).digest("hex").slice(0, 40);
-  const studio = templates.inquiryStudioEmailOnly({
-    name: String(a.name), email: String(a.email), services: serviceLabels, lines: answerLines(def, a),
-  });
+  const studio = inquiryStudioEmail({ sections: answerSections(def, a) });
   const sent = await sendEmail({
     to: serverEnv.studioNotifyEmail || "studio@localhost",
     replyTo: String(a.email),
