@@ -81,6 +81,8 @@ src/app/(auth)/     /login, /forgot-password, /account/set-password, /invite/[to
 src/components/site Public markup, 1:1 with the old HTML (same class names)
 src/components/app  Plain functional portal/admin components (design deferred)
 src/lib/            forms engine, auth guards, email outbox, payments, content, files
+src/content/design/ /start design-brief catalogs: 20 styles, 20 type pairings, 16 palettes
+                    (previews + fonts in src/components/onboarding/design/)
 src/content/        seed.ts (site content transcribed from legacy/), forms/ (questionnaires)
 src/styles/         site.css = the original styles.css (verbatim); app.css + forms.css = functional only
 supabase/           migrations (schema + RLS), local config, auth email templates

@@ -150,9 +150,34 @@ test("web clients can opt into the design brief and order homepage sections", as
   await page.locator("#ob-email").fill("actor@example.test");
   await page.getByRole("button", { name: "Continue" }).click();
   await page.keyboard.press("a"); // Yes, let's go
-  await expect(current()).toHaveAttribute("data-step", "brief_look");
-  await expect(current().locator(".ob-sample")).toHaveCount(6);
-  for (let i = 0; i < 5; i++) await page.getByRole("button", { name: "Skip" }).click(); // look, words, colours, type, pages
+  await expect(current()).toHaveAttribute("data-step", "brief_direction");
+
+  // Directions: two at most; avoiding one un-picks it; preview opens and closes with Escape.
+  const style = (id: string) => current().locator(`input[name="brief_styles"][value="${id}"]`);
+  await style("editorial").check({ force: true });
+  await style("cinematic").check({ force: true });
+  await expect(style("swiss")).toBeDisabled();
+  await current().locator('input[name="brief_styles_avoid"][value="editorial"]').check();
+  await expect(style("editorial")).not.toBeChecked();
+  await page.getByRole("button", { name: "Preview Luxury / fashion larger" }).click();
+  await expect(page.locator(".ds-dialog")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".ds-dialog")).toBeHidden();
+  await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByRole("button", { name: "Skip" }).click(); // your brand
+
+  // Typography: the suggestion only applies when asked.
+  await expect(current()).toHaveAttribute("data-step", "brief_typography");
+  await expect(current().locator('input[name="brief_type_pair"]:checked')).toHaveCount(0);
+  await current().locator(".ds-suggest").getByRole("button", { name: "Apply" }).click();
+  await expect(current().locator('input[name="brief_type_pair"][value="barlow"]')).toBeChecked();
+  await page.getByRole("button", { name: "Continue" }).click();
+
+  // Colour: brand colours reveal the pickers.
+  await current().getByText("Use my existing brand colours").click();
+  await expect(current().getByRole("button", { name: "+ Add a colour" })).toBeVisible();
+  await page.getByRole("button", { name: "Continue" }).click();
+  for (let i = 0; i < 3; i++) await page.getByRole("button", { name: "Skip" }).click(); // layout, finish, pages
   await expect(current()).toHaveAttribute("data-step", "brief_order");
   await page.getByRole("button", { name: "Selected work", exact: true }).click();
   await page.getByRole("button", { name: "Contact", exact: true }).click();

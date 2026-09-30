@@ -26,6 +26,30 @@ worth doing.
 - Published Supabase rows for the category are hidden in code; archive them in Admin whenever
   convenient, and edit the Filmmaker Package there too (the seed only covers fresh databases).
 
+## Sep 30 2026: Design brief v2 (style, type, colour discovery) — please review
+The brief's look-and-feel screens were rebuilt. Catalogs live in `src/content/design/`
+(styles.ts, typography.ts, palettes.ts, options.ts); previews in
+`src/components/onboarding/design/`.
+
+- **Directions** ("Which directions feel right?"): 20 styles with miniature-site previews,
+  10 shown first plus "Explore more styles". Pick up to two, mark any to avoid, Preview
+  opens desktop + phone versions. Sample content follows their "And you are…" answer and
+  uses invented names (Ada Moreau, Jonah Vale, Low Tide, Harbour & Pine, Studio Onda).
+  Imagery is illustration only (SVG scenes), as agreed.
+- **Typography**: 20 real pairings (Satoshi from Fontshare, the rest Google Fonts), filters,
+  one preferred + up to two "Also consider", suggestion strip with Apply. Licensed fonts
+  (PP Editorial New, PP Neue Montreal, PP Hatton, Söhne) are named only, "quoted separately".
+- **Colour**: 16 palettes shown on the same small page, with role-labelled swatches, filters,
+  preferred + alternative, "Use my existing brand colours" (pickers), "Let Meraki choose",
+  "Colours to avoid". Every palette passes WCAG AA for text, muted text, and buttons.
+- **Layout** (8 + help), **Light, motion & texture** (tone, motion in plain language,
+  surface details). Lead: "Optional finishing touches. Ambitious motion is scoped and quoted
+  separately."
+- The email and admin view list styles by name, pairings with roles, palettes with hex values.
+
+**To confirm:** each style's one-line description and tags, the palette mood lines, and the
+pairing descriptions (all in `src/content/design/`).
+
 ## Sep 2026: Start a Project, link rows + Web Design deep-dive ("design brief") — please review
 All wording lives in `src/lib/inquiry/steps.ts` (screen titles and leads) and
 `src/lib/inquiry/definition.ts` (questions and options).

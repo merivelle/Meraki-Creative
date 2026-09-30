@@ -3,12 +3,13 @@
 import { UNKNOWN, type Answers, type Question } from "@/lib/forms/types";
 import type { Step } from "@/lib/inquiry/steps";
 import { choiceOptions } from "./StepChoice";
+import { describeDesignValue } from "@/content/design/describe";
 
 function display(q: Question, v: unknown): string {
   if (v === undefined || v === null || v === "" || (Array.isArray(v) && !v.length)) return "";
   if (v === UNKNOWN) return "I don't know";
   const opts = choiceOptions(q);
-  const lbl = (x: string) => opts.find((o) => o.value === x)?.label ?? x;
+  const lbl = (x: string) => describeDesignValue(q.id, x) ?? opts.find((o) => o.value === x)?.label ?? x;
   if (Array.isArray(v)) {
     return v
       .map((x) => {

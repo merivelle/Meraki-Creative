@@ -13,6 +13,7 @@ import { templates } from "@/lib/email/templates";
 import type { PackageItem } from "@/lib/content/types";
 import { SERVICE_OPTIONS, briefDefinition, inquiryDefinition } from "./definition";
 import { answerSections } from "./summary";
+import { cleanAnswers } from "./clean";
 import { inquiryStudioEmail } from "@/lib/email/inquiry-email";
 
 export type InquiryState = {
@@ -33,7 +34,7 @@ type Pkg = Pick<PackageItem, "slug" | "name" | "categoryId">;
  */
 export async function processInquiry(fd: FormData, packages: Pkg[]): Promise<InquiryState> {
   const def = inquiryDefinition(packages);
-  const values = formDataToAnswers(def, fd);
+  const values = cleanAnswers(def, formDataToAnswers(def, fd));
   // A session saved before Sep 2026 can still carry retired options (package tiers, bundles,
   // color grading). Drop them quietly instead of failing the whole inquiry.
   const livePackages = new Set([...packages.map((p) => p.slug), "single-service"]);
@@ -194,7 +195,7 @@ async function emailOnly(def: FormDefinition, a: Answers, values: Answers): Prom
  */
 export async function processBrief(fd: FormData): Promise<InquiryState> {
   const def = briefDefinition();
-  const values = formDataToAnswers(def, fd);
+  const values = cleanAnswers(def, formDataToAnswers(def, fd));
   if (String(fd.get("botcheck") ?? "") !== "") return { status: "saved" };
   const timing = checkFormToken(String(fd.get("_t") ?? ""));
   if (timing === "too_fast") return { status: "saved" };

@@ -8,6 +8,11 @@ import { parseTimecode, formatTimecode } from "@/lib/timecode";
 import { briefDefinition, inquiryDefinition, preselect } from "@/lib/inquiry/definition";
 import { validate, validateDefinition, visibleQuestions } from "@/lib/forms/engine";
 import { formDataToAnswers } from "@/lib/forms/formdata";
+import { STYLES } from "@/content/design/styles";
+import { PAIRINGS, pairingById } from "@/content/design/typography";
+import { PALETTES, paletteById } from "@/content/design/palettes";
+import { contrast } from "@/lib/color/contrast";
+import { cleanAnswers } from "@/lib/inquiry/clean";
 import { answerLines, answerSections } from "@/lib/inquiry/summary";
 import { inquiryStudioEmail } from "@/lib/email/inquiry-email";
 import { checkFormToken, issueFormToken } from "@/lib/security/abuse";
@@ -196,9 +201,9 @@ describe("start: links, web questions, and the design brief", () => {
 
   it("shows the brief only to web clients who opt in", () => {
     const ids = (a: Record<string, unknown>) => visibleQuestions(def, a as never).map((q) => q.id);
-    expect(ids({ ...base, brief_gate: "no" })).not.toContain("brief_mood");
-    expect(ids({ ...base, services: ["post-production"], brief_gate: "yes" })).not.toContain("brief_mood");
-    expect(ids({ ...base, brief_gate: "yes" })).toEqual(expect.arrayContaining(["brief_mood", "brief_sections", "brief_self_edit"]));
+    expect(ids({ ...base, brief_gate: "no" })).not.toContain("brief_styles");
+    expect(ids({ ...base, services: ["post-production"], brief_gate: "yes" })).not.toContain("brief_styles");
+    expect(ids({ ...base, brief_gate: "yes" })).toEqual(expect.arrayContaining(["brief_styles", "brief_type_pair", "brief_palette", "brief_layout", "brief_motion", "brief_sections", "brief_self_edit"]));
     expect(ids({ ...base, web_updates: "studio", brief_gate: "yes" })).not.toContain("brief_self_edit");
   });
 
@@ -208,14 +213,56 @@ describe("start: links, web questions, and the design brief", () => {
   });
 
   it("emails the brief as its own part, with swatches and the order", () => {
-    const a = { ...base, brief_gate: "yes", brief_mood: "cinematic", brief_hex: "#7b2d26, #17150f", brief_sections: ["hero", "work"] };
+    const a = {
+      ...base, brief_gate: "yes", brief_styles: ["cinematic", "editorial"], brief_type_pair: "instrument", brief_palette: "paper-ink",
+      brief_palette_alt: "brand", brief_hex: "#7b2d26, #17150f", brief_sections: ["hero", "work"], brief_motion: "subtle",
+    };
     const e = inquiryStudioEmail({ sections: answerSections(def, a) });
     expect(e.text).toContain("DESIGN BRIEF");
-    expect(e.text).toContain("Which feels closest?: Cinematic & dark");
+    expect(e.text).toContain("Design directions you like: Cinematic / immersive, Editorial / magazine");
+    expect(e.text).toContain("Instrument Serif (headings) / Instrument Sans (body)");
+    expect(e.text).toContain("Paper & ink — #F7F5F0 / #171717 / #E8E4DC / #A33224");
+    expect(e.html).toContain("background:#A33224");
     expect(e.html).toContain("background:#7b2d26");
     expect(e.html).toContain("Showreel or opening image");
-    const b = inquiryStudioEmail({ sections: answerSections(briefDefinition(), { name: "Ada", email: "ada@example.test", brief_mood: "warm" }), kind: "brief" });
+    const b = inquiryStudioEmail({ sections: answerSections(briefDefinition(), { name: "Ada", email: "ada@example.test", brief_styles: ["organic"] }), kind: "brief" });
     expect(b.subject).toBe("Design brief: Ada");
+  });
+});
+
+describe("design catalogs", () => {
+  it("have the specified number of unique entries", () => {
+    for (const [list, n] of [[STYLES, 20], [PAIRINGS, 20], [PALETTES, 16]] as const) {
+      expect(list).toHaveLength(n);
+      expect(new Set(list.map((x) => x.id)).size).toBe(n);
+    }
+    for (const s of STYLES) expect(s.tags).toHaveLength(3);
+  });
+
+  it("only suggest pairings and palettes that exist", () => {
+    for (const s of STYLES) {
+      for (const id of s.pairings) expect(pairingById(id), `${s.id} → ${id}`).toBeDefined();
+      for (const id of s.palettes) expect(paletteById(id), `${s.id} → ${id}`).toBeDefined();
+    }
+  });
+
+  it("give every palette readable text, muted text, and button text (WCAG AA 4.5:1)", () => {
+    for (const p of PALETTES) {
+      expect(contrast(p.text, p.bg), `${p.name}: text on background`).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(p.muted, p.bg), `${p.name}: muted on background`).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(p.buttonText, p.accent), `${p.name}: button text on accent`).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(p.accentText, p.bg), `${p.name}: accent text on background`).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  it("drops retired choices from old drafts, and never both prefers and avoids a style", () => {
+    const def = briefDefinition();
+    const old = cleanAnswers(def, { name: "A", email: "a@example.test", brief_mood: "soft", brief_palette: "earth", brief_type: ["serif"], brief_styles: ["minimal", "nope"] } as never);
+    expect(old.brief_palette).toBeUndefined();
+    expect(old.brief_styles).toEqual(["minimal"]);
+    expect(validate(def, old, {}, "submit").ok).toBe(true);
+    const both = cleanAnswers(def, { name: "A", email: "a@example.test", brief_styles: ["swiss"], brief_styles_avoid: ["swiss", "grunge"] });
+    expect(both.brief_styles_avoid).toEqual(["grunge"]);
   });
 });
 

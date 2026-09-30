@@ -8,6 +8,9 @@ import { ActionButton } from "@/components/app/ActionButton";
 import { InternalNotes } from "@/components/app/InternalNotes";
 import { CLIENT_TYPE_LABELS, INQUIRY_STATUS_LABELS, fmtDate, fmtDateTime, label, one } from "@/lib/labels";
 import { convertInquiry, requestClarification, setInquiryStatus } from "@/app/admin/_actions/pipeline";
+import { inquiryDefinition } from "@/lib/inquiry/definition";
+import { answerSections } from "@/lib/inquiry/summary";
+import type { Answers } from "@/lib/forms/types";
 
 const CATEGORY_FROM_SERVICE: Record<string, string> = {
   "web-design": "web_design", "post-production": "post_production", "creative-materials": "creative_materials",
@@ -26,7 +29,8 @@ export default async function InquiryPage({ params }: { params: Promise<{ id: st
   ]);
   const services: string[] = inq.services ?? [];
   const suggestedCategory = services.filter((s) => s !== "not-sure").length > 1 ? "bundle" : CATEGORY_FROM_SERVICE[services[0]] ?? "web_design";
-  const scope = Object.entries(inq.scope ?? {}) as [string, unknown][];
+  // Scope answers (including the design brief), labelled the same way as the studio email.
+  const scope = answerSections(inquiryDefinition([]), (inq.scope ?? {}) as Answers).flatMap((sec) => sec.rows);
 
   return (
     <>
@@ -51,11 +55,11 @@ export default async function InquiryPage({ params }: { params: Promise<{ id: st
             <dt>Goal</dt><dd>{inq.goal ?? "—"}</dd>
             <dt>Deadline</dt><dd>{fmtDate(inq.deadline)}{inq.deadline_fixed ? ` (${inq.deadline_fixed})` : ""}</dd>
             <dt>Budget</dt><dd>{inq.budget_range ?? "—"}</dd>
-            {scope.map(([k, v]) => <Fragment key={k}><dt>{k.replace(/_/g, " ")}</dt><dd>{Array.isArray(v) ? v.join(", ") : String(v)}</dd></Fragment>)}
+            {scope.map((r) => <Fragment key={r.id}><dt>{r.label}</dt><dd>{r.value}</dd></Fragment>)}
           </dl>
           <h3>Description</h3>
           <p style={{ whiteSpace: "pre-wrap" }}>{inq.description}</p>
-          {inq.links?.length > 0 && <><h3>Links</h3><ul>{inq.links.map((l: string) => <li key={l}><a href={l} target="_blank" rel="noopener noreferrer" className="txt-link">{l}</a></li>)}</ul></>}
+          {inq.links?.length > 0 && <><h3>Links</h3><ul>{inq.links.map((l: string) => <li key={l}><a href={l.split(" — ")[0]} target="_blank" rel="noopener noreferrer" className="txt-link">{l}</a></li>)}</ul></>}
           {inq.notes && <><h3>Notes</h3><p style={{ whiteSpace: "pre-wrap" }}>{inq.notes}</p></>}
         </section>
 

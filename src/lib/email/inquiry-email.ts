@@ -57,6 +57,12 @@ export function inquiryStudioEmail(p: { sections: AnswerSection[]; received?: Da
     if (r.id === "brief_sections" && r.items) {
       return r.items.map((x, i) => `<span style="${mono(10, C.accent)}">${String(i + 1).padStart(2, "0")}</span>&nbsp;&nbsp;${esc(x)}`).join("<br>");
     }
+    if ((r.id === "brief_palette" || r.id === "brief_palette_alt") && /#[0-9a-f]{6}/i.test(r.value)) {
+      const [name, hexes] = r.value.split(" — ");
+      const chips = (hexes ?? "").split(" / ").filter((h) => HEX.test(h)).map((h, i) =>
+        `<span style="display:inline-block;margin:6px 8px 0 0;white-space:nowrap"><span style="display:inline-block;width:18px;height:18px;vertical-align:middle;background:${h};border:1px solid ${C.line}"></span>&nbsp;<span style="${mono(9, C.soft)}">${["Bg", "Text", "Surface", "Accent"][i]}</span>&nbsp;<span style="${mono(10, C.ink)}">${esc(h)}</span></span>`).join("");
+      return `${esc(name)}<br>${chips}`;
+    }
     if (r.id === "brief_hex") {
       return r.value.split(/[\s,]+/).filter((h) => HEX.test(h)).map((h) =>
         `<span style="display:inline-block;margin:0 10px 6px 0;white-space:nowrap"><span style="display:inline-block;width:18px;height:18px;vertical-align:middle;background:${h};border:1px solid ${C.line}"></span>&nbsp;<span style="${mono(10, C.ink)}">${esc(h)}</span></span>`).join("");

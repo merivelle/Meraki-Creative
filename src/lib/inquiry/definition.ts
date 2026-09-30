@@ -4,6 +4,10 @@
  */
 import type { Condition, FormDefinition, Option, Section } from "@/lib/forms/types";
 import type { PackageItem } from "@/lib/content/types";
+import { STYLES } from "@/content/design/styles";
+import { PAIRINGS, pairingLabel } from "@/content/design/typography";
+import { PALETTES } from "@/content/design/palettes";
+import { LAYOUT_OPTIONS, MOTION_OPTIONS, TONE_OPTIONS, TREATMENT_OPTIONS } from "@/content/design/options";
 
 export const SERVICE_OPTIONS: Option[] = [
   { value: "web-design", label: "Web design" },
@@ -197,32 +201,10 @@ export function inquiryDefinition(packages: Pkg[]): FormDefinition {
  * "standalone": /start/design, offered on the thank-you page to anyone who skipped it.
  * ---------------------------------------------------------------------------------------- */
 
-export const MOOD_OPTIONS: Option[] = [
-  { value: "minimal", label: "Minimal & editorial" },
-  { value: "cinematic", label: "Cinematic & dark" },
-  { value: "warm", label: "Warm & classic" },
-  { value: "bold", label: "Bold & graphic" },
-  { value: "soft", label: "Soft & romantic" },
-  { value: "unsure", label: "Not sure yet" },
-];
-
-export const PALETTE_OPTIONS: Option[] = [
-  { value: "mono", label: "Black & white" },
-  { value: "neutral", label: "Warm neutrals" },
-  { value: "earth", label: "Earth & rust" },
-  { value: "jewel", label: "Deep jewel tones" },
-  { value: "pastel", label: "Soft pastels" },
-  { value: "slate", label: "Cool slate" },
-  { value: "studio", label: "Let the studio choose" },
-];
-
-export const TYPE_OPTIONS: Option[] = [
-  { value: "serif", label: "Classic serif" },
-  { value: "sans", label: "Clean sans" },
-  { value: "display", label: "Bold display" },
-  { value: "typewriter", label: "Typewriter" },
-  { value: "script", label: "Handwritten accent" },
-];
+export const HELP = "help";
+export const STYLE_OPTIONS: Option[] = STYLES.map((s) => ({ value: s.id, label: s.name }));
+export const PAIRING_OPTIONS: Option[] = PAIRINGS.map((p) => ({ value: p.id, label: pairingLabel(p) }));
+export const PALETTE_OPTIONS: Option[] = PALETTES.map((p) => ({ value: p.id, label: p.name }));
 
 export const SECTION_OPTIONS: Option[] = [
   { value: "hero", label: "Showreel or opening image" },
@@ -251,39 +233,63 @@ export function briefSections(mode: "inline" | "standalone"): Section[] {
   const when = (c: Condition): Condition | undefined => (mode === "inline" ? c : undefined);
   return [
     {
-      id: "brief_look", title: "Look & feel", showIf: opted,
+      id: "brief_direction", title: "Direction", showIf: opted,
       questions: [
-        { id: "brief_mood", type: "radio", label: "Which feels closest?", options: MOOD_OPTIONS },
         {
-          id: "brief_tone", type: "radio", label: "Light or dark?",
-          options: [{ value: "light", label: "Light" }, { value: "dark", label: "Dark" }, { value: "mix", label: "A mix" }],
+          id: "brief_styles", type: "multiselect", label: "Design directions you like", maxItems: 2,
+          options: [...STYLE_OPTIONS, { value: HELP, label: "Help me decide" }],
         },
+        { id: "brief_styles_avoid", type: "multiselect", label: "Directions to avoid", options: STYLE_OPTIONS },
       ],
     },
     {
-      id: "brief_words_section", title: "In your words", showIf: opted,
+      id: "brief_brand", title: "Your brand", showIf: opted,
       questions: [
         { id: "brief_words", type: "text", label: "Three words for how it should feel", maxLength: 200, placeholder: "e.g. quiet, warm, cinematic" },
         { id: "brief_avoid", type: "text", label: "Anything it should never feel like?", maxLength: 300 },
-      ],
-    },
-    {
-      id: "brief_color", title: "Colours", showIf: opted,
-      questions: [
-        { id: "brief_palette", type: "radio", label: "Pick a palette", options: PALETTE_OPTIONS },
-        { id: "brief_hex", type: "text", label: "Exact colours, if you have them", maxLength: 120 },
-      ],
-    },
-    {
-      id: "brief_type_logo", title: "Type & logo", showIf: opted,
-      questions: [
-        { id: "brief_type", type: "multiselect", label: "Pick up to two type styles", options: TYPE_OPTIONS, maxItems: 2 },
-        { id: "brief_fonts", type: "text", label: "Font names you love", maxLength: 200 },
         { id: "brief_logo", type: "yes_no_unsure", label: "Do you have a logo?" },
         {
           id: "brief_brand_link", type: "url", label: "Link to your logo or brand guide (Drive, Dropbox…)",
           showIf: { key: "brief_logo", op: "equals", value: "yes" },
         },
+      ],
+    },
+    {
+      id: "brief_typography", title: "Typography", showIf: opted,
+      questions: [
+        {
+          id: "brief_type_pair", type: "radio", label: "Preferred type pairing",
+          options: [...PAIRING_OPTIONS, { value: HELP, label: "Help me choose" }],
+        },
+        { id: "brief_type_alt", type: "multiselect", label: "Also worth considering", options: PAIRING_OPTIONS, maxItems: 2 },
+        { id: "brief_fonts", type: "text", label: "Font names you love", maxLength: 200 },
+      ],
+    },
+    {
+      id: "brief_colour", title: "Colour", showIf: opted,
+      questions: [
+        {
+          id: "brief_palette", type: "radio", label: "Preferred palette",
+          options: [...PALETTE_OPTIONS, { value: "brand", label: "Use my existing brand colours" }, { value: "studio", label: "Let Meraki choose" }],
+        },
+        { id: "brief_palette_alt", type: "radio", label: "An alternative", options: PALETTE_OPTIONS },
+        {
+          id: "brief_hex", type: "text", label: "Your brand colours", maxLength: 120,
+          showIf: { key: "brief_palette", op: "equals", value: "brand" },
+        },
+        { id: "brief_colors_avoid", type: "text", label: "Colours to avoid", maxLength: 200, placeholder: "e.g. no bright pink" },
+      ],
+    },
+    {
+      id: "brief_layout", title: "Layout", showIf: opted,
+      questions: [{ id: "brief_layout", type: "multiselect", label: "Layouts you'd like", options: LAYOUT_OPTIONS }],
+    },
+    {
+      id: "brief_finish", title: "Light, motion & texture", showIf: opted,
+      questions: [
+        { id: "brief_tone", type: "radio", label: "Light or dark?", options: TONE_OPTIONS },
+        { id: "brief_motion", type: "radio", label: "How much movement?", options: MOTION_OPTIONS },
+        { id: "brief_treatments", type: "multiselect", label: "Surface details", options: TREATMENT_OPTIONS },
       ],
     },
     {

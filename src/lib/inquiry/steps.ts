@@ -8,8 +8,11 @@
 
 export type Display =
   | "cards" | "chips" | "text" | "textarea" | "email" | "date" | "url" | "links"
-  // Design brief: choice cards with a live sample, colour pickers, and an ordered list.
-  | "moodCards" | "typeCards" | "paletteCards" | "colors" | "order";
+  // Design brief: colour pickers and an ordered list,
+  | "colors" | "order"
+  // and the art-directed libraries (src/components/onboarding/design/). A library renders its
+  // partner questions too, which are then listed with display "partner".
+  | "styles" | "pairings" | "palettes" | "layouts" | "hinted" | "partner";
 
 export type Step = {
   id: string;
@@ -105,10 +108,28 @@ const REVIEW: Step = { id: "review", kind: "review", label: "Review", title: "He
 
 /** The design brief screens, shared by /start (after the opt-in) and /start/design. */
 export const BRIEF_STEPS: Step[] = [
-  { id: "brief_look", kind: "question", label: "Design brief", title: "Which feels closest?", lead: "Pick the mood, then light or dark.", questions: [{ id: "brief_mood", display: "moodCards" }, { id: "brief_tone", display: "chips" }], skippable: true },
-  { id: "brief_words", kind: "question", label: "Design brief", title: "In your words.", questions: [{ id: "brief_words", display: "text" }, { id: "brief_avoid", display: "text" }], skippable: true },
-  { id: "brief_color", kind: "question", label: "Design brief", title: "Colours.", lead: "Pick a palette. If you already have brand colours, add them too.", questions: [{ id: "brief_palette", display: "paletteCards" }, { id: "brief_hex", display: "colors" }], skippable: true },
-  { id: "brief_type", kind: "question", label: "Design brief", title: "Type & logo.", lead: "Up to two type styles.", questions: [{ id: "brief_type", display: "typeCards" }, { id: "brief_fonts", display: "text" }, { id: "brief_logo", display: "chips" }, { id: "brief_brand_link", display: "url" }], skippable: true },
+  {
+    id: "brief_direction", kind: "question", label: "Design brief", title: "Which directions feel right?",
+    lead: "Choose up to two. Preview any of them larger, and mark anything you'd rather avoid. These are starting points, not a final design.",
+    questions: [{ id: "brief_styles", display: "styles" }, { id: "brief_styles_avoid", display: "partner" }], skippable: true,
+  },
+  { id: "brief_brand", kind: "question", label: "Design brief", title: "In your words.", questions: [{ id: "brief_words", display: "text" }, { id: "brief_avoid", display: "text" }, { id: "brief_logo", display: "chips" }, { id: "brief_brand_link", display: "url" }], skippable: true },
+  {
+    id: "brief_typography", kind: "question", label: "Design brief", title: "Typography.",
+    lead: "Each pairing is a heading font and a body font. Pick one you'd like to start from.",
+    questions: [{ id: "brief_type_pair", display: "pairings" }, { id: "brief_type_alt", display: "partner" }, { id: "brief_fonts", display: "text" }], skippable: true,
+  },
+  {
+    id: "brief_colour", kind: "question", label: "Design brief", title: "Colour.",
+    lead: "Every palette is shown on the same small page, so you're comparing colour and nothing else.",
+    questions: [{ id: "brief_palette", display: "palettes" }, { id: "brief_palette_alt", display: "partner" }, { id: "brief_hex", display: "colors" }, { id: "brief_colors_avoid", display: "text" }], skippable: true,
+  },
+  { id: "brief_layout", kind: "question", label: "Design brief", title: "How should it be laid out?", lead: "Choose any that appeal.", questions: [{ id: "brief_layout", display: "layouts" }], skippable: true },
+  {
+    id: "brief_finish", kind: "question", label: "Design brief", title: "Light, motion & texture.",
+    lead: "Optional finishing touches. Ambitious motion is scoped and quoted separately.",
+    questions: [{ id: "brief_tone", display: "chips" }, { id: "brief_motion", display: "hinted" }, { id: "brief_treatments", display: "chips" }], skippable: true,
+  },
   { id: "brief_pages", kind: "question", label: "Design brief", title: "Which pages do you need?", lead: "Choose any that apply.", questions: [{ id: "brief_pages", display: "chips" }], skippable: true },
   { id: "brief_order", kind: "question", label: "Design brief", title: "What goes on the homepage?", lead: "Tap the sections you want, then put them in order.", questions: [{ id: "brief_sections", display: "order" }], skippable: true },
   { id: "brief_features", kind: "question", label: "Design brief", title: "Anything the site should do?", questions: [{ id: "brief_features", display: "chips" }, { id: "brief_self_edit", display: "chips" }], skippable: true },

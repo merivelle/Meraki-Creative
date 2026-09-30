@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * Controls for the richer /start questions: link rows with a note, colour pickers, an
- * ordered section picker, and the live type/palette/mood samples on design-brief cards.
+ * Controls for the richer /start questions: link rows with a note, colour pickers, and an
+ * ordered section picker.
  * Each one submits plain form fields that formDataToAnswers() already understands.
  */
 import { useEffect, useRef, useState } from "react";
@@ -198,77 +198,5 @@ export function OrderedPicker({ name, options, value, onChange, labelledBy }: {
       </div>
       <p className="visually-hidden" aria-live="polite">{announce}</p>
     </div>
-  );
-}
-
-/* ---------------------------------------------------------------- Live samples */
-
-const SERIF = "'Cormorant Garamond', Georgia, serif";
-const SANS = "var(--font-display)";
-const DISPLAY = "'Anton', Impact, sans-serif";
-const MONO = "var(--font-mono)";
-const SCRIPT = "'Caveat', cursive";
-
-type Look = { bg: string; fg: string; accent: string; font: string; weight: number; style?: string; case?: "upper"; size: string; tracking: string; caption: string; captionFont: string };
-
-const MOODS: Record<string, Look> = {
-  minimal: { bg: "#F4F2EC", fg: "#151515", accent: "#151515", font: SANS, weight: 800, size: "1.4rem", tracking: "-0.04em", caption: "Actor · LA", captionFont: MONO },
-  cinematic: { bg: "#111110", fg: "#EEE7DA", accent: "#C9897F", font: DISPLAY, weight: 400, case: "upper", size: "1.4rem", tracking: "0.02em", caption: "Now showing", captionFont: MONO },
-  warm: { bg: "#EFE3CF", fg: "#3B2A1E", accent: "#9C5A2C", font: SERIF, weight: 600, style: "italic", size: "1.8rem", tracking: "0", caption: "Stories, told slowly", captionFont: SERIF },
-  bold: { bg: "#F1EDE4", fg: "#111111", accent: "#D1432B", font: DISPLAY, weight: 400, case: "upper", size: "1.5rem", tracking: "0", caption: "Director", captionFont: MONO },
-  soft: { bg: "#F3E4E2", fg: "#6A4A55", accent: "#B7848E", font: SERIF, weight: 500, size: "1.75rem", tracking: "0.01em", caption: "with love", captionFont: SCRIPT },
-};
-
-export function MoodSample({ value }: { value: string }) {
-  const m = MOODS[value];
-  if (!m) return <span className="ob-sample ob-sample-unsure" aria-hidden="true"><span>?</span></span>;
-  return (
-    <span className="ob-sample" aria-hidden="true" style={{ background: m.bg, color: m.fg }}>
-      <span className="ob-sample-bar" style={{ background: m.accent }} />
-      <span className="ob-sample-name" style={{ fontFamily: m.font, fontWeight: m.weight, fontStyle: m.style, textTransform: m.case === "upper" ? "uppercase" : undefined, fontSize: m.size, letterSpacing: m.tracking }}>
-        Your Name
-      </span>
-      <span className="ob-sample-cap" style={{ fontFamily: m.captionFont, color: m.accent, fontSize: m.captionFont === SCRIPT ? "1.05rem" : undefined }}>{m.caption}</span>
-    </span>
-  );
-}
-
-const TYPES: Record<string, { font: string; weight: number; size: string; tracking: string; style?: string; case?: "upper" }> = {
-  serif: { font: SERIF, weight: 600, size: "2rem", tracking: "0" },
-  sans: { font: SANS, weight: 700, size: "1.7rem", tracking: "-0.035em" },
-  display: { font: DISPLAY, weight: 400, size: "2rem", tracking: "0.01em", case: "upper" },
-  typewriter: { font: MONO, weight: 500, size: "1.35rem", tracking: "0" },
-  script: { font: SCRIPT, weight: 600, size: "2.2rem", tracking: "0" },
-};
-
-export function TypeSample({ value }: { value: string }) {
-  const t = TYPES[value];
-  if (!t) return null;
-  return (
-    <span className="ob-sample ob-sample-type" aria-hidden="true">
-      <span className="ob-sample-name" style={{ fontFamily: t.font, fontWeight: t.weight, fontSize: t.size, letterSpacing: t.tracking, textTransform: t.case === "upper" ? "uppercase" : undefined }}>
-        Your Name
-      </span>
-      <span className="ob-sample-cap" style={{ fontFamily: t.font }}>Aa Bb Cc 123</span>
-    </span>
-  );
-}
-
-export const PALETTES: Record<string, string[]> = {
-  mono: ["#0E0E0E", "#3A3A3A", "#8C8C8C", "#D9D9D9", "#FAFAFA"],
-  neutral: ["#2E2A24", "#8A7B68", "#C9B99F", "#E8DDCB", "#F6F1E8"],
-  earth: ["#2B1D16", "#7B2D26", "#B5652F", "#D9B38C", "#F1E6D6"],
-  jewel: ["#14213D", "#1F5A4C", "#6B1E3A", "#B08D3C", "#F2EBDD"],
-  pastel: ["#5E5470", "#B7A6D3", "#F2C6C2", "#F7E3B5", "#FBF7F0"],
-  slate: ["#1C2530", "#3F5566", "#7F97A6", "#C5D2DA", "#F1F4F6"],
-};
-
-export function PaletteSample({ value }: { value: string }) {
-  const p = PALETTES[value];
-  if (!p) return <span className="ob-swatches ob-swatches-studio" aria-hidden="true"><span /></span>;
-  return (
-    <span className="ob-swatches" aria-hidden="true">
-      {p.map((c) => <span key={c} style={{ background: c }} />)}
-    </span>
   );
 }

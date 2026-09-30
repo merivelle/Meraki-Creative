@@ -1,0 +1,65 @@
+/*
+ * Design-brief previews: miniature websites. Everything is scoped to .sp, so a preview never
+ * restyles the form around it. Sizes are in em against a font-size tied to the preview's own
+ * width (container units), so each composition scales as a unit: at card and desktop sizes the
+ * page is 62.5em wide; the mobile variant is a narrow 25em page with stacked layouts.
+ */
+.sp {
+  container-type: inline-size;
+  position: relative;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 0;
+}
+.sp[data-v="mobile"] { aspect-ratio: 9 / 16; }
+
+.page {
+  position: absolute; inset: 0; overflow: hidden;
+  font-size: 1.6cqw; line-height: 1.35;
+  background: var(--bg); color: var(--tx);
+  font-family: var(--bf);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+.sp[data-v="mobile"] .page { font-size: 4cqw; }
+.page * { box-sizing: border-box; margin: 0; padding: 0; }
+.page svg { display: block; }
+
+.hd { font-family: var(--hd); }
+.img { position: relative; overflow: hidden; }
+.img > svg { position: absolute; inset: 0; }
+
+/* Layout helpers that collapse on the mobile variant. */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; }
+.g3 { display: grid; grid-template-columns: repeat(3, 1fr); }
+.row { display: flex; align-items: center; justify-content: space-between; }
+.sp[data-v="mobile"] .g2, .sp[data-v="mobile"] .g3 { grid-template-columns: 1fr !important; }
+.sp[data-v="mobile"] .dk { display: none !important; }
+.mo { display: none !important; }
+.sp[data-v="mobile"] .mo { display: revert !important; }
+.sp[data-v="mobile"] .stack { flex-direction: column; align-items: flex-start; }
+
+.nav { display: flex; gap: 1.6em; }
+.sp[data-v="mobile"] .nav { display: none; }
+.burger { display: none; width: 1.4em; height: 0.9em; border-top: 2px solid currentColor; border-bottom: 2px solid currentColor; }
+.sp[data-v="mobile"] .burger { display: block; }
+
+.btn {
+  display: inline-block; padding: 0.7em 1.2em; font-weight: 600; font-size: 0.85em;
+  background: var(--ac); color: var(--bt); white-space: nowrap;
+}
+.link { color: var(--at); text-decoration: underline; text-underline-offset: 0.2em; }
+.muted { color: var(--mu); }
+.cap { font-size: 0.72em; letter-spacing: 0.12em; text-transform: uppercase; }
+
+/* Neobrutalist hard outline + solid offset shadow. */
+.nb { border: 0.18em solid var(--tx); box-shadow: 0.45em 0.45em 0 var(--tx); }
+
+/* Paper grain overlay for textured styles. */
+.grain::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.18; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.6'/></svg>");
+}
+
+@media (prefers-reduced-motion: reduce) { .page * { animation: none !important; transition: none !important; } }

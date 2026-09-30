@@ -298,25 +298,137 @@ html.ob-js .ob:not(.is-live) .ob-begin { display: inline-flex; }
 .ob-order-add:hover { border-color: var(--ink); border-style: solid; }
 .ob-order-add:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* ---- Live samples on design-brief cards ---- */
-.ob-cards-sample { grid-template-columns: repeat(auto-fill, minmax(min(100%, 190px), 1fr)); }
-.ob-cards .ob-option.has-sample { min-height: 0; gap: 0.9rem; padding: 0.7rem 0.7rem 0.9rem; }
-.ob-sample {
-  position: relative; display: flex; flex-direction: column; justify-content: flex-end; gap: 0.3rem;
-  min-height: 118px; padding: 0.9rem 0.9rem 0.8rem; overflow: hidden; border: 1px solid var(--line-soft);
-}
-.ob-sample-bar { position: absolute; top: 0.9rem; left: 0.9rem; width: 1.6rem; height: 3px; }
-.ob-sample-name { line-height: 0.95; white-space: nowrap; }
-.ob-sample-cap { font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; }
-.ob-sample-type { background: var(--paper); color: var(--ink); }
-.ob-sample-type .ob-sample-cap { text-transform: none; letter-spacing: 0; font-size: 0.85rem; color: var(--ink-soft); }
-.ob-sample-unsure { align-items: center; justify-content: center; background: transparent; border-style: dashed; }
-.ob-sample-unsure span { font-family: var(--font-display); font-size: 2rem; color: var(--ink-soft); }
-.ob-option.is-selected .ob-sample-type { background: var(--paper); color: var(--ink); }
-.ob-swatches { display: flex; height: 64px; border: 1px solid var(--line-soft); }
-.ob-swatches span { flex: 1; }
-.ob-swatches-studio span { background: repeating-linear-gradient(135deg, var(--paper-2) 0 8px, var(--paper) 8px 16px); }
-
 /* ---- Thank-you page: offer the design brief ---- */
 .ob-offer { margin-top: 2.2rem; padding: 1.4rem 1.5rem 1.6rem; max-width: 640px; background: var(--paper-2); border-left: 3px solid var(--accent); }
 .ob-offer-text { margin: 0.6rem 0 1.2rem; font-size: 1.08rem; line-height: 1.5; }
+
+/* =================================================================
+   Design brief libraries: style directions, type pairings, palettes,
+   layouts, motion. Previews themselves are scoped in
+   src/components/onboarding/design/preview.module.css.
+   ================================================================= */
+.ds { max-width: 1180px; }
+.ds-status { margin-bottom: 1rem; color: var(--ink-soft); }
+.ds-grid { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.4rem 1.1rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); }
+.ds-grid-type { grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+.ds-grid-palette { grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); }
+.ds-group { margin-top: 2rem; }
+.ds-group-title { margin-bottom: 0.8rem; color: var(--ink-soft); }
+
+.ds-card { display: flex; flex-direction: column; gap: 0.45rem; position: relative; }
+.ds-card[hidden] { display: none; }
+.ds-pick { display: flex; flex-direction: column; gap: 0.6rem; cursor: pointer; }
+.ds-frame, .ds-spec, .ds-palpage {
+  display: block; position: relative; outline: 1px solid var(--line); outline-offset: 0;
+  transition: outline-color .2s, outline-width .2s;
+}
+.ds-pick:hover .ds-frame, .ds-pick:hover .ds-spec, .ds-pick:hover .ds-palpage { outline-color: var(--ink); }
+.ds-card.is-selected .ds-frame, .ds-card.is-selected .ds-spec, .ds-card.is-selected .ds-palpage { outline: 3px solid var(--ink); outline-offset: 3px; }
+.ds-pick:has(input:focus-visible) .ds-frame,
+.ds-pick:has(input:focus-visible) .ds-spec,
+.ds-pick:has(input:focus-visible) .ds-palpage { outline: 3px solid var(--accent); outline-offset: 3px; }
+.ds-card.is-avoided .ds-frame { opacity: .45; filter: grayscale(1); }
+.ds-pick:has(input:disabled) { cursor: not-allowed; }
+.ds-title { display: flex; align-items: baseline; justify-content: space-between; gap: 0.6rem; }
+.ds-name { font-family: var(--font-display); font-weight: 600; font-size: 1.05rem; letter-spacing: -0.01em; line-height: 1.2; }
+.ds-state { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); white-space: nowrap; }
+.ds-card.is-avoided .ds-state { color: var(--ink-soft); }
+.ds-blurb { font-size: 0.9rem; line-height: 1.45; color: var(--ink-2); }
+.ds-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.ds-tags span { font-family: var(--font-mono); font-size: 0.64rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-soft); border: 1px solid var(--line); padding: 0.15rem 0.45rem; }
+.ds-roles { color: var(--ink-soft); font-size: 0.66rem; }
+.ds-actions { display: flex; align-items: center; gap: 1.2rem; margin-top: 0.2rem; }
+.ds-avoid { display: inline-flex; align-items: center; gap: 0.4rem; font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-soft); cursor: pointer; }
+.ds-avoid input { accent-color: var(--ink); width: 1rem; height: 1rem; }
+.ds-avoid input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ds-avoid:has(input:disabled) { opacity: .45; cursor: not-allowed; }
+
+.ds-more { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.6rem; margin-top: 1.6rem; }
+.ds-help { display: inline-flex; align-items: center; gap: 0.55rem; padding: 0.65rem 1rem; border: 1px solid var(--line); cursor: pointer; font-size: 0.98rem; transition: border-color .2s, background-color .2s, color .2s; }
+.ds-help input { accent-color: var(--ink); }
+.ds-help:hover { border-color: var(--ink); }
+.ds-help.is-on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.ds-help.is-on input { accent-color: var(--accent-soft); }
+.ds-help:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ds-note { margin-top: 1.4rem; font-size: 0.85rem; color: var(--ink-soft); max-width: 70ch; }
+
+.ds-filters { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 1.2rem; }
+.ds-filter { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.45rem 0.8rem; border: 1px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; }
+.ds-filter:hover { border-color: var(--ink); }
+.ds-filter.is-on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.ds-filter:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.ds-suggest {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 1.2rem; margin-bottom: 1.2rem; padding: 0.8rem 1rem;
+  background: var(--paper-2); border-left: 3px solid var(--accent); font-size: 0.95rem;
+}
+
+/* ---- Type specimen: identical neutral layout for every pairing ---- */
+.ds-spec {
+  display: flex; flex-direction: column; gap: 0.7rem; min-height: 250px; padding: 1.1rem 1.2rem 1.2rem;
+  background: #FBFAF7; color: #1A1A1A;
+}
+.ds-spec-nav { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: #595959; padding-bottom: 0.6rem; border-bottom: 1px solid #E2DED6; }
+.ds-spec-head { font-size: 1.75rem; line-height: 1.08; margin-top: 0.3rem; }
+.ds-spec-body { font-size: 0.92rem; line-height: 1.55; color: #3A3A3A; }
+.ds-spec-btn { align-self: flex-start; margin-top: auto; font-size: 0.82rem; font-weight: 600; background: #1A1A1A; color: #FBFAF7; padding: 0.55rem 0.95rem; }
+
+/* ---- Palette page: the same small page in every palette ---- */
+.ds-palpage { display: flex; flex-direction: column; gap: 0.55rem; aspect-ratio: 4 / 3; padding: 0.9rem 1rem 0; overflow: hidden; font-family: var(--font-body); }
+.ds-palpage-nav { display: flex; justify-content: space-between; gap: 0.6rem; font-size: 0.66rem; letter-spacing: 0.04em; white-space: nowrap; overflow: hidden; }
+.ds-palpage-head { font-family: var(--font-display); font-weight: 700; font-size: 1.5rem; letter-spacing: -0.02em; line-height: 1.05; margin-top: 0.4rem; }
+.ds-palpage-body { font-size: 0.78rem; line-height: 1.4; }
+.ds-palpage-row { display: flex; align-items: center; gap: 0.9rem; font-size: 0.74rem; }
+.ds-palpage-btn { padding: 0.45rem 0.75rem; font-weight: 600; white-space: nowrap; }
+.ds-palpage-link { font-weight: 600; text-decoration: underline; text-underline-offset: 0.2em; white-space: nowrap; }
+.ds-palpage-panel { margin: auto -1rem 0; padding: 0.6rem 1rem; display: flex; gap: 1rem; font-size: 0.68rem; white-space: nowrap; overflow: hidden; }
+.ds-swatches { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.4rem; }
+.ds-swatches li { display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; }
+.ds-chip { height: 1.4rem; border: 1px solid var(--line); }
+.ds-swatch-text { display: flex; flex-direction: column; font-size: 0.62rem; line-height: 1.25; color: var(--ink-soft); }
+.ds-swatch-text code { font-family: var(--font-mono); color: var(--ink); font-size: 0.64rem; }
+
+/* ---- Layout cards ---- */
+.ds-grid-layout { grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); }
+.ds-layout { display: flex; flex-direction: column; gap: 0.5rem; padding: 0.9rem; border: 1px solid var(--line); cursor: pointer; height: 100%; transition: border-color .2s; }
+.ds-layout:hover { border-color: var(--ink); }
+.ds-layout.is-selected { border: 2px solid var(--ink); padding: calc(0.9rem - 1px); }
+.ds-layout:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ds-layout-art { width: 100%; height: auto; aspect-ratio: 120 / 72; background: var(--paper-2); color: var(--ink-soft); }
+.ds-layout-art rect { fill: currentColor; }
+.ds-layout.is-selected .ds-layout-art { color: var(--ink); }
+.ds-layout-help { display: grid; place-items: center; font-family: var(--font-display); font-size: 2rem; }
+
+/* ---- Motion: radio list with plain-language hints ---- */
+.ds-hinted { display: grid; gap: 0.5rem; max-width: 760px; }
+.ds-hint { display: grid; grid-template-columns: auto 1fr; column-gap: 0.8rem; align-items: baseline; padding: 0.75rem 1rem; border: 1px solid var(--line); cursor: pointer; transition: border-color .2s; }
+.ds-hint input { accent-color: var(--ink); grid-row: span 2; }
+.ds-hint .ds-blurb { grid-column: 2; }
+.ds-hint:hover { border-color: var(--ink); }
+.ds-hint.is-selected { border: 2px solid var(--ink); padding: calc(0.75rem - 1px) calc(1rem - 1px); }
+.ds-hint:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---- Expanded preview dialog ---- */
+.ds-dialog {
+  position: fixed; inset: 0; margin: auto; width: min(1180px, calc(100vw - 2rem)); max-height: calc(100dvh - 2rem);
+  height: fit-content; padding: 0; border: 1px solid var(--line); background: var(--paper); color: var(--ink); overflow: auto;
+}
+.ds-dialog::backdrop { background: rgba(21, 19, 14, 0.55); }
+.ds-dialog-body { padding: clamp(1.1rem, 2.4vw, 1.8rem); display: grid; gap: 1.2rem; }
+.ds-dialog-head { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }
+.ds-dialog-title { font-family: var(--font-display); font-weight: 700; font-size: clamp(1.5rem, 3vw, 2.2rem); letter-spacing: -0.02em; margin-top: 0.3rem; }
+.ds-dialog-blurb { margin: 0.4rem 0 0.6rem; max-width: 60ch; color: var(--ink-2); }
+.ds-close { flex: none; width: 2.4rem; height: 2.4rem; border: 1px solid var(--line); background: var(--paper); font-size: 1.3rem; cursor: pointer; }
+.ds-close:hover { border-color: var(--ink); }
+.ds-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ds-dialog-previews { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.32fr); gap: 1.2rem; align-items: start; }
+.ds-dialog-previews figure { display: grid; gap: 0.45rem; }
+.ds-dialog-previews figure > div { outline: 1px solid var(--line); }
+.ds-dialog-foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+.ds-dialog-note { font-size: 0.9rem; color: var(--ink-2); max-width: 60ch; }
+@media (max-width: 720px) {
+  .ds-dialog-previews { grid-template-columns: 1fr; }
+  .ds-dialog-mobile { max-width: 260px; }
+}
+@media (prefers-reduced-motion: reduce) { .ds-frame, .ds-spec, .ds-palpage { transition: none; } }
+.ds-dialog .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }

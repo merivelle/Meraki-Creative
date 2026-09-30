@@ -19,7 +19,9 @@ import { submitInquiry } from "@/app/(onboarding)/start/actions";
 import { KEYS, StepChoice, choiceOptions, isMulti } from "./StepChoice";
 import { ReviewStep } from "./ReviewStep";
 import { WordReveal } from "./WordReveal";
-import { ColorPicks, LinkRows, MoodSample, OrderedPicker, PaletteSample, TypeSample } from "./BriefControls";
+import { ColorPicks, LinkRows, OrderedPicker } from "./BriefControls";
+import { HintedChoice, LayoutCards, PairingLibrary, PaletteLibrary, StyleGallery } from "./design/Libraries";
+import { dropUnknownChoices } from "@/lib/forms/sanitize";
 
 type Props = {
   def: FormDefinition;
@@ -38,12 +40,9 @@ type Props = {
 };
 
 const AUTO_ADVANCE_MS = 420;
-const CHOICE_DISPLAYS: Display[] = ["cards", "chips", "moodCards", "typeCards", "paletteCards"];
-const SAMPLES: Partial<Record<Display, (v: string) => React.ReactNode>> = {
-  moodCards: (v) => <MoodSample value={v} />,
-  typeCards: (v) => <TypeSample value={v} />,
-  paletteCards: (v) => <PaletteSample value={v} />,
-};
+const CHOICE_DISPLAYS: Display[] = ["cards", "chips"];
+/** Library screens draw their own headings; their partner questions render inside them. */
+const OWN_LABEL: Display[] = ["styles", "pairings", "palettes", "layouts"];
 
 export function OnboardingFlow({
   def, initial, packageNames = {}, token, preselected = "", turnstileSiteKey,
@@ -84,7 +83,8 @@ export function OnboardingFlow({
       const fromLast: Answers = last ? { ...(last.name ? { name: last.name } : {}), ...(last.email ? { email: last.email } : {}) } : {};
       if (saved?.answers || last) {
         // Anything preselected by the link wins over older saved answers.
-        const merged = { ...fromLast, ...(saved?.answers ?? {}), ...initial };
+        // Drop answers to options that no longer exist (older drafts), so they can't block sending.
+        const merged = dropUnknownChoices(def, { ...fromLast, ...(saved?.answers ?? {}), ...initial });
         answersRef.current = merged;
         setAnswers(merged);
         if (saved?.currentId && saved.currentId !== "welcome") setCurrentId(saved.currentId);
@@ -349,7 +349,8 @@ export function OnboardingFlow({
                         const shown = !hydrated || (visible.has(q.id) && evaluate(q.showIf, answers));
                         // Separate labels only when a screen has several fields and this one
                         // isn't simply the screen's own question.
-                        const many = s.questions.length > 1 && q.label !== s.title;
+                        if (sq.display === "partner") return null;
+                        const many = s.questions.length > 1 && q.label !== s.title && !OWN_LABEL.includes(sq.display);
                         const err = errors[q.id];
                         const fid = `ob-${q.id}`;
                         const val = answers[q.id];
@@ -364,14 +365,25 @@ export function OnboardingFlow({
                         switch (sq.display) {
                           case "cards":
                           case "chips":
-                          case "moodCards":
-                          case "typeCards":
-                          case "paletteCards":
                             control = (
-                              <StepChoice q={q} display={sq.display === "chips" ? "chips" : "cards"} value={val} labelledBy={labelledBy}
-                                sample={SAMPLES[sq.display]}
+                              <StepChoice q={q} display={sq.display} value={val} labelledBy={labelledBy}
                                 onChange={(v) => setAnswer(q.id, v, Boolean(s.autoAdvance) && !isMulti(q))} />
                             );
+                            break;
+                          case "styles":
+                            control = <StyleGallery answers={answers} setAnswer={setAnswer} />;
+                            break;
+                          case "pairings":
+                            control = <PairingLibrary answers={answers} setAnswer={setAnswer} />;
+                            break;
+                          case "palettes":
+                            control = <PaletteLibrary answers={answers} setAnswer={setAnswer} />;
+                            break;
+                          case "layouts":
+                            control = <LayoutCards answers={answers} setAnswer={setAnswer} options={"options" in q ? q.options : []} />;
+                            break;
+                          case "hinted":
+                            control = <HintedChoice name={q.id} options={"options" in q ? q.options : []} value={val} labelledBy={labelledBy} onChange={(v) => setAnswer(q.id, v)} />;
                             break;
                           case "textarea":
                             control = <textarea {...common} className="ob-input ob-textarea" rows={5} value={(val as string) ?? ""}
