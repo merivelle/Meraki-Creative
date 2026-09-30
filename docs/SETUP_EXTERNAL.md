@@ -4,6 +4,22 @@ Nothing below has been configured or deployed. The code runs locally with only a
 project; every other integration shows as "Not configured" in Admin → Settings and falls back
 safely (no emails sent, no automatic payment status).
 
+## 0. Going live without Supabase ("email-only mode", Sep 2026)
+
+The public site runs with **no database**. Until Supabase is set up:
+- Pages render from `src/content/seed.ts`.
+- `/start` emails each inquiry to `STUDIO_NOTIFY_EMAIL` with every answer, with Reply-To set
+  to the visitor, and sends the visitor a receipt, all through Resend. If the studio email
+  can't be sent on Vercel, the visitor sees an error instead of a false "sent".
+- `/portal`, `/admin`, `/login`, `/account`, `/invite`, and `/forgot-password` return 404,
+  and the footer hides "Client login".
+
+Vercel env vars for this mode (Preview + Production): `RESEND_API_KEY`,
+`EMAIL_FROM="Meraki Creative <studio@merakicreative.co>"`, `STUDIO_NOTIFY_EMAIL`,
+`NEXT_PUBLIC_SITE_URL=https://www.merakicreative.co`, and `FORM_SIGNING_SECRET` (any long
+random string, e.g. from `openssl rand -hex 32`). Resend needs merakicreative.co verified (§2).
+Adding the Supabase variables later switches everything on, with no code change.
+
 ## 1. Supabase (production project)
 
 Create a **separate** production project from the dev one (e.g. `meraki-prod`).

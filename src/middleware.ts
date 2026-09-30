@@ -7,5 +7,5 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   // Only run where a session matters. Public marketing pages stay fully static.
-  matcher: ["/portal/:path*", "/admin/:path*", "/account/:path*", "/login", "/auth/:path*", "/invite/:path*"],
+  matcher: ["/portal/:path*", "/admin/:path*", "/account/:path*", "/login", "/forgot-password", "/auth/:path*", "/invite/:path*"],
 };

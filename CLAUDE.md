@@ -122,7 +122,9 @@ Fonts (Google): **Archivo** (display + body, weight contrast) + **JetBrains Mono
    (shown on its own service page). `/packages` 308s to `/services`; bundles are hidden like
    Creative Materials. Color grading is not a service, only an add-on on an edit.
 2. ~~**Contact form**~~ — replaced by the branching inquiry at `/start` (saved to Supabase,
-   emailed via Resend). Web3Forms is no longer called by the new site.
+   emailed via Resend). Web3Forms is no longer called by the new site. Until Supabase is
+   connected the site runs in **email-only mode**: inquiries are emailed (not stored) and the
+   portal/admin/login routes 404. See `docs/SETUP_EXTERNAL.md` §0.
 3. ~~**Socials**~~ — done; real Instagram / IMDb / Vimeo links are in every footer.
    ⚠️ There is **no `hello@merakicreative.com`** — `merakicreative.com` belongs to someone
    else. The site is `merakicreative.co`, and the canonical host is

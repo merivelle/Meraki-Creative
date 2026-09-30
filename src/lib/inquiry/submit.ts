@@ -2,14 +2,17 @@ import "server-only";
 import { after } from "next/server";
 import { validate } from "@/lib/forms/engine";
 import { formDataToAnswers } from "@/lib/forms/formdata";
-import type { Answers } from "@/lib/forms/types";
+import type { Answers, FormDefinition } from "@/lib/forms/types";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendEmail } from "@/lib/email/send";
+import { createHash } from "node:crypto";
 import { serverEnv } from "@/lib/server-env";
 import { checkFormToken, clientIpHash, rateLimit, userAgent, verifyTurnstile } from "@/lib/security/abuse";
 import { deliver, queueNotifications } from "@/lib/email/outbox";
 import { templates } from "@/lib/email/templates";
 import type { PackageItem } from "@/lib/content/types";
 import { SERVICE_OPTIONS, inquiryDefinition } from "./definition";
+import { answerLines } from "./summary";
 
 export type InquiryState = {
   status: "idle" | "error" | "saved";
@@ -66,6 +69,14 @@ export async function processInquiry(fd: FormData, packages: Pkg[]): Promise<Inq
     if (a[k] !== undefined) scope[k] = a[k];
   }
 
+  const serviceLabels = services.map((s) => SERVICE_OPTIONS.find((o) => o.value === s)?.label ?? s).join(", ");
+
+  // Email-only mode: until Supabase is connected, the inquiry is emailed to the studio (with
+  // every answer, since nothing is stored) and a receipt goes to the visitor, through Resend.
+  if (!databaseConfigured()) {
+    return emailOnly(def, a, serviceLabels, values);
+  }
+
   let admin: ReturnType<typeof createAdminClient>;
   try {
     admin = createAdminClient();
@@ -104,7 +115,6 @@ export async function processInquiry(fd: FormData, packages: Pkg[]): Promise<Inq
   }
 
   // --- Saved. Everything below is best-effort and cannot undo the inquiry. ---
-  const serviceLabels = services.map((s) => SERVICE_OPTIONS.find((o) => o.value === s)?.label ?? s).join(", ");
   const deliveryIds = await queueNotifications([
     {
       dedupeKey: `inquiry:${row.id}:studio`,
@@ -139,4 +149,38 @@ export async function processInquiry(fd: FormData, packages: Pkg[]): Promise<Inq
 
   after(() => deliver(deliveryIds));
   return { status: "saved", inquiryId: row.id };
+}
+
+const databaseConfigured = () => Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && serverEnv.supabaseServiceRoleKey);
+
+const SEND_FAILED = "Something went wrong sending your inquiry. Please try again in a moment, or email the studio directly.";
+
+async function emailOnly(def: FormDefinition, a: Answers, serviceLabels: string, values: Answers): Promise<InquiryState> {
+  // Missing Resend keys in production must never look like a sent inquiry.
+  const live = process.env.VERCEL_ENV === "production" || process.env.VERCEL_ENV === "preview";
+  if (!serverEnv.studioNotifyEmail && live) {
+    console.error("[inquiry] STUDIO_NOTIFY_EMAIL is not set; cannot deliver the inquiry.");
+    return { status: "error", values, formError: SEND_FAILED };
+  }
+  const key = createHash("sha256").update(`${a.email}|${a.name}|${a.description}`).digest("hex").slice(0, 40);
+  const studio = templates.inquiryStudioEmailOnly({
+    name: String(a.name), email: String(a.email), services: serviceLabels, lines: answerLines(def, a),
+  });
+  const sent = await sendEmail({
+    to: serverEnv.studioNotifyEmail || "studio@localhost",
+    replyTo: String(a.email),
+    idempotencyKey: `inquiry:${key}:studio`,
+    ...studio,
+  });
+  if (sent.status === "failed" || (sent.status === "dev_skipped" && live)) {
+    console.error("[inquiry] studio email not sent:", sent);
+    return { status: "error", values, formError: SEND_FAILED };
+  }
+  // The receipt is best-effort: the studio already has the inquiry.
+  after(() => sendEmail({
+    to: String(a.email),
+    idempotencyKey: `inquiry:${key}:receipt`,
+    ...templates.inquiryReceipt({ name: String(a.name) }),
+  }).then((r) => { if (r.status === "failed") console.error("[inquiry] receipt not sent:", r); }));
+  return { status: "saved" };
 }

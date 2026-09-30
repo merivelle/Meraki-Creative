@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { FOOTER_EXPLORE, SOCIAL_LINKS } from "@/lib/site";
+import { supabaseConfigured } from "@/lib/env";
 
 export function SiteFooter() {
   return (
@@ -20,7 +21,7 @@ export function SiteFooter() {
             <div className="footer-col">
               <h4>Connect</h4>
               <Link href="/start">Start a project</Link>
-              <Link href="/login">Client login</Link>
+              {supabaseConfigured() && <Link href="/login">Client login</Link>}
               {SOCIAL_LINKS.map((l) => <a key={l.href} href={l.href} target="_blank" rel="noopener">{l.label}</a>)}
             </div>
           </div>

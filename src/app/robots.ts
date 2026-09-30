@@ -8,7 +8,7 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: "*",
         allow: "/",
         // Internal tools, private areas and auth flows are never indexed.
-        disallow: ["/email-kit/", "/motion/", "/social/", "/portal", "/admin", "/auth", "/invite", "/account", "/login", "/api/"],
+        disallow: ["/email-kit/", "/motion/", "/social/", "/portal", "/admin", "/auth", "/invite", "/account", "/login", "/forgot-password", "/api/"],
       },
     ],
     sitemap: `${CANONICAL_ORIGIN}/sitemap.xml`,

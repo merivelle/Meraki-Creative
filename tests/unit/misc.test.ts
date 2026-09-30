@@ -5,7 +5,8 @@ import { seedPackages } from "@/content/seed";
 import { ADDON_GROUPS, ADDONS, WEB_SERVICES } from "@/content/web-design";
 import { POST_SERVICES } from "@/content/post-production";
 import { parseTimecode, formatTimecode } from "@/lib/timecode";
-import { preselect } from "@/lib/inquiry/definition";
+import { inquiryDefinition, preselect } from "@/lib/inquiry/definition";
+import { answerLines } from "@/lib/inquiry/summary";
 import { checkFormToken, issueFormToken } from "@/lib/security/abuse";
 
 describe("legacy redirects", () => {
@@ -130,6 +131,17 @@ describe("inquiry preselection", () => {
     const live = seedPackages.filter((p) => p.categoryId !== "bundles");
     expect(preselect(live, { package: "acting-package" })).toEqual({});
     expect(preselect(live, { package: "Demo Reel Refresh" })).toEqual({});
+  });
+});
+
+describe("email-only inquiry summary", () => {
+  it("spells out every answer with its question and option labels", () => {
+    const def = inquiryDefinition(seedPackages);
+    const lines = answerLines(def, { name: "Ada", email: "ada@example.test", services: ["post-production"], package: "demo-reel", description: "A reel from three scenes." });
+    expect(lines.some((l) => l.endsWith(": Demo Reel Edit"))).toBe(true); // package slug shown by name
+    expect(lines.some((l) => l.endsWith("A reel from three scenes."))).toBe(true);
+    expect(lines.join("\n")).not.toContain("post-production"); // option value replaced by its label
+    expect(lines.some((l) => l.includes("Ada"))).toBe(true);
   });
 });
 

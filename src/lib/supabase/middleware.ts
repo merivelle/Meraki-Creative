@@ -14,14 +14,13 @@ export async function updateSession(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const isPrivate = PRIVATE_PREFIXES.some((p) => path === p || path.startsWith(p + "/"));
 
+  // Until Supabase is connected, the portal, admin, and sign-in pages don't exist publicly:
+  // every path this middleware matches answers with the site's 404.
   if (!supabaseConfigured()) {
-    if (isPrivate) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/login";
-      url.search = "?error=not_configured";
-      return NextResponse.redirect(url);
-    }
-    return response;
+    const url = request.nextUrl.clone();
+    url.pathname = "/_hidden-until-supabase";
+    url.search = "";
+    return NextResponse.rewrite(url, { status: 404 });
   }
 
   const supabase = createServerClient(publicEnv.supabaseUrl, publicEnv.supabaseAnonKey, {

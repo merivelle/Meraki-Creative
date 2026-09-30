@@ -47,6 +47,14 @@ export const templates = {
     };
   },
 
+  /** Email-only mode (no database yet): the email is the record, so it carries every answer. */
+  inquiryStudioEmailOnly(p: { name: string; email: string; services: string; lines: string[] }): EmailContent {
+    return {
+      subject: `New inquiry from ${p.name}`,
+      ...wrap([`From: ${p.name} <${p.email}>`, `Services: ${p.services || "Not sure yet"}`, p.lines.join("\n"), "Reply to this email to answer them directly."]),
+    };
+  },
+
   clarification(p: { name: string; question: string }): EmailContent {
     return {
       subject: "A question about your project | Meraki Creative",
